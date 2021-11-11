@@ -2,7 +2,7 @@
 
 package runtime
 
-// The schema-stitching logic is generated in github.com/NpoolPlatform/go-service-app-template/pkg/db/ent/runtime.go
+// The schema-stitching logic is generated in github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/runtime.go
 
 const (
 	Version = "v0.9.1"                                          // Version of ent codegen.

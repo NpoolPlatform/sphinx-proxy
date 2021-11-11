@@ -3,23 +3,23 @@
 
 ## Table of Contents
 
-- [npool/service-sample.proto](#npool/service-sample.proto)
-    - [VersionResponse](#service.sample.v1.VersionResponse)
+- [npool/version/version.proto](#npool/version/version.proto)
+    - [VersionResponse](#sphinx.version.v1.VersionResponse)
   
-    - [ServiceExample](#service.sample.v1.ServiceExample)
+    - [VersionService](#sphinx.version.v1.VersionService)
   
 - [Scalar Value Types](#scalar-value-types)
 
 
 
-<a name="npool/service-sample.proto"></a>
+<a name="npool/version/version.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## npool/service-sample.proto
+## npool/version/version.proto
 
 
 
-<a name="service.sample.v1.VersionResponse"></a>
+<a name="sphinx.version.v1.VersionResponse"></a>
 
 ### VersionResponse
 request body and response
@@ -40,14 +40,14 @@ request body and response
  
 
 
-<a name="service.sample.v1.ServiceExample"></a>
+<a name="sphinx.version.v1.VersionService"></a>
 
-### ServiceExample
+### VersionService
 Service Name
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| Version | [.google.protobuf.Empty](#google.protobuf.Empty) | [VersionResponse](#service.sample.v1.VersionResponse) | Method Version |
+| Version | [.google.protobuf.Empty](#google.protobuf.Empty) | [VersionResponse](#sphinx.version.v1.VersionResponse) | Method Version |
 
  
 

@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package sphinx.proxy.v1;
+
+option go_package = "github.com/NpoolPlatform/sphinx-proxy/message/npool/signproxy";
+
+// Service Name
+service SignProxy {
+    // Method Version
+    rpc CreateCoin (CreateCoinRequest) returns (CreateCoinResponse){}
+    rpc Transaction (stream TransactionResponse) returns (stream TransactionRequest) {}
+}
+
+message CreateCoinRequest {
+    int32 CoinType = 100;
+}
+
+message CreateCoinResponse {
+}
+
+message TransactionRequest {
+
+}
+
+message TransactionResponse {
+
+}

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package sphinx.version.v1;
+
+option go_package = "github.com/NpoolPlatform/sphinx-proxy/message/npool/version";
+
+import "google/protobuf/empty.proto";
+
+// Service Name
+service VersionService {
+    // Method Version
+    rpc Version (google.protobuf.Empty) returns (VersionResponse){}
+}
+
+// request body and response
+message VersionResponse {
+    string Info = 100;
+}

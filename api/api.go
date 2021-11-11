@@ -1,23 +1,19 @@
 package api
 
 import (
-	"context"
-
-	"github.com/NpoolPlatform/go-service-app-template/message/npool"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/NpoolPlatform/sphinx-proxy/message/npool/signproxy"
+	"github.com/NpoolPlatform/sphinx-proxy/message/npool/version"
 	"google.golang.org/grpc"
 )
 
 // https://github.com/grpc/grpc-go/issues/3794
 // require_unimplemented_servers=false
 type Server struct {
-	npool.UnimplementedServiceExampleServer
+	version.UnimplementedVersionServiceServer
+	signproxy.UnimplementedSignProxyServer
 }
 
 func Register(server grpc.ServiceRegistrar) {
-	npool.RegisterServiceExampleServer(server, &Server{})
-}
-
-func RegisterGateway(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error {
-	return npool.RegisterServiceExampleHandlerFromEndpoint(context.Background(), mux, endpoint, opts)
+	version.RegisterVersionServiceServer(server, &Server{})
+	signproxy.RegisterSignProxyServer(server, &Server{})
 }

@@ -3,17 +3,14 @@ package main
 import (
 	"time"
 
-	"github.com/NpoolPlatform/go-service-app-template/api"
-	db "github.com/NpoolPlatform/go-service-app-template/pkg/db"
-	msgcli "github.com/NpoolPlatform/go-service-app-template/pkg/message/client"
-	msglistener "github.com/NpoolPlatform/go-service-app-template/pkg/message/listener"
-	msg "github.com/NpoolPlatform/go-service-app-template/pkg/message/message"
-	msgsrv "github.com/NpoolPlatform/go-service-app-template/pkg/message/server"
+	"github.com/NpoolPlatform/sphinx-proxy/api"
+	db "github.com/NpoolPlatform/sphinx-proxy/pkg/db"
+	msgcli "github.com/NpoolPlatform/sphinx-proxy/pkg/message/client"
+	msg "github.com/NpoolPlatform/sphinx-proxy/pkg/message/message"
+	msgsrv "github.com/NpoolPlatform/sphinx-proxy/pkg/message/server"
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
 	cli "github.com/urfave/cli/v2"
 
@@ -29,12 +26,6 @@ var runCmd = &cli.Command{
 			return err
 		}
 
-		go func() {
-			if err := grpc2.RunGRPC(rpcRegister); err != nil {
-				logger.Sugar().Errorf("fail to run grpc server: %v", err)
-			}
-		}()
-
 		if err := msgsrv.Init(); err != nil {
 			return err
 		}
@@ -42,20 +33,15 @@ var runCmd = &cli.Command{
 			return err
 		}
 
-		go msglistener.Listen()
 		go msgSender()
 
-		return grpc2.RunGRPCGateWay(rpcGatewayRegister)
+		return grpc2.RunGRPC(rpcRegister)
 	},
 }
 
 func rpcRegister(server grpc.ServiceRegistrar) error {
 	api.Register(server)
 	return nil
-}
-
-func rpcGatewayRegister(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error {
-	return api.RegisterGateway(mux, endpoint, opts)
 }
 
 func msgSender() {
