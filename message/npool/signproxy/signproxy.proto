@@ -67,7 +67,7 @@ message UnsignedMessage {
     int64 GasLimit          = 150;
     string GasFeeCap        = 160;
     string GasPremium       = 170;
-    int32 Method            = 180;
+    uint64 Method           = 180;
 
     bytes Params            = 190;
 }

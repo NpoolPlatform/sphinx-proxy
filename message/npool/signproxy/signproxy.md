@@ -182,7 +182,7 @@
 | GasLimit | [int64](#int64) |  |  |
 | GasFeeCap | [string](#string) |  |  |
 | GasPremium | [string](#string) |  |  |
-| Method | [int32](#int32) |  |  |
+| Method | [uint64](#uint64) |  |  |
 | Params | [bytes](#bytes) |  |  |
 
 
