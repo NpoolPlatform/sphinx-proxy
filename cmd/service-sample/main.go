@@ -6,10 +6,11 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/app"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	"github.com/NpoolPlatform/sphinx-proxy/pkg/servicename"
 	cli "github.com/urfave/cli/v2"
 )
 
-const serviceName = "Service Sample"
+const serviceName = servicename.ServiceName
 
 func main() {
 	commands := cli.Commands{

@@ -18,9 +18,14 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SignProxyClient interface {
-	// Method Version
-	CreateCoin(ctx context.Context, in *CreateCoinRequest, opts ...grpc.CallOption) (*CreateCoinResponse, error)
+	// RegisterCoin register new coin
+	RegisterCoin(ctx context.Context, in *RegisterCoinRequest, opts ...grpc.CallOption) (*RegisterCoinResponse, error)
+	// MpoolGetNonce get nonce for transaction or create new account
+	MpoolGetNonce(ctx context.Context, in *MpoolGetNonceRequest, opts ...grpc.CallOption) (*MpoolGetNonceResponse, error)
+	// Transaction use transfer or create new account
 	Transaction(ctx context.Context, opts ...grpc.CallOption) (SignProxy_TransactionClient, error)
+	// WalletBalance get account balance
+	WalletBalance(ctx context.Context, in *WalletBalanceRequest, opts ...grpc.CallOption) (*WalletBalanceResponse, error)
 }
 
 type signProxyClient struct {
@@ -31,9 +36,18 @@ func NewSignProxyClient(cc grpc.ClientConnInterface) SignProxyClient {
 	return &signProxyClient{cc}
 }
 
-func (c *signProxyClient) CreateCoin(ctx context.Context, in *CreateCoinRequest, opts ...grpc.CallOption) (*CreateCoinResponse, error) {
-	out := new(CreateCoinResponse)
-	err := c.cc.Invoke(ctx, "/sphinx.proxy.v1.SignProxy/CreateCoin", in, out, opts...)
+func (c *signProxyClient) RegisterCoin(ctx context.Context, in *RegisterCoinRequest, opts ...grpc.CallOption) (*RegisterCoinResponse, error) {
+	out := new(RegisterCoinResponse)
+	err := c.cc.Invoke(ctx, "/sphinx.proxy.v1.SignProxy/RegisterCoin", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *signProxyClient) MpoolGetNonce(ctx context.Context, in *MpoolGetNonceRequest, opts ...grpc.CallOption) (*MpoolGetNonceResponse, error) {
+	out := new(MpoolGetNonceResponse)
+	err := c.cc.Invoke(ctx, "/sphinx.proxy.v1.SignProxy/MpoolGetNonce", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -71,13 +85,27 @@ func (x *signProxyTransactionClient) Recv() (*TransactionRequest, error) {
 	return m, nil
 }
 
+func (c *signProxyClient) WalletBalance(ctx context.Context, in *WalletBalanceRequest, opts ...grpc.CallOption) (*WalletBalanceResponse, error) {
+	out := new(WalletBalanceResponse)
+	err := c.cc.Invoke(ctx, "/sphinx.proxy.v1.SignProxy/WalletBalance", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SignProxyServer is the server API for SignProxy service.
 // All implementations must embed UnimplementedSignProxyServer
 // for forward compatibility
 type SignProxyServer interface {
-	// Method Version
-	CreateCoin(context.Context, *CreateCoinRequest) (*CreateCoinResponse, error)
+	// RegisterCoin register new coin
+	RegisterCoin(context.Context, *RegisterCoinRequest) (*RegisterCoinResponse, error)
+	// MpoolGetNonce get nonce for transaction or create new account
+	MpoolGetNonce(context.Context, *MpoolGetNonceRequest) (*MpoolGetNonceResponse, error)
+	// Transaction use transfer or create new account
 	Transaction(SignProxy_TransactionServer) error
+	// WalletBalance get account balance
+	WalletBalance(context.Context, *WalletBalanceRequest) (*WalletBalanceResponse, error)
 	mustEmbedUnimplementedSignProxyServer()
 }
 
@@ -85,11 +113,17 @@ type SignProxyServer interface {
 type UnimplementedSignProxyServer struct {
 }
 
-func (UnimplementedSignProxyServer) CreateCoin(context.Context, *CreateCoinRequest) (*CreateCoinResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateCoin not implemented")
+func (UnimplementedSignProxyServer) RegisterCoin(context.Context, *RegisterCoinRequest) (*RegisterCoinResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterCoin not implemented")
+}
+func (UnimplementedSignProxyServer) MpoolGetNonce(context.Context, *MpoolGetNonceRequest) (*MpoolGetNonceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MpoolGetNonce not implemented")
 }
 func (UnimplementedSignProxyServer) Transaction(SignProxy_TransactionServer) error {
 	return status.Errorf(codes.Unimplemented, "method Transaction not implemented")
+}
+func (UnimplementedSignProxyServer) WalletBalance(context.Context, *WalletBalanceRequest) (*WalletBalanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method WalletBalance not implemented")
 }
 func (UnimplementedSignProxyServer) mustEmbedUnimplementedSignProxyServer() {}
 
@@ -104,20 +138,38 @@ func RegisterSignProxyServer(s grpc.ServiceRegistrar, srv SignProxyServer) {
 	s.RegisterService(&SignProxy_ServiceDesc, srv)
 }
 
-func _SignProxy_CreateCoin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateCoinRequest)
+func _SignProxy_RegisterCoin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterCoinRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SignProxyServer).CreateCoin(ctx, in)
+		return srv.(SignProxyServer).RegisterCoin(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sphinx.proxy.v1.SignProxy/CreateCoin",
+		FullMethod: "/sphinx.proxy.v1.SignProxy/RegisterCoin",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SignProxyServer).CreateCoin(ctx, req.(*CreateCoinRequest))
+		return srv.(SignProxyServer).RegisterCoin(ctx, req.(*RegisterCoinRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SignProxy_MpoolGetNonce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MpoolGetNonceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SignProxyServer).MpoolGetNonce(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sphinx.proxy.v1.SignProxy/MpoolGetNonce",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SignProxyServer).MpoolGetNonce(ctx, req.(*MpoolGetNonceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -148,6 +200,24 @@ func (x *signProxyTransactionServer) Recv() (*TransactionResponse, error) {
 	return m, nil
 }
 
+func _SignProxy_WalletBalance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(WalletBalanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SignProxyServer).WalletBalance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sphinx.proxy.v1.SignProxy/WalletBalance",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SignProxyServer).WalletBalance(ctx, req.(*WalletBalanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SignProxy_ServiceDesc is the grpc.ServiceDesc for SignProxy service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -156,8 +226,16 @@ var SignProxy_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*SignProxyServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateCoin",
-			Handler:    _SignProxy_CreateCoin_Handler,
+			MethodName: "RegisterCoin",
+			Handler:    _SignProxy_RegisterCoin_Handler,
+		},
+		{
+			MethodName: "MpoolGetNonce",
+			Handler:    _SignProxy_MpoolGetNonce_Handler,
+		},
+		{
+			MethodName: "WalletBalance",
+			Handler:    _SignProxy_WalletBalance_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

@@ -11,7 +11,7 @@ func (s *Server) Transaction(stream signproxy.SignProxy_TransactionServer) error
 	consumerInfo, err := msgcli.ConsumeExample()
 	if err != nil {
 		logger.Sugar().Errorf("fail to consume example: %v", err)
-		return nil
+		return err
 	}
 
 	for info := range consumerInfo {
@@ -19,11 +19,13 @@ func (s *Server) Transaction(stream signproxy.SignProxy_TransactionServer) error
 		logger.Sugar().Infof("consumer info: ", info.Body)
 		if err := stream.Send(&signproxy.TransactionRequest{}); err != nil {
 			logger.Sugar().Infof("consumer info: ", info.Body)
+			continue
 		}
 
 		resp, err := stream.Recv()
 		if err != nil {
 			logger.Sugar().Infof("consumer info: ", info.Body)
+			continue
 		}
 
 		logger.Sugar().Infof("", resp)

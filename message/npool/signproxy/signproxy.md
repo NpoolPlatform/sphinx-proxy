@@ -4,10 +4,19 @@
 ## Table of Contents
 
 - [npool/signproxy/signproxy.proto](#npool/signproxy/signproxy.proto)
-    - [CreateCoinRequest](#sphinx.proxy.v1.CreateCoinRequest)
-    - [CreateCoinResponse](#sphinx.proxy.v1.CreateCoinResponse)
+    - [MpoolGetNonceInfo](#sphinx.proxy.v1.MpoolGetNonceInfo)
+    - [MpoolGetNonceRequest](#sphinx.proxy.v1.MpoolGetNonceRequest)
+    - [MpoolGetNonceResponse](#sphinx.proxy.v1.MpoolGetNonceResponse)
+    - [RegisterCoinRequest](#sphinx.proxy.v1.RegisterCoinRequest)
+    - [RegisterCoinResponse](#sphinx.proxy.v1.RegisterCoinResponse)
+    - [Signature](#sphinx.proxy.v1.Signature)
     - [TransactionRequest](#sphinx.proxy.v1.TransactionRequest)
     - [TransactionResponse](#sphinx.proxy.v1.TransactionResponse)
+    - [TransactionResponseInfo](#sphinx.proxy.v1.TransactionResponseInfo)
+    - [UnsignedMessage](#sphinx.proxy.v1.UnsignedMessage)
+    - [WalletBalanceInfo](#sphinx.proxy.v1.WalletBalanceInfo)
+    - [WalletBalanceRequest](#sphinx.proxy.v1.WalletBalanceRequest)
+    - [WalletBalanceResponse](#sphinx.proxy.v1.WalletBalanceResponse)
   
     - [SignProxy](#sphinx.proxy.v1.SignProxy)
   
@@ -22,25 +31,86 @@
 
 
 
-<a name="sphinx.proxy.v1.CreateCoinRequest"></a>
+<a name="sphinx.proxy.v1.MpoolGetNonceInfo"></a>
 
-### CreateCoinRequest
+### MpoolGetNonceInfo
 
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| CoinType | [int32](#int32) |  |  |
+| Nonce | [uint64](#uint64) |  |  |
 
 
 
 
 
 
-<a name="sphinx.proxy.v1.CreateCoinResponse"></a>
+<a name="sphinx.proxy.v1.MpoolGetNonceRequest"></a>
 
-### CreateCoinResponse
+### MpoolGetNonceRequest
 
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Address | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="sphinx.proxy.v1.MpoolGetNonceResponse"></a>
+
+### MpoolGetNonceResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Info | [MpoolGetNonceInfo](#sphinx.proxy.v1.MpoolGetNonceInfo) |  |  |
+
+
+
+
+
+
+<a name="sphinx.proxy.v1.RegisterCoinRequest"></a>
+
+### RegisterCoinRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| CoinType | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="sphinx.proxy.v1.RegisterCoinResponse"></a>
+
+### RegisterCoinResponse
+
+
+
+
+
+
+
+<a name="sphinx.proxy.v1.Signature"></a>
+
+### Signature
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| SignType | [string](#string) |  | secp256k1 |
+| Data | [bytes](#bytes) |  |  |
 
 
 
@@ -53,6 +123,12 @@
 
 
 
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| TransactionType | [string](#string) |  |  |
+| Message | [UnsignedMessage](#sphinx.proxy.v1.UnsignedMessage) |  |  |
+
+
 
 
 
@@ -61,6 +137,96 @@
 
 ### TransactionResponse
 
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Info | [TransactionResponseInfo](#sphinx.proxy.v1.TransactionResponseInfo) |  |  |
+
+
+
+
+
+
+<a name="sphinx.proxy.v1.TransactionResponseInfo"></a>
+
+### TransactionResponseInfo
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Message | [UnsignedMessage](#sphinx.proxy.v1.UnsignedMessage) |  |  |
+| Signature | [Signature](#sphinx.proxy.v1.Signature) |  |  |
+
+
+
+
+
+
+<a name="sphinx.proxy.v1.UnsignedMessage"></a>
+
+### UnsignedMessage
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Version | [uint64](#uint64) |  |  |
+| To | [string](#string) |  |  |
+| From | [string](#string) |  |  |
+| Nonce | [uint64](#uint64) |  |  |
+| Value | [string](#string) |  |  |
+| GasLimit | [int64](#int64) |  |  |
+| GasFeeCap | [string](#string) |  |  |
+| GasPremium | [string](#string) |  |  |
+| Method | [int32](#int32) |  |  |
+| Params | [bytes](#bytes) |  |  |
+
+
+
+
+
+
+<a name="sphinx.proxy.v1.WalletBalanceInfo"></a>
+
+### WalletBalanceInfo
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Balance | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="sphinx.proxy.v1.WalletBalanceRequest"></a>
+
+### WalletBalanceRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Address | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="sphinx.proxy.v1.WalletBalanceResponse"></a>
+
+### WalletBalanceResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| Info | [WalletBalanceInfo](#sphinx.proxy.v1.WalletBalanceInfo) |  |  |
 
 
 
@@ -80,8 +246,10 @@ Service Name
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| CreateCoin | [CreateCoinRequest](#sphinx.proxy.v1.CreateCoinRequest) | [CreateCoinResponse](#sphinx.proxy.v1.CreateCoinResponse) | Method Version |
-| Transaction | [TransactionResponse](#sphinx.proxy.v1.TransactionResponse) stream | [TransactionRequest](#sphinx.proxy.v1.TransactionRequest) stream |  |
+| RegisterCoin | [RegisterCoinRequest](#sphinx.proxy.v1.RegisterCoinRequest) | [RegisterCoinResponse](#sphinx.proxy.v1.RegisterCoinResponse) | RegisterCoin register new coin |
+| MpoolGetNonce | [MpoolGetNonceRequest](#sphinx.proxy.v1.MpoolGetNonceRequest) | [MpoolGetNonceResponse](#sphinx.proxy.v1.MpoolGetNonceResponse) | MpoolGetNonce get nonce for transaction or create new account |
+| Transaction | [TransactionResponse](#sphinx.proxy.v1.TransactionResponse) stream | [TransactionRequest](#sphinx.proxy.v1.TransactionRequest) stream | Transaction use transfer or create new account |
+| WalletBalance | [WalletBalanceRequest](#sphinx.proxy.v1.WalletBalanceRequest) | [WalletBalanceResponse](#sphinx.proxy.v1.WalletBalanceResponse) | WalletBalance get account balance |
 
  
 

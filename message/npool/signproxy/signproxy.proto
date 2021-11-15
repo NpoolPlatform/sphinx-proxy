@@ -6,22 +6,76 @@ option go_package = "github.com/NpoolPlatform/sphinx-proxy/message/npool/signpro
 
 // Service Name
 service SignProxy {
-    // Method Version
-    rpc CreateCoin (CreateCoinRequest) returns (CreateCoinResponse){}
+    // RegisterCoin register new coin
+    rpc RegisterCoin (RegisterCoinRequest) returns (RegisterCoinResponse){}
+    // MpoolGetNonce get nonce for transaction or create new account
+    rpc MpoolGetNonce(MpoolGetNonceRequest) returns (MpoolGetNonceResponse) {}
+    // Transaction use transfer or create new account
     rpc Transaction (stream TransactionResponse) returns (stream TransactionRequest) {}
+    // WalletBalance get account balance
+    rpc WalletBalance (WalletBalanceRequest) returns (WalletBalanceResponse) {}
 }
 
-message CreateCoinRequest {
-    int32 CoinType = 100;
+message WalletBalanceRequest {
+    string Address = 100;
+}
+message WalletBalanceInfo {
+    string Balance = 100;
 }
 
-message CreateCoinResponse {
+message WalletBalanceResponse {
+    WalletBalanceInfo Info = 100;
+}
+
+message MpoolGetNonceRequest {
+    string Address = 100;
+}
+
+message MpoolGetNonceInfo {
+    uint64 Nonce = 100;
+}
+
+message MpoolGetNonceResponse {
+    MpoolGetNonceInfo Info = 100;
+}
+
+message RegisterCoinRequest {
+    string CoinType = 100;
+}
+
+message RegisterCoinResponse {
 }
 
 message TransactionRequest {
+    string TransactionType  = 100;
+    UnsignedMessage Message = 110;
+}
 
+message UnsignedMessage {
+    uint64 Version          = 100;
+    string To               = 110;
+    string From             = 120;
+    uint64 Nonce            = 130;
+    string Value            = 140;
+
+    int64 GasLimit          = 150;
+    string GasFeeCap        = 160;
+    string GasPremium       = 170;
+    int32 Method            = 180;
+
+    bytes Params            = 190;
 }
 
 message TransactionResponse {
+    TransactionResponseInfo Info = 100;
+}
 
+message TransactionResponseInfo {
+    UnsignedMessage Message   = 100;
+	Signature       Signature = 110;
+}
+
+message Signature {
+    string SignType = 100;//secp256k1
+    bytes Data      = 110;
 }

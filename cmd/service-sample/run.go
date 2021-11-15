@@ -1,12 +1,9 @@
 package main
 
 import (
-	"time"
-
 	"github.com/NpoolPlatform/sphinx-proxy/api"
 	db "github.com/NpoolPlatform/sphinx-proxy/pkg/db"
 	msgcli "github.com/NpoolPlatform/sphinx-proxy/pkg/message/client"
-	msg "github.com/NpoolPlatform/sphinx-proxy/pkg/message/message"
 	msgsrv "github.com/NpoolPlatform/sphinx-proxy/pkg/message/server"
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
@@ -21,6 +18,10 @@ var runCmd = &cli.Command{
 	Name:    "run",
 	Aliases: []string{"s"},
 	Usage:   "Run the daemon",
+	After: func(c *cli.Context) error {
+		grpc2.GShutdown()
+		return logger.Sync()
+	},
 	Action: func(c *cli.Context) error {
 		if err := db.Init(); err != nil {
 			return err
@@ -33,8 +34,6 @@ var runCmd = &cli.Command{
 			return err
 		}
 
-		go msgSender()
-
 		return grpc2.RunGRPC(rpcRegister)
 	},
 }
@@ -42,21 +41,4 @@ var runCmd = &cli.Command{
 func rpcRegister(server grpc.ServiceRegistrar) error {
 	api.Register(server)
 	return nil
-}
-
-func msgSender() {
-	id := 0
-	for {
-		logger.Sugar().Infof("send example")
-		err := msgsrv.PublishExample(&msg.Example{
-			ID:      id,
-			Example: "hello world",
-		})
-		if err != nil {
-			logger.Sugar().Errorf("fail to send example: %v", err)
-			return
-		}
-		id++
-		time.Sleep(3 * time.Second)
-	}
 }
