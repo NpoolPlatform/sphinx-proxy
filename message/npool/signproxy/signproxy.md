@@ -18,6 +18,8 @@
     - [WalletBalanceRequest](#sphinx.proxy.v1.WalletBalanceRequest)
     - [WalletBalanceResponse](#sphinx.proxy.v1.WalletBalanceResponse)
   
+    - [TransactionType](#sphinx.proxy.v1.TransactionType)
+  
     - [SignProxy](#sphinx.proxy.v1.SignProxy)
   
 - [Scalar Value Types](#scalar-value-types)
@@ -125,7 +127,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| TransactionType | [string](#string) |  |  |
+| TransactionType | [TransactionType](#sphinx.proxy.v1.TransactionType) |  |  |
 | Message | [UnsignedMessage](#sphinx.proxy.v1.UnsignedMessage) |  |  |
 
 
@@ -233,6 +235,19 @@
 
 
  
+
+
+<a name="sphinx.proxy.v1.TransactionType"></a>
+
+### TransactionType
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| UnKnow | 0 |  |
+| CreateAccount | 1 |  |
+| Transaction | 2 |  |
+
 
  
 

@@ -47,8 +47,14 @@ message RegisterCoinResponse {
 }
 
 message TransactionRequest {
-    string TransactionType  = 100;
+    TransactionType TransactionType  = 100;
     UnsignedMessage Message = 110;
+}
+
+enum TransactionType {
+    UnKnow = 0;
+    CreateAccount = 1;
+    Transaction = 2;
 }
 
 message UnsignedMessage {
