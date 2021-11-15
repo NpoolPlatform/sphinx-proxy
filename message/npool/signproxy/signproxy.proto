@@ -17,8 +17,10 @@ service SignProxy {
 }
 
 message WalletBalanceRequest {
-    string Address = 100;
+    CoinType CoinType   = 100;
+    string Address      = 110;
 }
+
 message WalletBalanceInfo {
     string Balance = 100;
 }
@@ -27,6 +29,7 @@ message WalletBalanceResponse {
     WalletBalanceInfo Info = 100;
 }
 
+// TODO diff coin type
 message MpoolGetNonceRequest {
     string Address = 100;
 }
@@ -40,21 +43,28 @@ message MpoolGetNonceResponse {
 }
 
 message RegisterCoinRequest {
-    string CoinType = 100;
+    CoinType CoinType = 100;
+}
+
+enum CoinType {
+    CoinTypeUnKnow = 0;
+    CoinTypeFIL = 1;
+    CoinTypeBTC = 2;
 }
 
 message RegisterCoinResponse {
 }
 
 message TransactionRequest {
-    TransactionType TransactionType  = 100;
-    UnsignedMessage Message = 110;
+    TransactionType TransactionType = 100;
+    CoinType CoinType               = 110;
+    UnsignedMessage Message         = 120;
 }
 
 enum TransactionType {
-    UnKnow = 0;
-    CreateAccount = 1;
-    Transaction = 2;
+    TransactionTypeUnKnow = 0;
+    TransactionTypeCreateAccount = 1;
+    TransactionTypeTransaction = 2;
 }
 
 message UnsignedMessage {

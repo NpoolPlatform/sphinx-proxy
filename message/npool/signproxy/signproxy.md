@@ -18,6 +18,7 @@
     - [WalletBalanceRequest](#sphinx.proxy.v1.WalletBalanceRequest)
     - [WalletBalanceResponse](#sphinx.proxy.v1.WalletBalanceResponse)
   
+    - [CoinType](#sphinx.proxy.v1.CoinType)
     - [TransactionType](#sphinx.proxy.v1.TransactionType)
   
     - [SignProxy](#sphinx.proxy.v1.SignProxy)
@@ -51,7 +52,7 @@
 <a name="sphinx.proxy.v1.MpoolGetNonceRequest"></a>
 
 ### MpoolGetNonceRequest
-
+TODO diff coin type
 
 
 | Field | Type | Label | Description |
@@ -86,7 +87,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| CoinType | [string](#string) |  |  |
+| CoinType | [CoinType](#sphinx.proxy.v1.CoinType) |  |  |
 
 
 
@@ -128,6 +129,7 @@
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | TransactionType | [TransactionType](#sphinx.proxy.v1.TransactionType) |  |  |
+| CoinType | [CoinType](#sphinx.proxy.v1.CoinType) |  |  |
 | Message | [UnsignedMessage](#sphinx.proxy.v1.UnsignedMessage) |  |  |
 
 
@@ -213,6 +215,7 @@
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| CoinType | [CoinType](#sphinx.proxy.v1.CoinType) |  |  |
 | Address | [string](#string) |  |  |
 
 
@@ -237,6 +240,19 @@
  
 
 
+<a name="sphinx.proxy.v1.CoinType"></a>
+
+### CoinType
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| CoinTypeUnKnow | 0 |  |
+| CoinTypeFIL | 1 |  |
+| CoinTypeBTC | 2 |  |
+
+
+
 <a name="sphinx.proxy.v1.TransactionType"></a>
 
 ### TransactionType
@@ -244,9 +260,9 @@
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
-| UnKnow | 0 |  |
-| CreateAccount | 1 |  |
-| Transaction | 2 |  |
+| TransactionTypeUnKnow | 0 |  |
+| TransactionTypeCreateAccount | 1 |  |
+| TransactionTypeTransaction | 2 |  |
 
 
  
