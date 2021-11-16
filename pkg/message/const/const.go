@@ -10,7 +10,7 @@ const (
 )
 
 const (
-	ServiceName = "sphinx.proxy.npool.top"
+	ServiceName = "sphinx-proxy.npool.top"
 )
 
 func FormatServiceName() string {
