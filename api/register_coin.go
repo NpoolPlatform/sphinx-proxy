@@ -2,12 +2,15 @@ package api
 
 import (
 	"context"
+	"fmt"
+	"net"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/config"
 	"github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/coininfo"
 	"github.com/NpoolPlatform/message/npool/signproxy"
+	coinconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/check"
 	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"google.golang.org/grpc/codes"
@@ -30,7 +33,16 @@ func (s *Server) RegisterCoin(ctx context.Context, in *signproxy.RegisterCoinReq
 	}
 
 	// get service conn
-	conn, err := grpc.GetGRPCConn(config.GetStringValueWithNameSpace("", ""))
+	svc, err := config.PeekService(config.GetStringValueWithNameSpace("", coinconst.ServiceName), grpc.GRPCTAG)
+	if err != nil {
+		logger.Sugar().Errorf("[%s] call PeekService ServiceName:%s error: %v",
+			constant.FormatServiceName(),
+			config.GetStringValueWithNameSpace("", coinconst.ServiceName),
+			err,
+		)
+		return nil, status.Error(codes.Internal, "interval server error")
+	}
+	conn, err := grpc.GetGRPCConn(net.JoinHostPort(svc.Address, fmt.Sprintf("%d", svc.Port)))
 	if err != nil {
 		logger.Sugar().Errorf("[%s] call GetGRPCConn error: %v",
 			constant.FormatServiceName(),

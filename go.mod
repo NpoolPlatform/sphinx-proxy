@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	entgo.io/ent v0.9.1
-	github.com/NpoolPlatform/go-service-framework v0.0.0-20211116033517-08d405150ec0
+	github.com/NpoolPlatform/go-service-framework v0.0.0-20211116114223-c078dc6a440d
 	github.com/NpoolPlatform/message v0.0.0-20211116100750-cd899d4a9762
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211115022617-243b1ef7313b
 	github.com/streadway/amqp v1.0.0
