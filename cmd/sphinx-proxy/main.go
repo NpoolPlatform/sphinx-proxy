@@ -5,7 +5,9 @@ import (
 	"os"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/app"
+	"github.com/NpoolPlatform/go-service-framework/pkg/config"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	coinconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/servicename"
 	cli "github.com/urfave/cli/v2"
 )
@@ -19,7 +21,16 @@ func main() {
 
 	description := fmt.Sprintf("my %v service cli\nFor help on any individual command run <%v COMMAND -h>\n",
 		serviceName, serviceName)
-	err := app.Init(serviceName, description, "", "", "./", nil, commands)
+	err := app.Init(
+		serviceName,
+		description,
+		"",
+		"",
+		"./",
+		nil,
+		commands,
+		config.ServiceNameToNamespace(coinconst.ServiceName),
+	)
 	if err != nil {
 		logger.Sugar().Errorf("fail to create %v: %v", serviceName, err)
 		return

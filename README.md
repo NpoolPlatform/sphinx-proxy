@@ -3,12 +3,12 @@
 [![Test](https://github.com/NpoolPlatform/go-service-app-template/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/NpoolPlatform/go-service-app-template/actions/workflows/main.yml)
 
 [目录](#目录)
-- [功能](#功能)
-- [命令](#命令)
-- [步骤](#步骤)
-- [最佳实践](#最佳实践)
-- [关于mysql](#关于mysql)
-- [GRPC](#grpc)
+- [Npool go service app template](#npool-go-service-app-template)
+    - [功能](#功能)
+    - [命令](#命令)
+    - [步骤](#步骤)
+    - [最佳实践](#最佳实践)
+    - [关于mysql](#关于mysql)
 
 -----------
 ### 功能
@@ -73,6 +73,3 @@
 ### 关于mysql
 * 创建app后，从app.Mysql()获取本地mysql client
 * [文档参考](https://entgo.io/docs/sql-integration)
-
-### GRPC
-* [GRPC 环境搭建和简单学习](./grpc.md)

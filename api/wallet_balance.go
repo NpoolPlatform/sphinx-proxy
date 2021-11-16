@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 
-	"github.com/NpoolPlatform/sphinx-proxy/message/npool/signproxy"
+	"github.com/NpoolPlatform/message/npool/signproxy"
 )
 
 func (s *Server) WalletBalance(ctx context.Context, in *signproxy.WalletBalanceRequest) (*signproxy.WalletBalanceResponse, error) {

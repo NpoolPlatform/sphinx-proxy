@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	"github.com/NpoolPlatform/sphinx-proxy/message/npool/signproxy"
+	"github.com/NpoolPlatform/message/npool/signproxy"
 	msgcli "github.com/NpoolPlatform/sphinx-proxy/pkg/message/client"
 )
 
