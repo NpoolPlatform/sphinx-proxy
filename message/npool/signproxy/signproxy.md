@@ -160,6 +160,7 @@ TODO diff coin type
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
+| Address | [string](#string) |  | create new account address |
 | Message | [UnsignedMessage](#sphinx.proxy.v1.UnsignedMessage) |  |  |
 | Signature | [Signature](#sphinx.proxy.v1.Signature) |  |  |
 

@@ -87,8 +87,9 @@ message TransactionResponse {
 }
 
 message TransactionResponseInfo {
-    UnsignedMessage Message   = 100;
-	Signature       Signature = 110;
+    string Address            = 100;// create new account address
+    UnsignedMessage Message   = 110;
+	Signature       Signature = 120;
 }
 
 message Signature {
