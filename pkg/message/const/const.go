@@ -6,11 +6,11 @@ import (
 )
 
 const (
-	GrpcTimeout = time.Second * 10
+	GrpcTimeout = time.Second * 10 // nolint
 )
 
 const (
-	ServiceName = "sphinx-proxy.npool.top"
+	ServiceName = "sphinx-proxy.npool.top" // nolint
 )
 
 func FormatServiceName() string {
