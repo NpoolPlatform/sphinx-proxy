@@ -3,7 +3,7 @@ config:
   hostname: "sphinx-proxy.npool.top"
   http_port: 50000
   grpc_port: 50001
-  promethues_port: 50002
+  prometheus_port: 50002
   appid: "89089012783789789719823798127398"
   logdir: "./"
   apolloAccessKey: "0147fb70b815403790e8634b899fac07"
