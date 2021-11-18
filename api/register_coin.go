@@ -59,7 +59,9 @@ func (s *Server) RegisterCoin(ctx context.Context, in *signproxy.RegisterCoinReq
 	defer cancel()
 
 	// new coin exists ?
-	coinInfo, err := client.GetCoinInfo(ctx, &coininfo.GetCoinInfoRequest{})
+	coinInfo, err := client.GetCoinInfo(ctx, &coininfo.GetCoinInfoRequest{
+		CoinType: in.GetCoinType(),
+	})
 	if err != nil {
 		logger.Sugar().Errorf("[%s] call GetCoinInfo error: %v",
 			constant.FormatServiceName(),
@@ -68,10 +70,12 @@ func (s *Server) RegisterCoin(ctx context.Context, in *signproxy.RegisterCoinReq
 		return nil, status.Error(codes.Internal, "interval server error")
 	}
 	if coinInfo != nil {
-		return nil, status.Error(codes.Internal, "")
+		return &signproxy.RegisterCoinResponse{}, nil
 	}
 
-	if _, err := client.RegisterCoin(ctx, &coininfo.RegisterCoinRequest{}); err != nil {
+	if _, err := client.RegisterCoin(ctx, &coininfo.RegisterCoinRequest{
+		CoinType: in.GetCoinType(),
+	}); err != nil {
 		return nil, status.Error(codes.Internal, "interval server error")
 	}
 

@@ -3,14 +3,14 @@ package check
 import (
 	"errors"
 
-	"github.com/NpoolPlatform/message/npool/signproxy"
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 )
 
 var ErrCoinTypeNotSupport = errors.New("coin type not support")
 
-func CoinType(coinType signproxy.CoinType) error {
+func CoinType(coinType sphinxplugin.CoinType) error {
 	switch coinType {
-	case signproxy.CoinType_CoinTypeBTC, signproxy.CoinType_CoinTypeFIL:
+	case sphinxplugin.CoinType_CoinTypeBTC, sphinxplugin.CoinType_CoinTypeFIL:
 	default:
 		return ErrCoinTypeNotSupport
 	}

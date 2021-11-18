@@ -1,6 +1,6 @@
 commonLabels:
-  # app: service-example
+  # app: sphinx-proxy
 
 resources:
-- 01-service-sample.yaml
+- 01-sphinx-proxy.yaml
 - 02-ingress.yaml
