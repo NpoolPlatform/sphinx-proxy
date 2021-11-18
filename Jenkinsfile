@@ -41,10 +41,13 @@ pipeline {
         expression { BUILD_TARGET == 'true' }
       }
       steps {
+        sh 'git clone https://github.com/NpoolPlatform/message.git /tmp/message'
         sh (returnStdout: false, script: '''
+          cd /tmp/message
           make -C tools/grpc install
           PATH=$PATH:/usr/go/bin:$HOME/go/bin make -C message clean proto
           make verify-build
+          cd -
         '''.stripIndent())
       }
     }
@@ -64,10 +67,10 @@ pipeline {
         sh 'git clone https://github.com/NpoolPlatform/apollo-base-config.git .apollo-base-config'
         sh (returnStdout: false, script: '''
           devboxpod=`kubectl get pods -A | grep development-box | awk '{print $2}'`
-          servicename="sample-service"
+          servicename="sphinx-proxy"
 
           PASSWORD=`kubectl get secret --namespace "kube-system" mysql-password-secret -o jsonpath="{.data.rootpassword}" | base64 --decode`
-          kubectl -n kube-system exec mysql-0 -- mysql -h 127.0.0.1 -uroot -p$PASSWORD -P3306 -e "create database if not exists service_sample;"
+          kubectl -n kube-system exec mysql-0 -- mysql -h 127.0.0.1 -uroot -p$PASSWORD -P3306 -e "create database if not exists sphinx-proxy;"
 
           kubectl exec --namespace kube-system $devboxpod -- make -C /tmp/$servicename after-test || true
           kubectl exec --namespace kube-system $devboxpod -- rm -rf /tmp/$servicename || true
@@ -80,7 +83,7 @@ pipeline {
 
             cd .apollo-base-config
             ./apollo-base-config.sh $APP_ID $TARGET_ENV $vhost
-            ./apollo-item-config.sh $APP_ID $TARGET_ENV $vhost database_name service_sample
+            ./apollo-item-config.sh $APP_ID $TARGET_ENV $vhost database_name sphinx-proxy
             cd -
           done
 
@@ -88,7 +91,9 @@ pipeline {
           kubectl exec --namespace kube-system $devboxpod -- rm -rf /tmp/$servicename
 
           swaggeruipod=`kubectl get pods -A | grep swagger | awk '{print $2}'`
-          kubectl cp message/npool/*.swagger.json kube-system/$swaggeruipod:/usr/share/nginx/html || true
+          for md in `find /tmp/message -name "*.swagger.json"`; do
+            kubectl cp $md kube-system/$swaggeruipod:/usr/share/nginx/html || true
+          done
         '''.stripIndent())
       }
     }
@@ -99,7 +104,7 @@ pipeline {
       }
       steps {
         sh(returnStdout: true, script: '''
-          images=`docker images | grep entropypool | grep service-sample | awk '{ print $3 }'`
+          images=`docker images | grep entropypool | grep sphinx-proxy | awk '{ print $3 }'`
           for image in $images; do
             docker rmi $image
           done
@@ -127,14 +132,14 @@ pipeline {
         sh 'make deploy-to-k8s-cluster'
         sh (returnStdout: false, script: '''
           PASSWORD=`kubectl get secret --namespace "kube-system" mysql-password-secret -o jsonpath="{.data.rootpassword}" | base64 --decode`
-          kubectl -n kube-system exec mysql-0 -- mysql -h 127.0.0.1 -uroot -p$PASSWORD -P3306 -e "create database if not exists service_sample;"
+          kubectl -n kube-system exec mysql-0 -- mysql -h 127.0.0.1 -uroot -p$PASSWORD -P3306 -e "create database if not exists sphinx-proxy;"
           username=`helm status rabbitmq --namespace kube-system | grep Username | awk -F ' : ' '{print $2}' | sed 's/"//g'`
           for vhost in `cat cmd/*/*.viper.yaml | grep hostname | awk '{print $2}' | sed 's/"//g' | sed 's/\\./-/g'`; do
             kubectl exec -it --namespace kube-system rabbitmq-0 -- rabbitmqctl add_vhost $vhost
             kubectl exec -it --namespace kube-system rabbitmq-0 -- rabbitmqctl set_permissions -p $vhost $username ".*" ".*" ".*"
             cd .apollo-base-config
             ./apollo-base-config.sh $APP_ID $TARGET_ENV $vhost
-            ./apollo-item-config.sh $APP_ID $TARGET_ENV $vhost database_name service_sample
+            ./apollo-item-config.sh $APP_ID $TARGET_ENV $vhost database_name sphinx-proxy
           done
         '''.stripIndent())
       }
