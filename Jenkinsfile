@@ -37,9 +37,9 @@ pipeline {
     }
 
     stage('Switch to current cluster') {
-        steps {
-            sh 'cd /etc/kubeasz; ./ezctl checkout $TARGET_ENV'
-        }
+      steps {
+          sh 'cd /etc/kubeasz; ./ezctl checkout $TARGET_ENV'
+      }
     }
 
     stage('Unit Tests') {

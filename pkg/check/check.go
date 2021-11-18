@@ -6,7 +6,7 @@ import (
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 )
 
-var ErrCoinTypeNotSupport = errors.New("coin type not support")
+var ErrCoinTypeNotSupport = errors.New("coin type not support") // nolint
 
 func CoinType(coinType sphinxplugin.CoinType) error {
 	switch coinType {
