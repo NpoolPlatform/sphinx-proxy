@@ -41,7 +41,7 @@ pipeline {
         expression { BUILD_TARGET == 'true' }
       }
       steps {
-        sh 'git clone https://github.com/NpoolPlatform/message.git /tmp/message'
+        sh 'rm /tmp/message -rf; git clone https://github.com/NpoolPlatform/message.git /tmp/message'
         sh (returnStdout: false, script: '''
           cd /tmp/message
           make -C tools/grpc install
