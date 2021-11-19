@@ -7,6 +7,9 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/app"
 	"github.com/NpoolPlatform/go-service-framework/pkg/config"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	mysqlconst "github.com/NpoolPlatform/go-service-framework/pkg/mysql/const"
+	rabbitmqconst "github.com/NpoolPlatform/go-service-framework/pkg/rabbitmq/const"
+	redisconst "github.com/NpoolPlatform/go-service-framework/pkg/redis/const"
 	coinconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/servicename"
 	cli "github.com/urfave/cli/v2"
@@ -30,6 +33,9 @@ func main() {
 		nil,
 		commands,
 		config.ServiceNameToNamespace(coinconst.ServiceName),
+		config.ServiceNameToNamespace(mysqlconst.MysqlServiceName),
+		config.ServiceNameToNamespace(redisconst.RedisServiceName),
+		config.ServiceNameToNamespace(rabbitmqconst.RabbitMQServiceName),
 	)
 	if err != nil {
 		logger.Sugar().Errorf("fail to create %v: %v", serviceName, err)
