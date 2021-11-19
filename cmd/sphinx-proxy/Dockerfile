@@ -1,6 +1,6 @@
 FROM jrei/systemd-centos:7
 
-COPY ServiceSample.viper.yaml /etc/ServiceSample/ServiceSample.viper.yaml
-COPY service-sample /usr/local/bin/service-sample
+COPY SphinxProxy.viper.yaml /etc/SphinxProxy/SphinxProxy.viper.yaml
+COPY sphinx-proxy /usr/local/bin/sphinx-proxy
 
-CMD ["service-sample", "run"]
+CMD ["sphinx-proxy", "run"]
