@@ -15,6 +15,7 @@ import (
 	"github.com/NpoolPlatform/message/npool/trading"
 	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	msgcli "github.com/NpoolPlatform/sphinx-proxy/pkg/message/message"
+	"github.com/NpoolPlatform/sphinx-proxy/pkg/unit"
 	sconst "github.com/NpoolPlatform/sphinx-service/pkg/message/const"
 	msgproducer "github.com/NpoolPlatform/sphinx-service/pkg/message/message"
 	"github.com/filecoin-project/specs-actors/actors/builtin"
@@ -256,6 +257,7 @@ func (p *mPlugin) pluginStreamSend() {
 					ErrorMessage:        fmt.Sprintf("get wallet balance error: %v", err),
 				}
 			}
+			logger.Sugar().Infof("proxy->plugin TransactionIDInsite: %v ok", info.GetTransactionIDInsite())
 		case info := <-p.preSign:
 			if err := p.pluginServer.Send(&signproxy.ProxyPluginRequest{
 				CoinType:            info.GetCoinType(),
@@ -272,7 +274,15 @@ func (p *mPlugin) pluginStreamSend() {
 					info.GetAddress(),
 					err,
 				)
+				p.ack <- &trading.ACKRequest{
+					IsOkay:              false,
+					TransactionType:     info.GetTransactionType(),
+					TransactionIdInsite: info.GetTransactionIDInsite(),
+					Address:             info.GetAddress(),
+					ErrorMessage:        fmt.Sprintf("get wallet balance error: %v", err),
+				}
 			}
+			logger.Sugar().Infof("proxy->plugin TransactionIDInsite: %v ok", info.GetTransactionIDInsite())
 		case info := <-p.mpoolPush:
 			if err := p.pluginServer.Send(&signproxy.ProxyPluginRequest{
 				CoinType:            info.GetCoinType(),
@@ -282,6 +292,13 @@ func (p *mPlugin) pluginStreamSend() {
 				Signature:           info.GetSignature(),
 			}); err != nil {
 				done <- struct{}{}
+				p.ack <- &trading.ACKRequest{
+					IsOkay:              false,
+					TransactionType:     info.GetTransactionType(),
+					TransactionIdInsite: info.GetTransactionIDInsite(),
+					Address:             info.GetAddress(),
+					ErrorMessage:        fmt.Sprintf("get wallet balance error: %v", err),
+				}
 				logger.Sugar().Errorf(
 					"proxy->plugin TransactionIDInsite: %v TransactionType %v, CoinType: %v Message: %v error: %v",
 					info.GetTransactionIDInsite(),
@@ -290,8 +307,8 @@ func (p *mPlugin) pluginStreamSend() {
 					info.GetMessage(),
 					err,
 				)
-				logger.Sugar().Infof("proxy->plugin TransactionIDInsite: %v ok", info.GetTransactionIDInsite())
 			}
+			logger.Sugar().Infof("proxy->plugin TransactionIDInsite: %v ok", info.GetTransactionIDInsite())
 		}
 	}
 }
@@ -316,6 +333,7 @@ func (p *mPlugin) pluginStreamRecv() {
 				TransactionIdInsite: psResponse.GetTransactionIDInsite(),
 				CoinTypeId:          int32(psResponse.GetCoinType()),
 			}
+			logger.Sugar().Infof("plugin register new coin: %v ok", psResponse.GetCoinType())
 			continue
 		case signproxy.TransactionType_Balance:
 			p.ack <- &trading.ACKRequest{
@@ -325,6 +343,7 @@ func (p *mPlugin) pluginStreamRecv() {
 				Balance:             float64(psResponse.GetBalance()),
 				CoinTypeId:          int32(psResponse.GetCoinType()),
 			}
+			logger.Sugar().Infof("get TransactionIDInsite: %v wallet balance ok", psResponse.GetTransactionIDInsite())
 			continue
 		case signproxy.TransactionType_PreSign:
 			signProxy := getProxySign()
@@ -333,14 +352,14 @@ func (p *mPlugin) pluginStreamRecv() {
 				CoinType:            psResponse.GetCoinType(),
 				TransactionIDInsite: psResponse.GetTransactionIDInsite(),
 				Message: &sphinxplugin.UnsignedMessage{
-					// To:    ,
-					// From:  ,
-					Nonce: psResponse.GetNonce(),
-					// Value:      cp.data.AmountFloat64,
-					// GasLimit:   0,
-					// GasFeeCap:  0,
-					// GasPremium: 0,
-					Method: uint64(builtin.MethodSend),
+					To:         psResponse.GetMessage().GetTo(),
+					From:       psResponse.GetMessage().GetFrom(),
+					Nonce:      psResponse.GetNonce(),
+					Value:      psResponse.GetMessage().GetValue(),
+					GasLimit:   psResponse.GetMessage().GetGasLimit(),
+					GasFeeCap:  psResponse.GetMessage().GetGasFeeCap(),
+					GasPremium: psResponse.GetMessage().GetGasPremium(),
+					Method:     uint64(builtin.MethodSend),
 				},
 			}
 		case signproxy.TransactionType_Broadcast:
@@ -352,6 +371,7 @@ func (p *mPlugin) pluginStreamRecv() {
 				CoinTypeId:          int32(psResponse.GetCoinType()),
 				TransactionIdChain:  psResponse.GetCID(),
 			}
+			logger.Sugar().Infof("Broadcast TransactionIDInsite: %v message ok", psResponse.GetTransactionIDInsite())
 		}
 	}
 }
@@ -367,6 +387,15 @@ func watch() {
 			TransactionType:     cproxy.data.TransactionType,
 			TransactionIDInsite: cproxy.data.TransactionIDInsite,
 			Address:             cproxy.data.AddressFrom,
+			Message: &sphinxplugin.UnsignedMessage{
+				To:         cproxy.data.AddressTo,
+				From:       cproxy.data.AddressFrom,
+				Value:      uint64(unit.FIL2AttoFIL(cproxy.data.AmountFloat64)),
+				GasLimit:   655063,
+				GasFeeCap:  2300,
+				GasPremium: 2250,
+				Method:     uint64(builtin.MethodSend),
+			},
 		}
 	}
 }
@@ -409,7 +438,6 @@ func ConsumerMQ() error {
 				mPlugin: mPlugin,
 				data:    tinfo,
 			}
-			mPlugin.preSign <- &signproxy.ProxyPluginRequest{}
 		case signproxy.TransactionType_Balance:
 			pluginStream := getProxyPlugin(tinfo.CoinType)
 			pluginStream.balance <- &signproxy.ProxyPluginRequest{

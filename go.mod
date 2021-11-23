@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20211121104402-9abc32fd422a
-	github.com/NpoolPlatform/message v0.0.0-20211123023125-9fe2cf15e22a
+	github.com/NpoolPlatform/message v0.0.0-20211123064021-293d02c62a52
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211118034400-6a6ad84fc182
 	github.com/NpoolPlatform/sphinx-service v0.0.0-20211121143758-f8fdd9e91a0c
 	github.com/filecoin-project/specs-actors v0.9.14

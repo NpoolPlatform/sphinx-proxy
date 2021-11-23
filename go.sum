@@ -58,8 +58,8 @@ github.com/NpoolPlatform/message v0.0.0-20211118031636-e8c78a0a0c3f/go.mod h1:Tp
 github.com/NpoolPlatform/message v0.0.0-20211118042348-c8b8138f631d/go.mod h1:TpqErU/o7lECBW1gcmbUsbrQkpVj27cgzi7qpVbZHzk=
 github.com/NpoolPlatform/message v0.0.0-20211118083406-0de35a6ec50a/go.mod h1:TpqErU/o7lECBW1gcmbUsbrQkpVj27cgzi7qpVbZHzk=
 github.com/NpoolPlatform/message v0.0.0-20211121143108-2212262dbf10/go.mod h1:1sfQHL02lIkzK1ObQRbNi0UAkSZWcBw/rsK5hn9Perg=
-github.com/NpoolPlatform/message v0.0.0-20211123023125-9fe2cf15e22a h1:r6mDe/QAXFdOm+JknpTVARzx2J2uNUTff6azIa4JYG0=
-github.com/NpoolPlatform/message v0.0.0-20211123023125-9fe2cf15e22a/go.mod h1:1sfQHL02lIkzK1ObQRbNi0UAkSZWcBw/rsK5hn9Perg=
+github.com/NpoolPlatform/message v0.0.0-20211123064021-293d02c62a52 h1:Pvux8oN2IsMvC4F3u60JpjSv9Mlwci7f62JQLxYriUI=
+github.com/NpoolPlatform/message v0.0.0-20211123064021-293d02c62a52/go.mod h1:1sfQHL02lIkzK1ObQRbNi0UAkSZWcBw/rsK5hn9Perg=
 github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211118034400-6a6ad84fc182 h1:V9VoI/qXSJ3DA0BgecgA7VJh3WuWW+XlEIVU3iZpgP4=
 github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211118034400-6a6ad84fc182/go.mod h1:thfXaTHeXovzHCtBraM3eZLgo+iswE8ViiYSfs+e0tk=
 github.com/NpoolPlatform/sphinx-plugin v0.0.0-20211115083319-34afa2ad3d5a/go.mod h1:Zjg1c41CZO7sZWgYkkLQ1TuaaxBsmtfqWjebW9RRnO0=
