@@ -19,7 +19,7 @@ spec:
           - path: /
             backend:
               serviceName: sphinx-proxy
-              servicePort: 32759
+              servicePort: 50001
 
 ---
 
@@ -44,4 +44,4 @@ spec:
           - path: /
             backend:
               serviceName: sphinx-proxy
-              servicePort: 32759
+              servicePort: 50001
