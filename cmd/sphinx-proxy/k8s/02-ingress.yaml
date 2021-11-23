@@ -8,7 +8,6 @@ metadata:
     k8s.kuboard.cn/workload: sphinx-proxy-npool
     kubernetes.io/ingress.class: "traefik-internet"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: "traefik-v2-autodetect@kubernetescrd"
     traefik.ingress.kubernetes.io/service.serversscheme: h2c
 
 spec:
@@ -33,7 +32,6 @@ metadata:
     k8s.kuboard.cn/workload: sphinx-proxy-xpool
     kubernetes.io/ingress.class: "traefik-internet"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: "traefik-v2-autodetect@kubernetescrd"
     traefik.ingress.kubernetes.io/service.serversscheme: h2c
 
 spec:
