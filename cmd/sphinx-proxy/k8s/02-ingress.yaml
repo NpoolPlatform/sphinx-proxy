@@ -7,14 +7,15 @@ metadata:
     k8s.kuboard.cn/displayName: sphinx-proxy-npool
     k8s.kuboard.cn/workload: sphinx-proxy-npool
     kubernetes.io/ingress.class: "traefik-internet"
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-v2-autodetect@kubernetescrd"
+    traefik.ingress.kubernetes.io/service.serversscheme: h2c
 
 spec:
   rules:
     - host: sphinx.proxy.api.npool.top
       http:
         paths:
-          - path: /sphinx-proxy
+          - path: /
             backend:
               serviceName: sphinx-proxy
               servicePort: 32759
@@ -30,26 +31,15 @@ metadata:
     k8s.kuboard.cn/displayName: sphinx-proxy-xpool
     k8s.kuboard.cn/workload: sphinx-proxy-xpool
     kubernetes.io/ingress.class: "traefik-internet"
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: "traefik-v2-autodetect@kubernetescrd"
+    traefik.ingress.kubernetes.io/service.serversscheme: h2c
 
 spec:
   rules:
     - host: sphinx.proxy.api.xpool.top
       http:
         paths:
-          - path: /sphinx-proxy
+          - path: /
             backend:
               serviceName: sphinx-proxy
               servicePort: 32759
-
----
-
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: strip-sphinx-proxy-prefix
-  namespace: kube-system
-spec:
-  stripPrefix:
-    prefixes:
-      - /sphinx-proxy
