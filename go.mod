@@ -4,11 +4,10 @@ go 1.16
 
 require (
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20211121104402-9abc32fd422a
-	github.com/NpoolPlatform/message v0.0.0-20211122095625-9c53fdaf63f5
+	github.com/NpoolPlatform/message v0.0.0-20211123023125-9fe2cf15e22a
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211118034400-6a6ad84fc182
 	github.com/NpoolPlatform/sphinx-service v0.0.0-20211121143758-f8fdd9e91a0c
 	github.com/filecoin-project/specs-actors v0.9.14
-	github.com/shopspring/decimal v1.3.1
 	github.com/streadway/amqp v1.0.0
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1

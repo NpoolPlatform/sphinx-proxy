@@ -15,7 +15,6 @@ import (
 	"github.com/NpoolPlatform/message/npool/trading"
 	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	msgcli "github.com/NpoolPlatform/sphinx-proxy/pkg/message/message"
-	"github.com/NpoolPlatform/sphinx-proxy/pkg/unit"
 	sconst "github.com/NpoolPlatform/sphinx-service/pkg/message/const"
 	msgproducer "github.com/NpoolPlatform/sphinx-service/pkg/message/message"
 	"github.com/filecoin-project/specs-actors/actors/builtin"
@@ -319,26 +318,11 @@ func (p *mPlugin) pluginStreamRecv() {
 			}
 			continue
 		case signproxy.TransactionType_Balance:
-			balance, err := unit.AttoFIL2FIL(psResponse.GetBalance())
-			if err != nil {
-				logger.Sugar().Errorf(
-					"call AttoFIL2FIL Balance: %v error: %v",
-					psResponse.GetBalance(),
-					err,
-				)
-				p.ack <- &trading.ACKRequest{
-					IsOkay:              false,
-					TransactionType:     psResponse.GetTransactionType(),
-					TransactionIdInsite: psResponse.GetTransactionIDInsite(),
-					CoinTypeId:          int32(psResponse.GetCoinType()),
-				}
-				continue
-			}
 			p.ack <- &trading.ACKRequest{
 				IsOkay:              true,
 				TransactionType:     psResponse.GetTransactionType(),
 				TransactionIdInsite: psResponse.GetTransactionIDInsite(),
-				Balance:             balance,
+				Balance:             float64(psResponse.GetBalance()),
 				CoinTypeId:          int32(psResponse.GetCoinType()),
 			}
 			continue
