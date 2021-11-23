@@ -8,11 +8,10 @@ metadata:
     k8s.kuboard.cn/workload: sphinx-proxy-npool
     kubernetes.io/ingress.class: "traefik-internet"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-sphinx-proxy-prefix@kubernetescrd
 
 spec:
   rules:
-    - host: api.npool.top
+    - host: sphinx.proxy.api.npool.top
       http:
         paths:
           - path: /sphinx-proxy
@@ -32,11 +31,10 @@ metadata:
     k8s.kuboard.cn/workload: sphinx-proxy-xpool
     kubernetes.io/ingress.class: "traefik-internet"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: kube-system-strip-sphinx-proxy-prefix@kubernetescrd
 
 spec:
   rules:
-    - host: api.xpool.top
+    - host: sphinx.proxy.api.xpool.top
       http:
         paths:
           - path: /sphinx-proxy
