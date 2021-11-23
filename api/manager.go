@@ -424,6 +424,11 @@ func ConsumerMQ() error {
 			continue
 		}
 
+		logger.Sugar().Infof(
+			"recv consumer info: %v",
+			tinfo,
+		)
+
 		switch tinfo.TransactionType {
 		case signproxy.TransactionType_WalletNew:
 			signStream := getProxySign()
@@ -454,7 +459,6 @@ func ConsumerMQ() error {
 			tinfo.CoinType,
 			tinfo.AddressFrom,
 			tinfo.AddressTo,
-			err,
 		)
 	}
 
