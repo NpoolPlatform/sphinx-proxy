@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math/rand"
 	"sync"
 	"time"
@@ -20,6 +21,8 @@ import (
 	sconst "github.com/NpoolPlatform/sphinx-service/pkg/message/const"
 	msgproducer "github.com/NpoolPlatform/sphinx-service/pkg/message/message"
 	"github.com/filecoin-project/specs-actors/actors/builtin"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -66,24 +69,25 @@ func getProxyPlugin(coinType sphinxplugin.CoinType) (*mPlugin, error) {
 }
 
 type mSign struct {
-	signServer signproxy.SignProxy_ProxySignServer
-	close      chan struct{}
-	walletNew  chan *signproxy.ProxySignRequest // address
-	sign       chan *signproxy.ProxySignRequest
+	signServer   signproxy.SignProxy_ProxySignServer
+	closeChannel chan struct{}
+	walletNew    chan *signproxy.ProxySignRequest // address
+	sign         chan *signproxy.ProxySignRequest
 }
 
 func newSignStream(stream signproxy.SignProxy_ProxySignServer) {
 	lc := &mSign{
-		signServer: stream,
-		close:      make(chan struct{}),
-		walletNew:  make(chan *signproxy.ProxySignRequest),
-		sign:       make(chan *signproxy.ProxySignRequest),
+		signServer:   stream,
+		closeChannel: make(chan struct{}),
+		walletNew:    make(chan *signproxy.ProxySignRequest),
+		sign:         make(chan *signproxy.ProxySignRequest),
 	}
 	slk.Lock()
 	lmSign = append(lmSign, lc)
 	slk.Unlock()
 	go lc.signStreamSend()
 	go lc.signStreamRecv()
+	go lc.close()
 }
 
 // wallet new
@@ -146,6 +150,12 @@ func (s *mSign) signStreamRecv() {
 				"proxy->sign error: %v",
 				err,
 			)
+			if status.Code(err) == codes.Canceled ||
+				status.Code(err) == codes.Unavailable ||
+				err == io.EOF {
+				s.closeChannel <- struct{}{}
+				break
+			}
 			continue
 		}
 
@@ -182,9 +192,26 @@ func (s *mSign) signStreamRecv() {
 	}
 }
 
+func (s *mSign) close() {
+	for {
+		<-s.closeChannel
+		slk.Lock()
+		nlmSign := make([]*mSign, 0, len(lmSign))
+		for idx, sign := range lmSign {
+			if sign.signServer == s.signServer {
+				nlmSign = append(nlmSign, lmSign[0:idx]...)
+				nlmSign = append(nlmSign, lmSign[idx+1:]...)
+				break
+			}
+		}
+		lmSign = nlmSign
+		slk.Unlock()
+	}
+}
+
 type mPlugin struct {
 	pluginServer signproxy.SignProxy_ProxyPluginServer
-	close        chan struct{}
+	closeChannel chan struct{}
 	coinType     sphinxplugin.CoinType              // coin type
 	balance      chan *signproxy.ProxyPluginRequest // address
 	preSign      chan *signproxy.ProxyPluginRequest
@@ -195,7 +222,7 @@ type mPlugin struct {
 func newPluginStream(stream signproxy.SignProxy_ProxyPluginServer) {
 	lp := &mPlugin{
 		pluginServer: stream,
-		close:        make(chan struct{}),
+		closeChannel: make(chan struct{}),
 		balance:      make(chan *signproxy.ProxyPluginRequest),
 		preSign:      make(chan *signproxy.ProxyPluginRequest),
 		mpoolPush:    make(chan *signproxy.ProxyPluginRequest),
@@ -203,6 +230,7 @@ func newPluginStream(stream signproxy.SignProxy_ProxyPluginServer) {
 	}
 	go lp.pluginStreamSend()
 	go lp.pluginStreamRecv()
+	go lp.close()
 }
 
 // add new coin type
@@ -312,6 +340,12 @@ func (p *mPlugin) pluginStreamRecv() {
 				"proxy->plugin error: %v",
 				err,
 			)
+			if status.Code(err) == codes.Canceled ||
+				status.Code(err) == codes.Unavailable ||
+				err == io.EOF {
+				p.closeChannel <- struct{}{}
+				break
+			}
 			continue
 		}
 
@@ -376,6 +410,23 @@ func (p *mPlugin) pluginStreamRecv() {
 			}
 			logger.Sugar().Infof("Broadcast TransactionIDInsite: %v message ok", psResponse.GetTransactionIDInsite())
 		}
+	}
+}
+
+func (p *mPlugin) close() {
+	for {
+		<-p.closeChannel
+		plk.Lock()
+		nlmPlugin := make([]*mPlugin, 0, len(lmPlugin[p.coinType]))
+		for idx, plugin := range lmPlugin[p.coinType] {
+			if plugin.pluginServer == p.pluginServer {
+				nlmPlugin = append(nlmPlugin, lmPlugin[p.coinType][0:idx]...)
+				nlmPlugin = append(nlmPlugin, lmPlugin[p.coinType][idx+1:]...)
+				break
+			}
+		}
+		lmPlugin[p.coinType] = nlmPlugin
+		plk.Unlock()
 	}
 }
 
@@ -482,7 +533,7 @@ func ConsumerMQ() error {
 				Address:             tinfo.AddressFrom,
 			}
 		default:
-			logger.Sugar().Error("consumer info TransactionType: %v invalid", tinfo.TransactionType)
+			logger.Sugar().Errorf("consumer info TransactionType: %v invalid", tinfo.TransactionType)
 			ackReq.IsOkay = false
 			ackChannel <- ackReq
 			continue
