@@ -15,7 +15,6 @@ import (
 	"github.com/NpoolPlatform/message/npool/signproxy"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/trading"
-	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	msgcli "github.com/NpoolPlatform/sphinx-proxy/pkg/message/message"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/unit"
 	sconst "github.com/NpoolPlatform/sphinx-service/pkg/message/const"
@@ -557,9 +556,7 @@ func ack() {
 			continue
 		}
 		ackClient := trading.NewTradingClient(ackConn)
-		ctx, cancel := context.WithTimeout(context.Background(), constant.GrpcTimeout)
-		_, err = ackClient.ACK(ctx, ackInfo)
-		cancel()
+		_, err = ackClient.ACK(context.Background(), ackInfo)
 		if err != nil {
 			logger.Sugar().Errorf("ack error: %v", err)
 		}
