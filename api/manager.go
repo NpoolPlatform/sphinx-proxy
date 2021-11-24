@@ -37,6 +37,7 @@ type combineProxy struct {
 var (
 	rnd                = rand.New(rand.NewSource(time.Now().UnixNano()))
 	done               = make(chan struct{})
+	ackChannel         = make(chan *trading.ACKRequest)
 	slk                sync.RWMutex
 	plk                sync.RWMutex
 	lmSign             = make([]*mSign, 0)
@@ -69,7 +70,6 @@ type mSign struct {
 	close      chan struct{}
 	walletNew  chan *signproxy.ProxySignRequest // address
 	sign       chan *signproxy.ProxySignRequest
-	ack        chan *trading.ACKRequest
 }
 
 func newSignStream(stream signproxy.SignProxy_ProxySignServer) {
@@ -78,27 +78,12 @@ func newSignStream(stream signproxy.SignProxy_ProxySignServer) {
 		close:      make(chan struct{}),
 		walletNew:  make(chan *signproxy.ProxySignRequest),
 		sign:       make(chan *signproxy.ProxySignRequest),
-		ack:        make(chan *trading.ACKRequest),
 	}
 	slk.Lock()
 	lmSign = append(lmSign, lc)
 	slk.Unlock()
 	go lc.signStreamSend()
 	go lc.signStreamRecv()
-	go lc.handleACK()
-}
-
-func (s *mSign) handleACK() {
-	for {
-		ackReq := <-s.ack
-		if err := ack(ackReq); err != nil {
-			logger.Sugar().Errorf(
-				"handle ack info: %v error: %v",
-				ackReq,
-				err,
-			)
-		}
-	}
 }
 
 // wallet new
@@ -118,7 +103,7 @@ func (s *mSign) signStreamSend() {
 					info.GetTransactionIDInsite(),
 					err,
 				)
-				s.ack <- &trading.ACKRequest{
+				ackChannel <- &trading.ACKRequest{
 					IsOkay:              false,
 					TransactionType:     info.GetTransactionType(),
 					TransactionIdInsite: info.GetTransactionIDInsite(),
@@ -134,7 +119,7 @@ func (s *mSign) signStreamSend() {
 				Message:             info.GetMessage(),
 			}); err != nil {
 				done <- struct{}{}
-				s.ack <- &trading.ACKRequest{
+				ackChannel <- &trading.ACKRequest{
 					IsOkay:              false,
 					TransactionType:     info.GetTransactionType(),
 					TransactionIdInsite: info.GetTransactionIDInsite(),
@@ -173,7 +158,7 @@ func (s *mSign) signStreamRecv() {
 
 		switch ssResponse.GetTransactionType() {
 		case signproxy.TransactionType_WalletNew:
-			s.ack <- &trading.ACKRequest{
+			ackChannel <- &trading.ACKRequest{
 				IsOkay:              true,
 				TransactionType:     ssResponse.GetTransactionType(),
 				CoinTypeId:          int32(ssResponse.GetCoinType()),
@@ -205,7 +190,6 @@ type mPlugin struct {
 	preSign      chan *signproxy.ProxyPluginRequest
 	mpoolPush    chan *signproxy.ProxyPluginRequest
 	registerCoin chan *signproxy.ProxyPluginResponse
-	ack          chan *trading.ACKRequest
 }
 
 func newPluginStream(stream signproxy.SignProxy_ProxyPluginServer) {
@@ -216,24 +200,9 @@ func newPluginStream(stream signproxy.SignProxy_ProxyPluginServer) {
 		preSign:      make(chan *signproxy.ProxyPluginRequest),
 		mpoolPush:    make(chan *signproxy.ProxyPluginRequest),
 		registerCoin: make(chan *signproxy.ProxyPluginResponse),
-		ack:          make(chan *trading.ACKRequest),
 	}
 	go lp.pluginStreamSend()
 	go lp.pluginStreamRecv()
-	go lp.handleACK()
-}
-
-func (p *mPlugin) handleACK() {
-	for {
-		ackReq := <-p.ack
-		if err := ack(ackReq); err != nil {
-			logger.Sugar().Errorf(
-				"handle ack info: %v error: %v",
-				ackReq,
-				err,
-			)
-		}
-	}
 }
 
 // add new coin type
@@ -271,7 +240,7 @@ func (p *mPlugin) pluginStreamSend() {
 					info.GetAddress(),
 					err,
 				)
-				p.ack <- &trading.ACKRequest{
+				ackChannel <- &trading.ACKRequest{
 					IsOkay:              false,
 					TransactionType:     info.GetTransactionType(),
 					TransactionIdInsite: info.GetTransactionIDInsite(),
@@ -296,7 +265,7 @@ func (p *mPlugin) pluginStreamSend() {
 					info.GetAddress(),
 					err,
 				)
-				p.ack <- &trading.ACKRequest{
+				ackChannel <- &trading.ACKRequest{
 					IsOkay:              false,
 					TransactionType:     info.GetTransactionType(),
 					TransactionIdInsite: info.GetTransactionIDInsite(),
@@ -314,7 +283,7 @@ func (p *mPlugin) pluginStreamSend() {
 				Signature:           info.GetSignature(),
 			}); err != nil {
 				done <- struct{}{}
-				p.ack <- &trading.ACKRequest{
+				ackChannel <- &trading.ACKRequest{
 					IsOkay:              false,
 					TransactionType:     info.GetTransactionType(),
 					TransactionIdInsite: info.GetTransactionIDInsite(),
@@ -349,7 +318,7 @@ func (p *mPlugin) pluginStreamRecv() {
 		switch psResponse.GetTransactionType() {
 		case signproxy.TransactionType_RegisterCoin:
 			lmPlugin.append(psResponse.GetCoinType(), *p)
-			p.ack <- &trading.ACKRequest{
+			ackChannel <- &trading.ACKRequest{
 				IsOkay:              true,
 				TransactionType:     psResponse.GetTransactionType(),
 				TransactionIdInsite: psResponse.GetTransactionIDInsite(),
@@ -358,7 +327,7 @@ func (p *mPlugin) pluginStreamRecv() {
 			logger.Sugar().Infof("plugin register new coin: %v ok", psResponse.GetCoinType())
 			continue
 		case signproxy.TransactionType_Balance:
-			p.ack <- &trading.ACKRequest{
+			ackChannel <- &trading.ACKRequest{
 				IsOkay:              true,
 				TransactionType:     psResponse.GetTransactionType(),
 				TransactionIdInsite: psResponse.GetTransactionIDInsite(),
@@ -371,7 +340,7 @@ func (p *mPlugin) pluginStreamRecv() {
 			signProxy, err := getProxySign()
 			if err != nil {
 				logger.Sugar().Error("proxy->sign no invalid connection")
-				p.ack <- &trading.ACKRequest{
+				ackChannel <- &trading.ACKRequest{
 					IsOkay:              false,
 					TransactionType:     psResponse.GetTransactionType(),
 					TransactionIdInsite: psResponse.GetTransactionIDInsite(),
@@ -398,7 +367,7 @@ func (p *mPlugin) pluginStreamRecv() {
 			}
 		case signproxy.TransactionType_Broadcast:
 			done <- struct{}{}
-			p.ack <- &trading.ACKRequest{
+			ackChannel <- &trading.ACKRequest{
 				IsOkay:              true,
 				TransactionType:     psResponse.GetTransactionType(),
 				TransactionIdInsite: psResponse.GetTransactionIDInsite(),
@@ -444,6 +413,9 @@ func ConsumerMQ() error {
 	go func() {
 		watch()
 	}()
+	go func() {
+		ack()
+	}()
 
 	consumerInfo, err := msgcli.ConsumeTrans()
 	if err != nil {
@@ -475,7 +447,8 @@ func ConsumerMQ() error {
 			if err != nil {
 				logger.Sugar().Error("proxy->sign no invalid connection")
 				ackReq.IsOkay = false
-				goto ackTag
+				ackChannel <- ackReq
+				continue
 			}
 			signStream.walletNew <- &signproxy.ProxySignRequest{
 				TransactionType:     tinfo.TransactionType,
@@ -487,7 +460,8 @@ func ConsumerMQ() error {
 			if err != nil {
 				logger.Sugar().Error("proxy->plugin no invalid connection")
 				ackReq.IsOkay = false
-				goto ackTag
+				ackChannel <- ackReq
+				continue
 			}
 			combineProxyChannl <- combineProxy{
 				mPlugin: mPlugin,
@@ -498,7 +472,8 @@ func ConsumerMQ() error {
 			if err != nil {
 				logger.Sugar().Error("proxy->plugin no invalid connection")
 				ackReq.IsOkay = false
-				goto ackTag
+				ackChannel <- ackReq
+				continue
 			}
 			pluginStream.balance <- &signproxy.ProxyPluginRequest{
 				TransactionType:     tinfo.TransactionType,
@@ -509,7 +484,8 @@ func ConsumerMQ() error {
 		default:
 			logger.Sugar().Error("consumer info TransactionType: %v invalid", tinfo.TransactionType)
 			ackReq.IsOkay = false
-			goto ackTag
+			ackChannel <- ackReq
+			continue
 		}
 
 		logger.Sugar().Infof(
@@ -519,34 +495,24 @@ func ConsumerMQ() error {
 			tinfo.AddressFrom,
 			tinfo.AddressTo,
 		)
-
-		// TODO global ack
-		continue
-
-	ackTag:
-		{
-			if err := ack(ackReq); err != nil {
-				logger.Sugar().Infof(
-					"deal consumer info TranID: %v CoinType: %v error: %v",
-					tinfo.TransactionIDInsite,
-					tinfo.CoinType,
-					err,
-				)
-			}
-		}
 	}
-
 	return nil
 }
 
-func ack(ackRequest *trading.ACKRequest) error {
-	ackConn, err := grpc2.GetGRPCConn(sconst.ServiceName, grpc2.GRPCTAG)
-	if err != nil {
-		return err
+func ack() {
+	for {
+		ackInfo := <-ackChannel
+		ackConn, err := grpc2.GetGRPCConn(sconst.ServiceName, grpc2.GRPCTAG)
+		if err != nil {
+			logger.Sugar().Errorf("ack call GetGRPCConn error: %v", err)
+			continue
+		}
+		ackClient := trading.NewTradingClient(ackConn)
+		ctx, cancel := context.WithTimeout(context.Background(), constant.GrpcTimeout)
+		_, err = ackClient.ACK(ctx, ackInfo)
+		cancel()
+		if err != nil {
+			logger.Sugar().Errorf("ack error: %v", err)
+		}
 	}
-	ackClient := trading.NewTradingClient(ackConn)
-	ctx, cancel := context.WithTimeout(context.Background(), constant.GrpcTimeout)
-	defer cancel()
-	_, err = ackClient.ACK(ctx, ackRequest)
-	return err
 }

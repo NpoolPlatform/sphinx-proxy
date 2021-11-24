@@ -133,4 +133,4 @@ linters-settings:
       - unnecessaryBlock
   gocognit:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
-    min-complexity: 25
+    min-complexity: 20
