@@ -8,8 +8,7 @@ metadata:
     k8s.kuboard.cn/workload: sphinx-proxy-npool
     kubernetes.io/ingress.class: "traefik-internet"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    ingress.kubernetes.io/protocol: h2c
-    # traefik.protocol: h2c
+    traefik.ingress.kubernetes.io/service.serversscheme: h2c
 
 spec:
   rules:
@@ -33,8 +32,7 @@ metadata:
     k8s.kuboard.cn/workload: sphinx-proxy-xpool
     kubernetes.io/ingress.class: "traefik-internet"
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    ingress.kubernetes.io/protocol: h2c
-    # traefik.protocol: h2c
+    traefik.ingress.kubernetes.io/service.serversscheme: h2c
 
 spec:
   rules:

@@ -86,6 +86,7 @@ func newSignStream(stream signproxy.SignProxy_ProxySignServer) {
 	go lc.signStreamRecv(wg)
 	go lc.close(wg)
 	wg.Wait()
+	logger.Sugar().Info("some sign client down, close it")
 }
 
 // wallet new
@@ -199,9 +200,11 @@ func (s *mSign) close(wg *sync.WaitGroup) {
 	slk.Lock()
 	nlmSign := make([]*mSign, 0, len(lmSign))
 	for _, sign := range lmSign {
-		if sign.signServer != s.signServer {
-			nlmSign = append(nlmSign, sign)
+		if sign.signServer == s.signServer {
+			logger.Sugar().Infof("some sign client closed, proxy remove it")
+			continue
 		}
+		nlmSign = append(nlmSign, sign)
 	}
 	lmSign = nlmSign
 	slk.Unlock()
@@ -232,6 +235,7 @@ func newPluginStream(stream signproxy.SignProxy_ProxyPluginServer) {
 	go lp.pluginStreamRecv(wg)
 	go lp.close(wg)
 	wg.Wait()
+	logger.Sugar().Info("some plugin client down, close it")
 }
 
 // add new coin type
@@ -420,9 +424,11 @@ func (p *mPlugin) close(wg *sync.WaitGroup) {
 	plk.Lock()
 	nlmPlugin := make([]*mPlugin, 0, len(lmPlugin[p.coinType]))
 	for _, plugin := range lmPlugin[p.coinType] {
-		if plugin.pluginServer != p.pluginServer {
-			nlmPlugin = append(nlmPlugin, plugin)
+		if plugin.pluginServer == p.pluginServer {
+			logger.Sugar().Info("some plugin client closed, proxy remove it")
+			continue
 		}
+		nlmPlugin = append(nlmPlugin, plugin)
 	}
 	lmPlugin[p.coinType] = nlmPlugin
 	plk.Unlock()
