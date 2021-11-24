@@ -463,11 +463,18 @@ func ConsumerMQ() error {
 			tinfo,
 		)
 
+		ackReq := &trading.ACKRequest{
+			TransactionType:     tinfo.TransactionType,
+			CoinTypeId:          int32(tinfo.CoinType),
+			TransactionIdInsite: tinfo.TransactionIDInsite,
+		}
+
 		switch tinfo.TransactionType {
 		case signproxy.TransactionType_WalletNew:
 			signStream, err := getProxySign()
 			if err != nil {
 				logger.Sugar().Error("proxy->sign no invalid connection")
+				ackReq.IsOkay = false
 				goto ackTag
 			}
 			signStream.walletNew <- &signproxy.ProxySignRequest{
@@ -479,6 +486,7 @@ func ConsumerMQ() error {
 			mPlugin, err := getProxyPlugin(tinfo.CoinType)
 			if err != nil {
 				logger.Sugar().Error("proxy->plugin no invalid connection")
+				ackReq.IsOkay = false
 				goto ackTag
 			}
 			combineProxyChannl <- combineProxy{
@@ -489,6 +497,7 @@ func ConsumerMQ() error {
 			pluginStream, err := getProxyPlugin(tinfo.CoinType)
 			if err != nil {
 				logger.Sugar().Error("proxy->plugin no invalid connection")
+				ackReq.IsOkay = false
 				goto ackTag
 			}
 			pluginStream.balance <- &signproxy.ProxyPluginRequest{
@@ -497,6 +506,10 @@ func ConsumerMQ() error {
 				TransactionIDInsite: tinfo.TransactionIDInsite,
 				Address:             tinfo.AddressFrom,
 			}
+		default:
+			logger.Sugar().Error("consumer info TransactionType: %v invalid", tinfo.TransactionType)
+			ackReq.IsOkay = false
+			goto ackTag
 		}
 
 		logger.Sugar().Infof(
@@ -507,9 +520,12 @@ func ConsumerMQ() error {
 			tinfo.AddressTo,
 		)
 
+		// TODO global ack
+		continue
+
 	ackTag:
 		{
-			if err := ack(&trading.ACKRequest{}); err != nil {
+			if err := ack(ackReq); err != nil {
 				logger.Sugar().Infof(
 					"deal consumer info TranID: %v CoinType: %v error: %v",
 					tinfo.TransactionIDInsite,
