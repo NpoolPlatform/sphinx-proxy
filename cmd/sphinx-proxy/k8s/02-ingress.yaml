@@ -1,5 +1,5 @@
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
 metadata:
   name: sphinx-proxy-npool-top-ingress
   namespace: kube-system
@@ -7,39 +7,17 @@ metadata:
     k8s.kuboard.cn/displayName: sphinx-proxy-npool
     k8s.kuboard.cn/workload: sphinx-proxy-npool
     kubernetes.io/ingress.class: "traefik-internet"
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/service.serversscheme: h2c
 
 spec:
-  rules:
-    - host: sphinx.proxy.api.npool.top
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: sphinx-proxy
-              servicePort: 50001
-
----
-
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  name: sphinx-proxy-xpool-top-ingress
-  namespace: kube-system
-  annotations:
-    k8s.kuboard.cn/displayName: sphinx-proxy-xpool
-    k8s.kuboard.cn/workload: sphinx-proxy-xpool
-    kubernetes.io/ingress.class: "traefik-internet"
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/service.serversscheme: h2c
-
-spec:
-  rules:
-    - host: sphinx.proxy.api.xpool.top
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: sphinx-proxy
-              servicePort: 50001
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: Host(`sphinx.proxy.api.npool.top`)
+      kind: Rule
+      services:
+        - name: sphinx-proxy
+          #This port will causing the fallback to "http" scheme instead of "https"
+          port: 50001
+          scheme: h2c
