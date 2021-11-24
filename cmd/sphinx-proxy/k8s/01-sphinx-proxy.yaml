@@ -44,6 +44,9 @@ kind: Service
 metadata:
   name: sphinx-proxy
   namespace: kube-system
+  annotations:
+    traefik.ingress.kubernetes.io/service.serversscheme: h2c
+
 spec:
   ports:
   - name: grpc
