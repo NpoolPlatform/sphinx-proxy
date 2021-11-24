@@ -25,27 +25,22 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+type lmPluginType map[sphinxplugin.CoinType][]*mPlugin
+
 var (
 	ErrNoSignServiceFound   = errors.New("no sign service found")
 	ErrNoPluginServiceFound = errors.New("no plugin service found")
 )
 
-type lmPluginType map[sphinxplugin.CoinType][]*mPlugin
-
-type combineProxy struct {
-	mPlugin *mPlugin
-	data    *msgproducer.NotificationTransaction
-}
-
 var (
-	rnd                = rand.New(rand.NewSource(time.Now().UnixNano()))
-	done               = make(chan struct{})
-	ackChannel         = make(chan *trading.ACKRequest)
-	slk                sync.RWMutex
-	plk                sync.RWMutex
-	lmSign             = make([]*mSign, 0)
-	lmPlugin           = make(lmPluginType)
-	combineProxyChannl = make(chan combineProxy, 1024)
+	rnd               = rand.New(rand.NewSource(time.Now().UnixNano()))
+	done              = make(chan struct{})
+	ackChannel        = make(chan *trading.ACKRequest)
+	slk               sync.RWMutex
+	plk               sync.RWMutex
+	lmSign            = make([]*mSign, 0)
+	lmPlugin          = make(lmPluginType)
+	cacheProxyChannel = make(chan *msgproducer.NotificationTransaction, 1024)
 )
 
 func getProxySign() (*mSign, error) {
@@ -95,6 +90,7 @@ func (s *mSign) signStreamSend() {
 	for {
 		select {
 		case info := <-s.walletNew:
+			logger.Sugar().Infof("proxy->sign TransactionIDInsite: %v start", info.GetTransactionIDInsite())
 			if err := s.signServer.Send(&signproxy.ProxySignRequest{
 				TransactionType:     info.GetTransactionType(),
 				CoinType:            info.GetCoinType(),
@@ -116,6 +112,7 @@ func (s *mSign) signStreamSend() {
 			}
 			logger.Sugar().Infof("proxy->sign TransactionIDInsite: %v ok", info.GetTransactionIDInsite())
 		case info := <-s.sign:
+			logger.Sugar().Infof("proxy->sign TransactionIDInsite: %v start", info.GetTransactionIDInsite())
 			if err := s.signServer.Send(&signproxy.ProxySignRequest{
 				TransactionType:     info.GetTransactionType(),
 				CoinType:            info.GetCoinType(),
@@ -138,6 +135,7 @@ func (s *mSign) signStreamSend() {
 					err,
 				)
 			}
+			logger.Sugar().Infof("proxy->sign TransactionIDInsite: %v ok", info.GetTransactionIDInsite())
 		}
 	}
 }
@@ -211,9 +209,9 @@ func (s *mSign) close() {
 
 type mPlugin struct {
 	pluginServer signproxy.SignProxy_ProxyPluginServer
+	coinType     sphinxplugin.CoinType
 	closeChannel chan struct{}
-	coinType     sphinxplugin.CoinType              // coin type
-	balance      chan *signproxy.ProxyPluginRequest // address
+	balance      chan *signproxy.ProxyPluginRequest
 	preSign      chan *signproxy.ProxyPluginRequest
 	mpoolPush    chan *signproxy.ProxyPluginRequest
 	registerCoin chan *signproxy.ProxyPluginResponse
@@ -430,33 +428,8 @@ func (p *mPlugin) close() {
 	}
 }
 
-// handle complex trans
-// block one to one
-func watch() {
-	for cproxy := range combineProxyChannl {
-		logger.Sugar().Infof("handle new trans info: %v", cproxy.data)
-		<-done
-		cproxy.mPlugin.preSign <- &signproxy.ProxyPluginRequest{
-			CoinType:            cproxy.data.CoinType,
-			TransactionType:     cproxy.data.TransactionType,
-			TransactionIDInsite: cproxy.data.TransactionIDInsite,
-			Address:             cproxy.data.AddressFrom,
-			Message: &sphinxplugin.UnsignedMessage{
-				To:         cproxy.data.AddressTo,
-				From:       cproxy.data.AddressFrom,
-				Value:      uint64(unit.FIL2AttoFIL(cproxy.data.AmountFloat64)),
-				GasLimit:   655063,
-				GasFeeCap:  2300,
-				GasPremium: 2250,
-				Method:     uint64(builtin.MethodSend),
-			},
-		}
-	}
-}
-
 // ConsumerMQ dispatch tran
 func ConsumerMQ() error {
-	// dispatch combine
 	go func() {
 		// if start and has trans do it
 		done <- struct{}{}
@@ -507,17 +480,8 @@ func ConsumerMQ() error {
 				TransactionIDInsite: tinfo.TransactionIDInsite,
 			}
 		case signproxy.TransactionType_TransactionNew:
-			mPlugin, err := getProxyPlugin(tinfo.CoinType)
-			if err != nil {
-				logger.Sugar().Error("proxy->plugin no invalid connection")
-				ackReq.IsOkay = false
-				ackChannel <- ackReq
-				continue
-			}
-			combineProxyChannl <- combineProxy{
-				mPlugin: mPlugin,
-				data:    tinfo,
-			}
+			// cache and limit speed
+			cacheProxyChannel <- tinfo
 		case signproxy.TransactionType_Balance:
 			pluginStream, err := getProxyPlugin(tinfo.CoinType)
 			if err != nil {
@@ -548,6 +512,40 @@ func ConsumerMQ() error {
 		)
 	}
 	return nil
+}
+
+// handle complex trans
+// block one to one
+func watch() {
+	for cproxy := range cacheProxyChannel {
+		logger.Sugar().Infof("handle new trans info: %v", cproxy)
+		<-done
+		pluginProxy, err := getProxyPlugin(cproxy.CoinType)
+		if err != nil {
+			ackChannel <- &trading.ACKRequest{
+				IsOkay:              false,
+				TransactionType:     cproxy.TransactionType,
+				CoinTypeId:          int32(cproxy.CoinType),
+				TransactionIdInsite: cproxy.TransactionIDInsite,
+			}
+			continue
+		}
+		pluginProxy.preSign <- &signproxy.ProxyPluginRequest{
+			CoinType:            cproxy.CoinType,
+			TransactionType:     cproxy.TransactionType,
+			TransactionIDInsite: cproxy.TransactionIDInsite,
+			Address:             cproxy.AddressFrom,
+			Message: &sphinxplugin.UnsignedMessage{
+				To:         cproxy.AddressTo,
+				From:       cproxy.AddressFrom,
+				Value:      uint64(unit.FIL2AttoFIL(cproxy.AmountFloat64)),
+				GasLimit:   655063,
+				GasFeeCap:  2300,
+				GasPremium: 2250,
+				Method:     uint64(builtin.MethodSend),
+			},
+		}
+	}
 }
 
 func ack() {
