@@ -79,13 +79,18 @@ func newSignStream(stream signproxy.SignProxy_ProxySignServer) {
 	slk.Lock()
 	lmSign = append(lmSign, lc)
 	slk.Unlock()
-	go lc.signStreamSend()
-	go lc.signStreamRecv()
-	go lc.close()
+
+	wg := &sync.WaitGroup{}
+	wg.Add(3)
+	go lc.signStreamSend(wg)
+	go lc.signStreamRecv(wg)
+	go lc.close(wg)
+	wg.Wait()
 }
 
 // wallet new
-func (s *mSign) signStreamSend() {
+func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
 		select {
 		case info := <-s.walletNew:
@@ -139,7 +144,8 @@ func (s *mSign) signStreamSend() {
 	}
 }
 
-func (s *mSign) signStreamRecv() {
+func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
 		ssResponse, err := s.signServer.Recv()
 		if err != nil {
@@ -147,9 +153,7 @@ func (s *mSign) signStreamRecv() {
 				"proxy->sign error: %v",
 				err,
 			)
-			if status.Code(err) == codes.Canceled ||
-				status.Code(err) == codes.Unavailable ||
-				err == io.EOF {
+			if checkCode(err) {
 				s.closeChannel <- struct{}{}
 				break
 			}
@@ -189,21 +193,18 @@ func (s *mSign) signStreamRecv() {
 	}
 }
 
-func (s *mSign) close() {
-	for {
-		<-s.closeChannel
-		slk.Lock()
-		nlmSign := make([]*mSign, 0, len(lmSign))
-		for idx, sign := range lmSign {
-			if sign.signServer == s.signServer {
-				nlmSign = append(nlmSign, lmSign[0:idx]...)
-				nlmSign = append(nlmSign, lmSign[idx+1:]...)
-				break
-			}
+func (s *mSign) close(wg *sync.WaitGroup) {
+	defer wg.Done()
+	<-s.closeChannel
+	slk.Lock()
+	nlmSign := make([]*mSign, 0, len(lmSign))
+	for _, sign := range lmSign {
+		if sign.signServer != s.signServer {
+			nlmSign = append(nlmSign, sign)
 		}
-		lmSign = nlmSign
-		slk.Unlock()
 	}
+	lmSign = nlmSign
+	slk.Unlock()
 }
 
 type mPlugin struct {
@@ -225,9 +226,12 @@ func newPluginStream(stream signproxy.SignProxy_ProxyPluginServer) {
 		mpoolPush:    make(chan *signproxy.ProxyPluginRequest),
 		registerCoin: make(chan *signproxy.ProxyPluginResponse),
 	}
-	go lp.pluginStreamSend()
-	go lp.pluginStreamRecv()
-	go lp.close()
+	wg := &sync.WaitGroup{}
+	wg.Add(3)
+	go lp.pluginStreamSend(wg)
+	go lp.pluginStreamRecv(wg)
+	go lp.close(wg)
+	wg.Wait()
 }
 
 // add new coin type
@@ -247,7 +251,8 @@ func (lp lmPluginType) append(coinType sphinxplugin.CoinType, lmp mPlugin) {
 	}
 }
 
-func (p *mPlugin) pluginStreamSend() {
+func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
 		select {
 		case info := <-p.balance:
@@ -329,7 +334,8 @@ func (p *mPlugin) pluginStreamSend() {
 	}
 }
 
-func (p *mPlugin) pluginStreamRecv() {
+func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
 		psResponse, err := p.pluginServer.Recv()
 		if err != nil {
@@ -337,9 +343,7 @@ func (p *mPlugin) pluginStreamRecv() {
 				"proxy->plugin error: %v",
 				err,
 			)
-			if status.Code(err) == codes.Canceled ||
-				status.Code(err) == codes.Unavailable ||
-				err == io.EOF {
+			if checkCode(err) {
 				p.closeChannel <- struct{}{}
 				break
 			}
@@ -410,21 +414,18 @@ func (p *mPlugin) pluginStreamRecv() {
 	}
 }
 
-func (p *mPlugin) close() {
-	for {
-		<-p.closeChannel
-		plk.Lock()
-		nlmPlugin := make([]*mPlugin, 0, len(lmPlugin[p.coinType]))
-		for idx, plugin := range lmPlugin[p.coinType] {
-			if plugin.pluginServer == p.pluginServer {
-				nlmPlugin = append(nlmPlugin, lmPlugin[p.coinType][0:idx]...)
-				nlmPlugin = append(nlmPlugin, lmPlugin[p.coinType][idx+1:]...)
-				break
-			}
+func (p *mPlugin) close(wg *sync.WaitGroup) {
+	defer wg.Done()
+	<-p.closeChannel
+	plk.Lock()
+	nlmPlugin := make([]*mPlugin, 0, len(lmPlugin[p.coinType]))
+	for _, plugin := range lmPlugin[p.coinType] {
+		if plugin.pluginServer != p.pluginServer {
+			nlmPlugin = append(nlmPlugin, plugin)
 		}
-		lmPlugin[p.coinType] = nlmPlugin
-		plk.Unlock()
 	}
+	lmPlugin[p.coinType] = nlmPlugin
+	plk.Unlock()
 }
 
 // ConsumerMQ dispatch tran
@@ -561,4 +562,13 @@ func ack() {
 			logger.Sugar().Errorf("ack error: %v", err)
 		}
 	}
+}
+
+func checkCode(err error) bool {
+	if err == io.EOF ||
+		status.Code(err) == codes.Unavailable ||
+		status.Code(err) == codes.Canceled {
+		return true
+	}
+	return false
 }
