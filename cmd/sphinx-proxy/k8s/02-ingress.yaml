@@ -7,7 +7,6 @@ metadata:
     k8s.kuboard.cn/displayName: sphinx-proxy-npool
     k8s.kuboard.cn/workload: sphinx-proxy-npool
     kubernetes.io/ingress.class: "traefik-internet"
-    traefik.ingress.kubernetes.io/service.serversscheme: h2c
 
 spec:
   entryPoints:
@@ -32,7 +31,6 @@ metadata:
     k8s.kuboard.cn/displayName: sphinx-proxy-xpool
     k8s.kuboard.cn/workload: sphinx-proxy-xpool
     kubernetes.io/ingress.class: "traefik-internet"
-    traefik.ingress.kubernetes.io/service.serversscheme: h2c
 
 spec:
   entryPoints:
