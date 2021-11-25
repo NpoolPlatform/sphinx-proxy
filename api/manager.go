@@ -243,16 +243,16 @@ func newPluginStream(stream signproxy.SignProxy_ProxyPluginServer) {
 }
 
 // add new coin type
-func (lp lmPluginType) append(coinType sphinxplugin.CoinType, lmp mPlugin) {
+func (lp lmPluginType) append(coinType sphinxplugin.CoinType, lmp *mPlugin) {
 	plk.Lock()
 	defer plk.Unlock()
+	lmp.coinType = coinType
 	if _, ok := lp[coinType]; !ok {
-		lmp.coinType = coinType
-		lp[coinType] = append(lp[coinType], &lmp)
+		lp[coinType] = append(lp[coinType], lmp)
 	} else {
 		for _, info := range lp[coinType] {
 			if info.pluginServer != lmp.pluginServer {
-				lp[coinType] = append(lp[coinType], &lmp)
+				lp[coinType] = append(lp[coinType], lmp)
 				break
 			}
 		}
@@ -301,7 +301,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 					TransactionType:     info.GetTransactionType(),
 					TransactionIdInsite: info.GetTransactionIDInsite(),
 					Address:             info.GetAddress(),
-					ErrorMessage:        fmt.Sprintf("get wallet balance error: %v", err),
+					ErrorMessage:        fmt.Sprintf("get wallet nonce error: %v", err),
 				}
 				logger.Sugar().Errorf(
 					"proxy->plugin TransactionIDInsite: %v TransactionType %v, CoinType: %v Address: %v error: %v",
@@ -328,7 +328,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 					TransactionType:     info.GetTransactionType(),
 					TransactionIdInsite: info.GetTransactionIDInsite(),
 					Address:             info.GetAddress(),
-					ErrorMessage:        fmt.Sprintf("get wallet balance error: %v", err),
+					ErrorMessage:        fmt.Sprintf("mpool push error: %v", err),
 				}
 				logger.Sugar().Errorf(
 					"proxy->plugin TransactionIDInsite: %v TransactionType %v, CoinType: %v Message: %v error: %v",
@@ -363,7 +363,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 
 		switch psResponse.GetTransactionType() {
 		case signproxy.TransactionType_RegisterCoin:
-			lmPlugin.append(psResponse.GetCoinType(), *p)
+			lmPlugin.append(psResponse.GetCoinType(), p)
 			ackChannel <- &trading.ACKRequest{
 				IsOkay:              true,
 				TransactionType:     psResponse.GetTransactionType(),
@@ -590,10 +590,13 @@ func ack() {
 }
 
 func trans(ackInfo *trading.ACKRequest) {
+	logger.Sugar().Infof("ack info: %v", ackInfo)
 	ackConn, err := grpc2.GetGRPCConn(sconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		logger.Sugar().Errorf("ack call GetGRPCConn error: %v", err)
+		return
 	}
+
 	ackClient := trading.NewTradingClient(ackConn)
 	ctx, cancel := context.WithTimeout(context.Background(), spconst.GrpcTimeout)
 	defer cancel()
@@ -604,9 +607,11 @@ func trans(ackInfo *trading.ACKRequest) {
 }
 
 func registerCoin(ackInfo *trading.ACKRequest) {
+	logger.Sugar().Infof("register info: %v", ackInfo)
 	ackConn, err := grpc2.GetGRPCConn(scconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		logger.Sugar().Errorf("ack call GetGRPCConn error: %v", err)
+		return
 	}
 	client := coininfo.NewSphinxCoinInfoClient(ackConn)
 	ctx, cancel := context.WithTimeout(context.Background(), spconst.GrpcTimeout)
