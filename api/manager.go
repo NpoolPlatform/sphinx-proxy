@@ -298,6 +298,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 				TransactionType:     info.GetTransactionType(),
 				TransactionIDInsite: info.GetTransactionIDInsite(),
 				Address:             info.GetAddress(),
+				Message:             info.GetMessage(),
 			}); err != nil {
 				done <- struct{}{}
 				ackChannel <- &trading.ACKRequest{
