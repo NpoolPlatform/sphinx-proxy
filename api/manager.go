@@ -381,7 +381,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				IsOkay:              true,
 				TransactionType:     psResponse.GetTransactionType(),
 				TransactionIdInsite: psResponse.GetTransactionIDInsite(),
-				Balance:             float64(psResponse.GetBalance()),
+				Balance:             psResponse.GetBalance(),
 				CoinTypeId:          int32(psResponse.GetCoinType()),
 			}
 			logger.Sugar().Infof("get TransactionIDInsite: %v wallet balance ok", psResponse.GetTransactionIDInsite())

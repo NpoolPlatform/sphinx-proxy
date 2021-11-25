@@ -1,7 +1,7 @@
 package unit
 
 import (
-	"strconv"
+	"github.com/shopspring/decimal"
 )
 
 const (
@@ -18,6 +18,12 @@ func FIL2AttoFIL(value float64) float64 {
 	return value * AttoFIL
 }
 
-func AttoFIL2FIL(value string) (float64, error) {
-	return strconv.ParseFloat(value, 64)
+func AttoFIL2FIL(value string) (float64, bool) {
+	v, err := decimal.NewFromString(value)
+	if err != nil {
+		// TODO not occur
+		return 0, false
+	}
+	return v.Div(decimal.NewFromFloat(AttoFIL)).
+		Float64()
 }
