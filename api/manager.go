@@ -250,11 +250,15 @@ func (lp lmPluginType) append(coinType sphinxplugin.CoinType, lmp *mPlugin) {
 	if _, ok := lp[coinType]; !ok {
 		lp[coinType] = append(lp[coinType], lmp)
 	} else {
+		exist := false
 		for _, info := range lp[coinType] {
-			if info.pluginServer != lmp.pluginServer {
-				lp[coinType] = append(lp[coinType], lmp)
+			if info.pluginServer == lmp.pluginServer {
+				exist = true
 				break
 			}
+		}
+		if !exist {
+			lp[coinType] = append(lp[coinType], lmp)
 		}
 	}
 }
