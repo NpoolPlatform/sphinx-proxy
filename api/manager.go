@@ -189,7 +189,7 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 			}
 			pluginProxy.mpoolPush <- &signproxy.ProxyPluginRequest{
 				CoinType:            ssResponse.GetCoinType(),
-				TransactionType:     ssResponse.GetTransactionType(),
+				TransactionType:     signproxy.TransactionType_Broadcast,
 				TransactionIDInsite: ssResponse.GetTransactionIDInsite(),
 				Message:             ssResponse.GetInfo().GetMessage(),
 				Signature:           ssResponse.GetInfo().GetSignature(),
@@ -401,7 +401,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				continue
 			}
 			signProxy.sign <- &signproxy.ProxySignRequest{
-				TransactionType:     psResponse.GetTransactionType(),
+				TransactionType:     signproxy.TransactionType_Signature,
 				CoinType:            psResponse.GetCoinType(),
 				TransactionIDInsite: psResponse.GetTransactionIDInsite(),
 				Message: &sphinxplugin.UnsignedMessage{
@@ -565,7 +565,7 @@ func watch() {
 		}
 		pluginProxy.preSign <- &signproxy.ProxyPluginRequest{
 			CoinType:            cproxy.CoinType,
-			TransactionType:     cproxy.TransactionType,
+			TransactionType:     signproxy.TransactionType_PreSign,
 			TransactionIDInsite: cproxy.TransactionIDInsite,
 			Address:             cproxy.AddressFrom,
 			Message: &sphinxplugin.UnsignedMessage{
