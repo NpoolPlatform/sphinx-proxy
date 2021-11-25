@@ -2,6 +2,7 @@ package check
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 )
@@ -15,4 +16,8 @@ func CoinType(coinType sphinxplugin.CoinType) error {
 		return ErrCoinTypeNotSupport
 	}
 	return nil
+}
+
+func TruncateCoinTypePrefix(ct sphinxplugin.CoinType) string {
+	return strings.TrimPrefix(ct.String(), "CoinType")
 }

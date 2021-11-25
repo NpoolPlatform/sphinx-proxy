@@ -588,12 +588,12 @@ func ack() {
 		case signproxy.TransactionType_RegisterCoin:
 			registerCoin(ackInfo)
 		default:
-			trans(ackInfo)
+			transaction(ackInfo)
 		}
 	}
 }
 
-func trans(ackInfo *trading.ACKRequest) {
+func transaction(ackInfo *trading.ACKRequest) {
 	logger.Sugar().Infof("ack info: %v", ackInfo)
 	ackConn, err := grpc2.GetGRPCConn(sconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
@@ -625,7 +625,7 @@ func registerCoin(ackInfo *trading.ACKRequest) {
 	_, err = client.CreateCoinInfo(ctx, &coininfo.CreateCoinInfoRequest{
 		Info: &coininfo.CoinInfo{
 			Enum: ackInfo.CoinTypeId,
-			Name: sphinxplugin.CoinType(ackInfo.CoinTypeId).String(),
+			Name: check.TruncateCoinTypePrefix(sphinxplugin.CoinType(ackInfo.CoinTypeId)),
 			Unit: "FIL",
 		},
 	})
