@@ -12,9 +12,13 @@ import (
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	"github.com/NpoolPlatform/message/npool/coininfo"
 	"github.com/NpoolPlatform/message/npool/signproxy"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/trading"
+	scconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
+	"github.com/NpoolPlatform/sphinx-proxy/pkg/check"
+	spconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	msgcli "github.com/NpoolPlatform/sphinx-proxy/pkg/message/message"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/unit"
 	sconst "github.com/NpoolPlatform/sphinx-service/pkg/message/const"
@@ -266,6 +270,13 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 				TransactionIDInsite: info.GetTransactionIDInsite(),
 				Address:             info.GetAddress(),
 			}); err != nil {
+				ackChannel <- &trading.ACKRequest{
+					IsOkay:              false,
+					TransactionType:     info.GetTransactionType(),
+					TransactionIdInsite: info.GetTransactionIDInsite(),
+					Address:             info.GetAddress(),
+					ErrorMessage:        fmt.Sprintf("get wallet balance error: %v", err),
+				}
 				logger.Sugar().Errorf(
 					"proxy->plugin TransactionIDInsite: %v TransactionType: %v CoinType: %v Address: %v error: %v",
 					info.GetTransactionIDInsite(),
@@ -274,13 +285,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 					info.GetAddress(),
 					err,
 				)
-				ackChannel <- &trading.ACKRequest{
-					IsOkay:              false,
-					TransactionType:     info.GetTransactionType(),
-					TransactionIdInsite: info.GetTransactionIDInsite(),
-					Address:             info.GetAddress(),
-					ErrorMessage:        fmt.Sprintf("get wallet balance error: %v", err),
-				}
+				continue
 			}
 			logger.Sugar().Infof("proxy->plugin TransactionIDInsite: %v ok", info.GetTransactionIDInsite())
 		case info := <-p.preSign:
@@ -291,6 +296,13 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 				Address:             info.GetAddress(),
 			}); err != nil {
 				done <- struct{}{}
+				ackChannel <- &trading.ACKRequest{
+					IsOkay:              false,
+					TransactionType:     info.GetTransactionType(),
+					TransactionIdInsite: info.GetTransactionIDInsite(),
+					Address:             info.GetAddress(),
+					ErrorMessage:        fmt.Sprintf("get wallet balance error: %v", err),
+				}
 				logger.Sugar().Errorf(
 					"proxy->plugin TransactionIDInsite: %v TransactionType %v, CoinType: %v Address: %v error: %v",
 					info.GetTransactionIDInsite(),
@@ -299,13 +311,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 					info.GetAddress(),
 					err,
 				)
-				ackChannel <- &trading.ACKRequest{
-					IsOkay:              false,
-					TransactionType:     info.GetTransactionType(),
-					TransactionIdInsite: info.GetTransactionIDInsite(),
-					Address:             info.GetAddress(),
-					ErrorMessage:        fmt.Sprintf("get wallet balance error: %v", err),
-				}
+				continue
 			}
 			logger.Sugar().Infof("proxy->plugin TransactionIDInsite: %v ok", info.GetTransactionIDInsite())
 		case info := <-p.mpoolPush:
@@ -332,6 +338,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 					info.GetMessage(),
 					err,
 				)
+				continue
 			}
 			logger.Sugar().Infof("proxy->plugin TransactionIDInsite: %v ok", info.GetTransactionIDInsite())
 		}
@@ -489,6 +496,22 @@ func ConsumerMQ() error {
 			// cache and limit speed
 			cacheProxyChannel <- tinfo
 		case signproxy.TransactionType_Balance:
+			if err := check.CoinType(tinfo.CoinType); err != nil {
+				logger.Sugar().Errorf("consumer info CoinType: %v invalid", tinfo.CoinType)
+				ackReq.IsOkay = false
+				ackReq.ErrorMessage = fmt.Sprintf("CoinType: %v invalid", tinfo.CoinType)
+				ackChannel <- ackReq
+				continue
+			}
+
+			if tinfo.AddressFrom == "" {
+				logger.Sugar().Errorf("consumer info AddressFrom: %v empty")
+				ackReq.IsOkay = false
+				ackReq.ErrorMessage = "AddressFrom is empty"
+				ackChannel <- ackReq
+				continue
+			}
+
 			pluginStream, err := getProxyPlugin(tinfo.CoinType)
 			if err != nil {
 				logger.Sugar().Error("proxy->plugin no invalid connection")
@@ -557,16 +580,49 @@ func watch() {
 func ack() {
 	for {
 		ackInfo := <-ackChannel
-		ackConn, err := grpc2.GetGRPCConn(sconst.ServiceName, grpc2.GRPCTAG)
-		if err != nil {
-			logger.Sugar().Errorf("ack call GetGRPCConn error: %v", err)
-			continue
+		switch ackInfo.TransactionType {
+		case signproxy.TransactionType_RegisterCoin:
+			registerCoin(ackInfo)
+		default:
+			trans(ackInfo)
 		}
-		ackClient := trading.NewTradingClient(ackConn)
-		_, err = ackClient.ACK(context.Background(), ackInfo)
-		if err != nil {
-			logger.Sugar().Errorf("ack error: %v", err)
-		}
+	}
+}
+
+func trans(ackInfo *trading.ACKRequest) {
+	ackConn, err := grpc2.GetGRPCConn(sconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		logger.Sugar().Errorf("ack call GetGRPCConn error: %v", err)
+	}
+	ackClient := trading.NewTradingClient(ackConn)
+	ctx, cancel := context.WithTimeout(context.Background(), spconst.GrpcTimeout)
+	defer cancel()
+	_, err = ackClient.ACK(ctx, ackInfo)
+	if err != nil {
+		logger.Sugar().Errorf("ack error: %v", err)
+	}
+}
+
+func registerCoin(ackInfo *trading.ACKRequest) {
+	ackConn, err := grpc2.GetGRPCConn(scconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		logger.Sugar().Errorf("ack call GetGRPCConn error: %v", err)
+	}
+	client := coininfo.NewSphinxCoinInfoClient(ackConn)
+	ctx, cancel := context.WithTimeout(context.Background(), spconst.GrpcTimeout)
+	defer cancel()
+
+	// define in plugin
+	_, err = client.CreateCoinInfo(ctx, &coininfo.CreateCoinInfoRequest{
+		Info: &coininfo.CoinInfo{
+			Enum: ackInfo.CoinTypeId,
+			Name: sphinxplugin.CoinType(ackInfo.CoinTypeId).String(),
+			Unit: "FIL",
+		},
+	})
+
+	if err != nil {
+		logger.Sugar().Errorf("ack error: %v", err)
 	}
 }
 
