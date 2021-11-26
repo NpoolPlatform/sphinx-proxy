@@ -128,7 +128,7 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 				TransactionIDInsite: info.GetTransactionIDInsite(),
 				Message:             info.GetMessage(),
 			}); err != nil {
-				done <- struct{}{}
+				go func() { done <- struct{}{} }()
 				ackChannel <- &trading.ACKRequest{
 					IsOkay:              false,
 					TransactionType:     info.GetTransactionType(),
@@ -185,6 +185,14 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 			pluginProxy, err := getProxyPlugin(ssResponse.GetCoinType())
 			if err != nil {
 				logger.Sugar().Error("proxy->plugin no invalid connection")
+				go func() { done <- struct{}{} }()
+				ackChannel <- &trading.ACKRequest{
+					IsOkay:              false,
+					TransactionType:     ssResponse.GetTransactionType(),
+					CoinTypeId:          int32(ssResponse.GetCoinType()),
+					TransactionIdInsite: ssResponse.GetTransactionIDInsite(),
+					Address:             ssResponse.GetInfo().GetAddress(),
+				}
 				continue
 			}
 			pluginProxy.mpoolPush <- &signproxy.ProxyPluginRequest{
@@ -300,7 +308,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 				Address:             info.GetAddress(),
 				Message:             info.GetMessage(),
 			}); err != nil {
-				done <- struct{}{}
+				go func() { done <- struct{}{} }()
 				ackChannel <- &trading.ACKRequest{
 					IsOkay:              false,
 					TransactionType:     info.GetTransactionType(),
@@ -327,7 +335,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 				Message:             info.GetMessage(),
 				Signature:           info.GetSignature(),
 			}); err != nil {
-				done <- struct{}{}
+				go func() { done <- struct{}{} }()
 				ackChannel <- &trading.ACKRequest{
 					IsOkay:              false,
 					TransactionType:     info.GetTransactionType(),
@@ -398,7 +406,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					CoinTypeId:          int32(psResponse.GetCoinType()),
 					ErrorMessage:        "proxy->sign no invalid connection",
 				}
-				done <- struct{}{}
+				go func() { done <- struct{}{} }()
 				continue
 			}
 			signProxy.sign <- &signproxy.ProxySignRequest{
@@ -417,7 +425,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				},
 			}
 		case signproxy.TransactionType_Broadcast:
-			done <- struct{}{}
+			go func() { done <- struct{}{} }()
 			ackChannel <- &trading.ACKRequest{
 				IsOkay:              true,
 				TransactionType:     psResponse.GetTransactionType(),
