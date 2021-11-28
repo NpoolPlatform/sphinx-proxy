@@ -36,13 +36,18 @@ var (
 )
 
 var (
-	rnd               = rand.New(rand.NewSource(time.Now().UnixNano()))
+	// rand stream client
+	rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	ackChannel = make(chan *trading.ACKRequest)
+
+	slk      sync.RWMutex
+	plk      sync.RWMutex
+	lmSign   = make([]*mSign, 0)
+	lmPlugin = make(lmPluginType)
+
+	// control only one transaction can deal at the same time
 	done              = make(chan struct{})
-	ackChannel        = make(chan *trading.ACKRequest)
-	slk               sync.RWMutex
-	plk               sync.RWMutex
-	lmSign            = make([]*mSign, 0)
-	lmPlugin          = make(lmPluginType)
 	cacheProxyChannel = make(chan *msgproducer.NotificationTransaction, 1024)
 )
 
@@ -69,6 +74,7 @@ func getProxyPlugin(coinType sphinxplugin.CoinType) (*mPlugin, error) {
 type mSign struct {
 	signServer   signproxy.SignProxy_ProxySignServer
 	closeChannel chan struct{}
+	closeFlag    bool
 	walletNew    chan *signproxy.ProxySignRequest // address
 	sign         chan *signproxy.ProxySignRequest
 }
@@ -77,6 +83,7 @@ func newSignStream(stream signproxy.SignProxy_ProxySignServer) {
 	lc := &mSign{
 		signServer:   stream,
 		closeChannel: make(chan struct{}),
+		closeFlag:    false,
 		walletNew:    make(chan *signproxy.ProxySignRequest),
 		sign:         make(chan *signproxy.ProxySignRequest),
 	}
@@ -96,7 +103,7 @@ func newSignStream(stream signproxy.SignProxy_ProxySignServer) {
 // wallet new
 func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for {
+	for !s.closeFlag {
 		select {
 		case info := <-s.walletNew:
 			logger.Sugar().Infof("proxy->sign TransactionIDInsite: %v start", info.GetTransactionIDInsite())
@@ -128,7 +135,6 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 				TransactionIDInsite: info.GetTransactionIDInsite(),
 				Message:             info.GetMessage(),
 			}); err != nil {
-				go func() { done <- struct{}{} }()
 				ackChannel <- &trading.ACKRequest{
 					IsOkay:              false,
 					TransactionType:     info.GetTransactionType(),
@@ -151,7 +157,7 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 
 func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for {
+	for !s.closeFlag {
 		ssResponse, err := s.signServer.Recv()
 		if err != nil {
 			logger.Sugar().Errorf(
@@ -167,9 +173,9 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 
 		logger.Sugar().Infof(
 			"proxy->sign recv TransactionIDInsite: %v TransactionType %v, CoinType: %v",
+			ssResponse.GetTransactionIDInsite(),
 			ssResponse.GetTransactionType(),
 			ssResponse.GetCoinType(),
-			ssResponse.GetTransactionIDInsite(),
 		)
 
 		switch ssResponse.GetTransactionType() {
@@ -185,7 +191,6 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 			pluginProxy, err := getProxyPlugin(ssResponse.GetCoinType())
 			if err != nil {
 				logger.Sugar().Error("proxy->plugin no invalid connection")
-				go func() { done <- struct{}{} }()
 				ackChannel <- &trading.ACKRequest{
 					IsOkay:              false,
 					TransactionType:     ssResponse.GetTransactionType(),
@@ -210,6 +215,8 @@ func (s *mSign) close(wg *sync.WaitGroup) {
 	defer wg.Done()
 	<-s.closeChannel
 	slk.Lock()
+	// cancel recv transaction
+	s.closeFlag = true
 	nlmSign := make([]*mSign, 0, len(lmSign))
 	for _, sign := range lmSign {
 		if sign.signServer == s.signServer {
@@ -226,6 +233,7 @@ type mPlugin struct {
 	pluginServer signproxy.SignProxy_ProxyPluginServer
 	coinType     sphinxplugin.CoinType
 	closeChannel chan struct{}
+	closeFlag    bool
 	balance      chan *signproxy.ProxyPluginRequest
 	preSign      chan *signproxy.ProxyPluginRequest
 	mpoolPush    chan *signproxy.ProxyPluginRequest
@@ -236,6 +244,7 @@ func newPluginStream(stream signproxy.SignProxy_ProxyPluginServer) {
 	lp := &mPlugin{
 		pluginServer: stream,
 		closeChannel: make(chan struct{}),
+		closeFlag:    false,
 		balance:      make(chan *signproxy.ProxyPluginRequest),
 		preSign:      make(chan *signproxy.ProxyPluginRequest),
 		mpoolPush:    make(chan *signproxy.ProxyPluginRequest),
@@ -273,7 +282,7 @@ func (lp lmPluginType) append(coinType sphinxplugin.CoinType, lmp *mPlugin) {
 
 func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for {
+	for !p.closeFlag {
 		select {
 		case info := <-p.balance:
 			if err := p.pluginServer.Send(&signproxy.ProxyPluginRequest{
@@ -308,7 +317,6 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 				Address:             info.GetAddress(),
 				Message:             info.GetMessage(),
 			}); err != nil {
-				go func() { done <- struct{}{} }()
 				ackChannel <- &trading.ACKRequest{
 					IsOkay:              false,
 					TransactionType:     info.GetTransactionType(),
@@ -335,7 +343,6 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 				Message:             info.GetMessage(),
 				Signature:           info.GetSignature(),
 			}); err != nil {
-				go func() { done <- struct{}{} }()
 				ackChannel <- &trading.ACKRequest{
 					IsOkay:              false,
 					TransactionType:     info.GetTransactionType(),
@@ -360,7 +367,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 
 func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for {
+	for !p.closeFlag {
 		psResponse, err := p.pluginServer.Recv()
 		if err != nil {
 			logger.Sugar().Errorf(
@@ -406,7 +413,6 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					CoinTypeId:          int32(psResponse.GetCoinType()),
 					ErrorMessage:        "proxy->sign no invalid connection",
 				}
-				go func() { done <- struct{}{} }()
 				continue
 			}
 			signProxy.sign <- &signproxy.ProxySignRequest{
@@ -425,7 +431,6 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				},
 			}
 		case signproxy.TransactionType_Broadcast:
-			go func() { done <- struct{}{} }()
 			ackChannel <- &trading.ACKRequest{
 				IsOkay:              true,
 				TransactionType:     psResponse.GetTransactionType(),
@@ -442,6 +447,7 @@ func (p *mPlugin) close(wg *sync.WaitGroup) {
 	defer wg.Done()
 	<-p.closeChannel
 	plk.Lock()
+	p.closeFlag = true
 	nlmPlugin := make([]*mPlugin, 0, len(lmPlugin[p.coinType]))
 	for _, plugin := range lmPlugin[p.coinType] {
 		if plugin.pluginServer == p.pluginServer {
@@ -604,6 +610,19 @@ func ack() {
 
 func transaction(ackInfo *trading.ACKRequest) {
 	logger.Sugar().Infof("ack info: %v", ackInfo)
+
+	// check transaction type
+	switch ackInfo.GetTransactionType() {
+	case
+		signproxy.TransactionType_TransactionNew,
+		signproxy.TransactionType_Signature,
+		signproxy.TransactionType_PreSign,
+		signproxy.TransactionType_Broadcast:
+		// TransactionNew PreSign Signature when fail
+		// Broadcast succ or fail
+		go func() { done <- struct{}{} }()
+	}
+
 	ackConn, err := grpc2.GetGRPCConn(sconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		logger.Sugar().Errorf("ack call GetGRPCConn error: %v", err)
