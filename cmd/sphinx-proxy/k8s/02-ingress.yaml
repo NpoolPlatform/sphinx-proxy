@@ -15,7 +15,6 @@ spec:
   routes:
     - match: Headers(`content-type`,`application/grpc`) && Host(`sphinx.proxy.api.npool.top`)
       kind: Rule
-      priority: 50
       services:
         - name: sphinx-proxy
           port: 50001
