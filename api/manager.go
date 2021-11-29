@@ -521,14 +521,6 @@ func ConsumerMQ() error {
 			// cache and limit speed
 			cacheProxyChannel <- tinfo
 		case signproxy.TransactionType_Balance:
-			if err := check.CoinType(tinfo.CoinType); err != nil {
-				logger.Sugar().Errorf("consumer info CoinType: %v invalid", tinfo.CoinType)
-				ackReq.IsOkay = false
-				ackReq.ErrorMessage = fmt.Sprintf("CoinType: %v invalid", tinfo.CoinType)
-				ackChannel <- ackReq
-				continue
-			}
-
 			if tinfo.AddressFrom == "" {
 				logger.Sugar().Errorf("consumer info AddressFrom empty")
 				ackReq.IsOkay = false
@@ -537,14 +529,14 @@ func ConsumerMQ() error {
 				continue
 			}
 
-			pluginStream, err := getProxyPlugin(tinfo.CoinType)
+			pluginProxy, err := getProxyPlugin(tinfo.CoinType)
 			if err != nil {
 				logger.Sugar().Error("proxy->plugin no invalid connection")
 				ackReq.IsOkay = false
 				ackChannel <- ackReq
 				continue
 			}
-			pluginStream.balance <- &signproxy.ProxyPluginRequest{
+			pluginProxy.balance <- &signproxy.ProxyPluginRequest{
 				TransactionType:     tinfo.TransactionType,
 				CoinType:            tinfo.CoinType,
 				TransactionIDInsite: tinfo.TransactionIDInsite,

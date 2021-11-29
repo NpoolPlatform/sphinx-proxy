@@ -5,6 +5,7 @@
 [目录](#目录)
 - [Npool go service app template](#npool-go-service-app-template)
     - [功能](#功能)
+    - [设计](#设计)
     - [命令](#命令)
     - [步骤](#步骤)
     - [最佳实践](#最佳实践)
@@ -12,27 +13,29 @@
 
 -----------
 ### 功能
-- [x] 创建sample service
-- [x] 封装日志库
-- [x] 统一service cli框架
-- [x] 集成cli框架(https://github.com/urfave/cli)
-- [x] 集成http server框架(https://github.com/go-chi/chi.git 不需要封装)
-- [x] 集成http client框架(https://github.com/go-resty/resty 不需要封装)
-- [x] 集成consul注册与发现
-- [x] 全局主机环境参数解析
-- [x] 集成apollo配置中心(https://github.com/philchia/agollo.git)
-- [x] 集成redis访问
-- [x] 集成mysql访问框架(https://github.com/ent/ent)
-* [x] 集成版本信息
-* [x] 集成rabbitmq访问
-* [x] 完善rabbitmq API
-* [x] 生成docker镜像
-* [x] 发布docker镜像
-* [x] 将服务部署到k8s集群
-* [x] 将服务api通过traefik-internet ingress代理，供外部应用调用(视服务功能决定是否需要)
-* [ ] ingress中服务相关api的traefik规则定义
-* [x] 集成GRPC
-* [x] 添加GRPC proto编译支持
+- [x] 创建钱包账号
+- [x] 查询余额
+- [x] 转账
+- [x] 上报币种
+
+### 设计
+
+Transaction:
+
+| Field                 | Type              | Unique | Optional | Nillable | Default | UpdateDefault | Immutable | StructTag                              | Validators |
+| :-------------------- | :---------------- | :----- | :------- | :------- | :------ | :------------ | :-------- | :------------------------------------- | :--------- |
+| id                    | string            | true   | false    | false    | true    | false         | false     | json:"id,omitempty"                    | 0          |
+| nonce                 | uint64            | false  | false    | false    | true    | false         | false     | json:"nonce,omitempty"                 | 0          |
+| transaction_type      | int8              | false  | false    | false    | true    | false         | false     | json:"transaction_type,omitempty"      | 0          |
+| coin_type             | int8              | false  | false    | false    | true    | false         | false     | json:"coin_type,omitempty"             | 0          |
+| transaction_id_insite | string            | false  | false    | false    | true    | false         | false     | json:"transaction_id_insite,omitempty" | 1          |
+| from                  | string            | false  | false    | false    | true    | false         | false     | json:"from,omitempty"                  | 1          |
+| to                    | string            | false  | false    | false    | true    | false         | false     | json:"to,omitempty"                    | 1          |
+| value                 | float64           | false  | false    | false    | true    | false         | false     | json:"value,omitempty"                 | 0          |
+| state                 | transaction.State | false  | false    | false    | false   | false         | false     | json:"state,omitempty"                 | 0          |
+| create_at             | uint32            | false  | false    | false    | true    | false         | false     | json:"create_at,omitempty"             | 0          |
+| update_at             | uint32            | false  | false    | false    | true    | true          | false     | json:"update_at,omitempty"             | 0          |
+| delete_at             | uint32            | false  | false    | false    | true    | false         | false     | json:"delete_at,omitempty"             | 0          |
 
 ### 命令
 * make init ```初始化仓库，创建go.mod```
@@ -45,24 +48,6 @@
 * make deploy-to-k8s-cluster ```部署到k8s集群```
 
 ### 步骤
-* 在github上将模板仓库https://github.com/NpoolPlatform/go-service-app-template.git import为https://github.com/NpoolPlatform/my-service-name.git
-* git clone https://github.com/NpoolPlatform/my-service-name.git
-* cd my-service-name
-* mv cmd/service-sample cmd/my-service
-* 修改cmd/my-service/main.go中的serviceName为My Service
-* mv cmd/my-service/ServiceSample.viper.yaml cmd/my-service/MyService.viper.yaml
-* 将cmd/my-service/MyService.viper.yaml中的内容修改为当前服务对应内容
-* 修改Dockerfile和k8s部署文档为当前服务对应内容
-  * grep -rb "service sample" ./*
-  * grep -rb "service-example" ./*
-  * grep -rb "go-service-app-template" ./*
-  * grep -rb "service\.sample" ./*
-  * grep -rb "service\*sample" ./*
-  * grep -rb "ServiceSample" ./*
-  * grep -rb "ServiceExample" ./*
-  * grep -rb "service_sample" ./*
-  * grep -rb "service_example" ./*
-  * grep -rb "sample-service" ./*
 
 ### 最佳实践
 * 每个服务只提供单一可执行文件，有利于docker镜像打包与k8s部署管理

@@ -11,6 +11,7 @@ import (
 	rabbitmqconst "github.com/NpoolPlatform/go-service-framework/pkg/rabbitmq/const"
 	redisconst "github.com/NpoolPlatform/go-service-framework/pkg/redis/const"
 	coinconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
+	"github.com/NpoolPlatform/sphinx-proxy/pkg/db"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/servicename"
 	cli "github.com/urfave/cli/v2"
 )
@@ -40,6 +41,9 @@ func main() {
 	if err != nil {
 		logger.Sugar().Errorf("fail to create %v: %v", serviceName, err)
 		return
+	}
+	if err := db.Init(); err != nil {
+		logger.Sugar().Errorf("fail to init db %v", err)
 	}
 	err = app.Run(os.Args)
 	if err != nil {
