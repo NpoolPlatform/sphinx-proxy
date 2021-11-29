@@ -498,7 +498,7 @@ func ConsumerMQ() error {
 		}
 
 		if err := checkParam(tinfo, ackReq); err != nil {
-			logger.Sugar().Error("call checkParam error: %v", err)
+			logger.Sugar().Errorf("call checkParam error: %v", err)
 			ackChannel <- ackReq
 			continue
 		}
