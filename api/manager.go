@@ -497,6 +497,12 @@ func ConsumerMQ() error {
 			TransactionIdInsite: tinfo.TransactionIDInsite,
 		}
 
+		if err := checkParam(tinfo, ackReq); err != nil {
+			logger.Sugar().Error("call checkParam error: %v", err)
+			ackChannel <- ackReq
+			continue
+		}
+
 		switch tinfo.TransactionType {
 		case signproxy.TransactionType_WalletNew:
 			signStream, err := getProxySign()
@@ -524,7 +530,7 @@ func ConsumerMQ() error {
 			}
 
 			if tinfo.AddressFrom == "" {
-				logger.Sugar().Errorf("consumer info AddressFrom: %v empty")
+				logger.Sugar().Errorf("consumer info AddressFrom empty")
 				ackReq.IsOkay = false
 				ackReq.ErrorMessage = "AddressFrom is empty"
 				ackChannel <- ackReq
@@ -559,6 +565,24 @@ func ConsumerMQ() error {
 			tinfo.AddressTo,
 		)
 	}
+	return nil
+}
+
+func checkParam(tinfo *msgproducer.NotificationTransaction, ackReq *trading.ACKRequest) error {
+	if err := check.CoinType(tinfo.CoinType); err != nil {
+		logger.Sugar().Errorf("consumer info CoinType: %v invalid", tinfo.CoinType)
+		ackReq.IsOkay = false
+		ackReq.ErrorMessage = "CoinType invalid"
+		return err
+	}
+
+	if err := check.TransactionType(tinfo.TransactionType); err != nil {
+		logger.Sugar().Errorf("consumer info TransactionType: %v invalid", tinfo.TransactionType)
+		ackReq.IsOkay = false
+		ackReq.ErrorMessage = "TransactionType invalid"
+		return err
+	}
+
 	return nil
 }
 
