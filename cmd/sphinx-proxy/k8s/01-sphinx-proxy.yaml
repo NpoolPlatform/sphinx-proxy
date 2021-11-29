@@ -51,7 +51,5 @@ spec:
   ports:
   - name: grpc
     port: 50001
-  - name: prometheus
-    port: 50002
   selector:
     app: sphinx-proxy

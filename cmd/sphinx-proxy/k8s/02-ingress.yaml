@@ -1,5 +1,5 @@
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: sphinx-proxy-npool-top-ingress
   namespace: kube-system
@@ -7,22 +7,24 @@ metadata:
     k8s.kuboard.cn/displayName: sphinx-proxy-npool
     k8s.kuboard.cn/workload: sphinx-proxy-npool
     kubernetes.io/ingress.class: "traefik-internet"
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
 
 spec:
-  entryPoints:
-    - web
-    - websecure
-  routes:
-    - match: Headers(`content-type`,`application/grpc`) && Host(`sphinx.proxy.api.npool.top`)
-      kind: Rule
-      services:
-        - name: sphinx-proxy
-          port: 50001
-          scheme: h2c
+  rules:
+    - host: sphinx.proxy.api.npool.top
+      http:
+        paths:
+          - path: /
+            pathType: Exact
+            backend:
+              service:
+                name: sphinx-proxy
+                port:
+                  number: 50001
 
 ---
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: sphinx-proxy-xpool-top-ingress
   namespace: kube-system
@@ -32,14 +34,14 @@ metadata:
     kubernetes.io/ingress.class: "traefik-internet"
 
 spec:
-  entryPoints:
-    - web
-    - websecure
-  routes:
-    - match: Headers(`content-type`,`application/grpc`) && Host(`sphinx.proxy.api.xpool.top`)
-      kind: Rule
-      priority: 50
-      services:
-        - name: sphinx-proxy
-          port: 50001
-          scheme: h2c
+  rules:
+    - host: sphinx.proxy.api.xpool.top
+      http:
+        paths:
+          - path: /
+            pathType: Exact
+            backend:
+              service:
+                name: sphinx-proxy
+                port:
+                  number: 50001
