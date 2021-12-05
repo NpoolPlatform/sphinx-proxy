@@ -8,21 +8,24 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
+	"github.com/google/uuid"
 )
 
 // Transaction is the model entity for the Transaction schema.
 type Transaction struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Nonce holds the value of the "nonce" field.
 	Nonce uint64 `json:"nonce,omitempty"`
 	// TransactionType holds the value of the "transaction_type" field.
 	TransactionType int8 `json:"transaction_type,omitempty"`
 	// CoinType holds the value of the "coin_type" field.
-	CoinType int8 `json:"coin_type,omitempty"`
-	// TransactionIDInsite holds the value of the "transaction_id_insite" field.
-	TransactionIDInsite string `json:"transaction_id_insite,omitempty"`
+	CoinType int32 `json:"coin_type,omitempty"`
+	// TransactionID holds the value of the "transaction_id" field.
+	TransactionID string `json:"transaction_id,omitempty"`
+	// Cid holds the value of the "cid" field.
+	Cid string `json:"cid,omitempty"`
 	// From holds the value of the "from" field.
 	From string `json:"from,omitempty"`
 	// To holds the value of the "to" field.
@@ -48,8 +51,10 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullFloat64)
 		case transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldCoinType, transaction.FieldCreateAt, transaction.FieldUpdateAt, transaction.FieldDeleteAt:
 			values[i] = new(sql.NullInt64)
-		case transaction.FieldID, transaction.FieldTransactionIDInsite, transaction.FieldFrom, transaction.FieldTo, transaction.FieldState:
+		case transaction.FieldTransactionID, transaction.FieldCid, transaction.FieldFrom, transaction.FieldTo, transaction.FieldState:
 			values[i] = new(sql.NullString)
+		case transaction.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Transaction", columns[i])
 		}
@@ -66,10 +71,10 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 	for i := range columns {
 		switch columns[i] {
 		case transaction.FieldID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				t.ID = value.String
+			} else if value != nil {
+				t.ID = *value
 			}
 		case transaction.FieldNonce:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -87,13 +92,19 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field coin_type", values[i])
 			} else if value.Valid {
-				t.CoinType = int8(value.Int64)
+				t.CoinType = int32(value.Int64)
 			}
-		case transaction.FieldTransactionIDInsite:
+		case transaction.FieldTransactionID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field transaction_id_insite", values[i])
+				return fmt.Errorf("unexpected type %T for field transaction_id", values[i])
 			} else if value.Valid {
-				t.TransactionIDInsite = value.String
+				t.TransactionID = value.String
+			}
+		case transaction.FieldCid:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field cid", values[i])
+			} else if value.Valid {
+				t.Cid = value.String
 			}
 		case transaction.FieldFrom:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -171,8 +182,10 @@ func (t *Transaction) String() string {
 	builder.WriteString(fmt.Sprintf("%v", t.TransactionType))
 	builder.WriteString(", coin_type=")
 	builder.WriteString(fmt.Sprintf("%v", t.CoinType))
-	builder.WriteString(", transaction_id_insite=")
-	builder.WriteString(t.TransactionIDInsite)
+	builder.WriteString(", transaction_id=")
+	builder.WriteString(t.TransactionID)
+	builder.WriteString(", cid=")
+	builder.WriteString(t.Cid)
 	builder.WriteString(", from=")
 	builder.WriteString(t.From)
 	builder.WriteString(", to=")

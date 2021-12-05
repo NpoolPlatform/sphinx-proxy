@@ -1,6 +1,7 @@
 package unit
 
 import (
+	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/shopspring/decimal"
 )
 
@@ -26,4 +27,8 @@ func AttoFIL2FIL(value string) (float64, bool) {
 	}
 	return v.Div(decimal.NewFromFloat(AttoFIL)).
 		Float64()
+}
+
+func ParseFIL(s string) (types.FIL, error) {
+	return types.ParseFIL(s)
 }

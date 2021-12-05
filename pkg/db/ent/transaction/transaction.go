@@ -4,6 +4,8 @@ package transaction
 
 import (
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -17,8 +19,10 @@ const (
 	FieldTransactionType = "transaction_type"
 	// FieldCoinType holds the string denoting the coin_type field in the database.
 	FieldCoinType = "coin_type"
-	// FieldTransactionIDInsite holds the string denoting the transaction_id_insite field in the database.
-	FieldTransactionIDInsite = "transaction_id_insite"
+	// FieldTransactionID holds the string denoting the transaction_id field in the database.
+	FieldTransactionID = "transaction_id"
+	// FieldCid holds the string denoting the cid field in the database.
+	FieldCid = "cid"
 	// FieldFrom holds the string denoting the from field in the database.
 	FieldFrom = "from"
 	// FieldTo holds the string denoting the to field in the database.
@@ -43,7 +47,8 @@ var Columns = []string{
 	FieldNonce,
 	FieldTransactionType,
 	FieldCoinType,
-	FieldTransactionIDInsite,
+	FieldTransactionID,
+	FieldCid,
 	FieldFrom,
 	FieldTo,
 	FieldValue,
@@ -69,11 +74,15 @@ var (
 	// DefaultTransactionType holds the default value on creation for the "transaction_type" field.
 	DefaultTransactionType int8
 	// DefaultCoinType holds the default value on creation for the "coin_type" field.
-	DefaultCoinType int8
-	// DefaultTransactionIDInsite holds the default value on creation for the "transaction_id_insite" field.
-	DefaultTransactionIDInsite string
-	// TransactionIDInsiteValidator is a validator for the "transaction_id_insite" field. It is called by the builders before save.
-	TransactionIDInsiteValidator func(string) error
+	DefaultCoinType int32
+	// DefaultTransactionID holds the default value on creation for the "transaction_id" field.
+	DefaultTransactionID string
+	// TransactionIDValidator is a validator for the "transaction_id" field. It is called by the builders before save.
+	TransactionIDValidator func(string) error
+	// DefaultCid holds the default value on creation for the "cid" field.
+	DefaultCid string
+	// CidValidator is a validator for the "cid" field. It is called by the builders before save.
+	CidValidator func(string) error
 	// DefaultFrom holds the default value on creation for the "from" field.
 	DefaultFrom string
 	// FromValidator is a validator for the "from" field. It is called by the builders before save.
@@ -93,7 +102,7 @@ var (
 	// DefaultDeleteAt holds the default value on creation for the "delete_at" field.
 	DefaultDeleteAt func() uint32
 	// DefaultID holds the default value on creation for the "id" field.
-	DefaultID func() string
+	DefaultID func() uuid.UUID
 )
 
 // State defines the type for the "state" enum field.
@@ -102,6 +111,7 @@ type State string
 // State values.
 const (
 	StateWait State = "wait"
+	StateSign State = "sign"
 	StateDone State = "done"
 	StateFail State = "fail"
 )
@@ -113,7 +123,7 @@ func (s State) String() string {
 // StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
 func StateValidator(s State) error {
 	switch s {
-	case StateWait, StateDone, StateFail:
+	case StateWait, StateSign, StateDone, StateFail:
 		return nil
 	default:
 		return fmt.Errorf("transaction: invalid enum value for state field: %q", s)

@@ -1,10 +1,7 @@
 package main
 
 import (
-	"os"
-
 	"github.com/NpoolPlatform/sphinx-proxy/api"
-	msgcli "github.com/NpoolPlatform/sphinx-proxy/pkg/message/message"
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
@@ -23,15 +20,7 @@ var runCmd = &cli.Command{
 		return logger.Sync()
 	},
 	Action: func(c *cli.Context) error {
-		if err := msgcli.Init(); err != nil {
-			return err
-		}
-		go func() {
-			if err := api.ConsumerMQ(); err != nil {
-				// mq must ok
-				os.Exit(1)
-			}
-		}()
+		api.Transaction()
 		return grpc2.RunGRPC(rpcRegister)
 	},
 }

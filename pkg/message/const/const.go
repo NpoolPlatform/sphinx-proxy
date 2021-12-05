@@ -6,13 +6,18 @@ import (
 )
 
 const (
-	GrpcTimeout = time.Second * 10 // nolint
+	// GrpcTimeout ..
+	GrpcTimeout = time.Second * 10
+	// ServiceName ..
+	ServiceName = "sphinx-proxy.npool.top"
+
+	// DefaultPageSize ..
+	DefaultPageSize = 50
+	// TaskTimeout ..
+	TaskTimeout = time.Second * 10
 )
 
-const (
-	ServiceName = "sphinx-proxy.npool.top" // nolint
-)
-
+// FormatServiceName ..
 func FormatServiceName() string {
 	return strings.Title(ServiceName)
 }

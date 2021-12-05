@@ -26,7 +26,6 @@ Transaction:
 | :-------------------- | :---------------- | :----- | :------- | :------- | :------ | :------------ | :-------- | :------------------------------------- | :--------- |
 | id                    | string            | true   | false    | false    | true    | false         | false     | json:"id,omitempty"                    | 0          |
 | nonce                 | uint64            | false  | false    | false    | true    | false         | false     | json:"nonce,omitempty"                 | 0          |
-| transaction_type      | int8              | false  | false    | false    | true    | false         | false     | json:"transaction_type,omitempty"      | 0          |
 | coin_type             | int8              | false  | false    | false    | true    | false         | false     | json:"coin_type,omitempty"             | 0          |
 | transaction_id_insite | string            | false  | false    | false    | true    | false         | false     | json:"transaction_id_insite,omitempty" | 1          |
 | from                  | string            | false  | false    | false    | true    | false         | false     | json:"from,omitempty"                  | 1          |

@@ -5,6 +5,7 @@ package ent
 import (
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/schema"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
+	"github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -24,45 +25,51 @@ func init() {
 	// transactionDescCoinType is the schema descriptor for coin_type field.
 	transactionDescCoinType := transactionFields[3].Descriptor()
 	// transaction.DefaultCoinType holds the default value on creation for the coin_type field.
-	transaction.DefaultCoinType = transactionDescCoinType.Default.(int8)
-	// transactionDescTransactionIDInsite is the schema descriptor for transaction_id_insite field.
-	transactionDescTransactionIDInsite := transactionFields[4].Descriptor()
-	// transaction.DefaultTransactionIDInsite holds the default value on creation for the transaction_id_insite field.
-	transaction.DefaultTransactionIDInsite = transactionDescTransactionIDInsite.Default.(string)
-	// transaction.TransactionIDInsiteValidator is a validator for the "transaction_id_insite" field. It is called by the builders before save.
-	transaction.TransactionIDInsiteValidator = transactionDescTransactionIDInsite.Validators[0].(func(string) error)
+	transaction.DefaultCoinType = transactionDescCoinType.Default.(int32)
+	// transactionDescTransactionID is the schema descriptor for transaction_id field.
+	transactionDescTransactionID := transactionFields[4].Descriptor()
+	// transaction.DefaultTransactionID holds the default value on creation for the transaction_id field.
+	transaction.DefaultTransactionID = transactionDescTransactionID.Default.(string)
+	// transaction.TransactionIDValidator is a validator for the "transaction_id" field. It is called by the builders before save.
+	transaction.TransactionIDValidator = transactionDescTransactionID.Validators[0].(func(string) error)
+	// transactionDescCid is the schema descriptor for cid field.
+	transactionDescCid := transactionFields[5].Descriptor()
+	// transaction.DefaultCid holds the default value on creation for the cid field.
+	transaction.DefaultCid = transactionDescCid.Default.(string)
+	// transaction.CidValidator is a validator for the "cid" field. It is called by the builders before save.
+	transaction.CidValidator = transactionDescCid.Validators[0].(func(string) error)
 	// transactionDescFrom is the schema descriptor for from field.
-	transactionDescFrom := transactionFields[5].Descriptor()
+	transactionDescFrom := transactionFields[6].Descriptor()
 	// transaction.DefaultFrom holds the default value on creation for the from field.
 	transaction.DefaultFrom = transactionDescFrom.Default.(string)
 	// transaction.FromValidator is a validator for the "from" field. It is called by the builders before save.
 	transaction.FromValidator = transactionDescFrom.Validators[0].(func(string) error)
 	// transactionDescTo is the schema descriptor for to field.
-	transactionDescTo := transactionFields[6].Descriptor()
+	transactionDescTo := transactionFields[7].Descriptor()
 	// transaction.DefaultTo holds the default value on creation for the to field.
 	transaction.DefaultTo = transactionDescTo.Default.(string)
 	// transaction.ToValidator is a validator for the "to" field. It is called by the builders before save.
 	transaction.ToValidator = transactionDescTo.Validators[0].(func(string) error)
 	// transactionDescValue is the schema descriptor for value field.
-	transactionDescValue := transactionFields[7].Descriptor()
+	transactionDescValue := transactionFields[8].Descriptor()
 	// transaction.DefaultValue holds the default value on creation for the value field.
 	transaction.DefaultValue = transactionDescValue.Default.(float64)
 	// transactionDescCreateAt is the schema descriptor for create_at field.
-	transactionDescCreateAt := transactionFields[9].Descriptor()
+	transactionDescCreateAt := transactionFields[10].Descriptor()
 	// transaction.DefaultCreateAt holds the default value on creation for the create_at field.
 	transaction.DefaultCreateAt = transactionDescCreateAt.Default.(func() uint32)
 	// transactionDescUpdateAt is the schema descriptor for update_at field.
-	transactionDescUpdateAt := transactionFields[10].Descriptor()
+	transactionDescUpdateAt := transactionFields[11].Descriptor()
 	// transaction.DefaultUpdateAt holds the default value on creation for the update_at field.
 	transaction.DefaultUpdateAt = transactionDescUpdateAt.Default.(func() uint32)
 	// transaction.UpdateDefaultUpdateAt holds the default value on update for the update_at field.
 	transaction.UpdateDefaultUpdateAt = transactionDescUpdateAt.UpdateDefault.(func() uint32)
 	// transactionDescDeleteAt is the schema descriptor for delete_at field.
-	transactionDescDeleteAt := transactionFields[11].Descriptor()
+	transactionDescDeleteAt := transactionFields[12].Descriptor()
 	// transaction.DefaultDeleteAt holds the default value on creation for the delete_at field.
 	transaction.DefaultDeleteAt = transactionDescDeleteAt.Default.(func() uint32)
 	// transactionDescID is the schema descriptor for id field.
 	transactionDescID := transactionFields[0].Descriptor()
 	// transaction.DefaultID holds the default value on creation for the id field.
-	transaction.DefaultID = transactionDescID.Default.(func() string)
+	transaction.DefaultID = transactionDescID.Default.(func() uuid.UUID)
 }

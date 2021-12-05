@@ -5,31 +5,32 @@ package transaction
 import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id string) predicate.Transaction {
+func ID(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id string) predicate.Transaction {
+func IDEQ(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id string) predicate.Transaction {
+func IDNEQ(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...string) predicate.Transaction {
+func IDIn(ids ...uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -46,7 +47,7 @@ func IDIn(ids ...string) predicate.Transaction {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...string) predicate.Transaction {
+func IDNotIn(ids ...uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -63,28 +64,28 @@ func IDNotIn(ids ...string) predicate.Transaction {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.Transaction {
+func IDGT(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.Transaction {
+func IDGTE(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.Transaction {
+func IDLT(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.Transaction {
+func IDLTE(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
 	})
@@ -105,16 +106,23 @@ func TransactionType(v int8) predicate.Transaction {
 }
 
 // CoinType applies equality check predicate on the "coin_type" field. It's identical to CoinTypeEQ.
-func CoinType(v int8) predicate.Transaction {
+func CoinType(v int32) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldCoinType), v))
 	})
 }
 
-// TransactionIDInsite applies equality check predicate on the "transaction_id_insite" field. It's identical to TransactionIDInsiteEQ.
-func TransactionIDInsite(v string) predicate.Transaction {
+// TransactionID applies equality check predicate on the "transaction_id" field. It's identical to TransactionIDEQ.
+func TransactionID(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTransactionIDInsite), v))
+		s.Where(sql.EQ(s.C(FieldTransactionID), v))
+	})
+}
+
+// Cid applies equality check predicate on the "cid" field. It's identical to CidEQ.
+func Cid(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCid), v))
 	})
 }
 
@@ -313,21 +321,21 @@ func TransactionTypeLTE(v int8) predicate.Transaction {
 }
 
 // CoinTypeEQ applies the EQ predicate on the "coin_type" field.
-func CoinTypeEQ(v int8) predicate.Transaction {
+func CoinTypeEQ(v int32) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldCoinType), v))
 	})
 }
 
 // CoinTypeNEQ applies the NEQ predicate on the "coin_type" field.
-func CoinTypeNEQ(v int8) predicate.Transaction {
+func CoinTypeNEQ(v int32) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldCoinType), v))
 	})
 }
 
 // CoinTypeIn applies the In predicate on the "coin_type" field.
-func CoinTypeIn(vs ...int8) predicate.Transaction {
+func CoinTypeIn(vs ...int32) predicate.Transaction {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -344,7 +352,7 @@ func CoinTypeIn(vs ...int8) predicate.Transaction {
 }
 
 // CoinTypeNotIn applies the NotIn predicate on the "coin_type" field.
-func CoinTypeNotIn(vs ...int8) predicate.Transaction {
+func CoinTypeNotIn(vs ...int32) predicate.Transaction {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -361,49 +369,49 @@ func CoinTypeNotIn(vs ...int8) predicate.Transaction {
 }
 
 // CoinTypeGT applies the GT predicate on the "coin_type" field.
-func CoinTypeGT(v int8) predicate.Transaction {
+func CoinTypeGT(v int32) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldCoinType), v))
 	})
 }
 
 // CoinTypeGTE applies the GTE predicate on the "coin_type" field.
-func CoinTypeGTE(v int8) predicate.Transaction {
+func CoinTypeGTE(v int32) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldCoinType), v))
 	})
 }
 
 // CoinTypeLT applies the LT predicate on the "coin_type" field.
-func CoinTypeLT(v int8) predicate.Transaction {
+func CoinTypeLT(v int32) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldCoinType), v))
 	})
 }
 
 // CoinTypeLTE applies the LTE predicate on the "coin_type" field.
-func CoinTypeLTE(v int8) predicate.Transaction {
+func CoinTypeLTE(v int32) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldCoinType), v))
 	})
 }
 
-// TransactionIDInsiteEQ applies the EQ predicate on the "transaction_id_insite" field.
-func TransactionIDInsiteEQ(v string) predicate.Transaction {
+// TransactionIDEQ applies the EQ predicate on the "transaction_id" field.
+func TransactionIDEQ(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTransactionIDInsite), v))
+		s.Where(sql.EQ(s.C(FieldTransactionID), v))
 	})
 }
 
-// TransactionIDInsiteNEQ applies the NEQ predicate on the "transaction_id_insite" field.
-func TransactionIDInsiteNEQ(v string) predicate.Transaction {
+// TransactionIDNEQ applies the NEQ predicate on the "transaction_id" field.
+func TransactionIDNEQ(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldTransactionIDInsite), v))
+		s.Where(sql.NEQ(s.C(FieldTransactionID), v))
 	})
 }
 
-// TransactionIDInsiteIn applies the In predicate on the "transaction_id_insite" field.
-func TransactionIDInsiteIn(vs ...string) predicate.Transaction {
+// TransactionIDIn applies the In predicate on the "transaction_id" field.
+func TransactionIDIn(vs ...string) predicate.Transaction {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -415,12 +423,12 @@ func TransactionIDInsiteIn(vs ...string) predicate.Transaction {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldTransactionIDInsite), v...))
+		s.Where(sql.In(s.C(FieldTransactionID), v...))
 	})
 }
 
-// TransactionIDInsiteNotIn applies the NotIn predicate on the "transaction_id_insite" field.
-func TransactionIDInsiteNotIn(vs ...string) predicate.Transaction {
+// TransactionIDNotIn applies the NotIn predicate on the "transaction_id" field.
+func TransactionIDNotIn(vs ...string) predicate.Transaction {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -432,70 +440,181 @@ func TransactionIDInsiteNotIn(vs ...string) predicate.Transaction {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldTransactionIDInsite), v...))
+		s.Where(sql.NotIn(s.C(FieldTransactionID), v...))
 	})
 }
 
-// TransactionIDInsiteGT applies the GT predicate on the "transaction_id_insite" field.
-func TransactionIDInsiteGT(v string) predicate.Transaction {
+// TransactionIDGT applies the GT predicate on the "transaction_id" field.
+func TransactionIDGT(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldTransactionIDInsite), v))
+		s.Where(sql.GT(s.C(FieldTransactionID), v))
 	})
 }
 
-// TransactionIDInsiteGTE applies the GTE predicate on the "transaction_id_insite" field.
-func TransactionIDInsiteGTE(v string) predicate.Transaction {
+// TransactionIDGTE applies the GTE predicate on the "transaction_id" field.
+func TransactionIDGTE(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldTransactionIDInsite), v))
+		s.Where(sql.GTE(s.C(FieldTransactionID), v))
 	})
 }
 
-// TransactionIDInsiteLT applies the LT predicate on the "transaction_id_insite" field.
-func TransactionIDInsiteLT(v string) predicate.Transaction {
+// TransactionIDLT applies the LT predicate on the "transaction_id" field.
+func TransactionIDLT(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldTransactionIDInsite), v))
+		s.Where(sql.LT(s.C(FieldTransactionID), v))
 	})
 }
 
-// TransactionIDInsiteLTE applies the LTE predicate on the "transaction_id_insite" field.
-func TransactionIDInsiteLTE(v string) predicate.Transaction {
+// TransactionIDLTE applies the LTE predicate on the "transaction_id" field.
+func TransactionIDLTE(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldTransactionIDInsite), v))
+		s.Where(sql.LTE(s.C(FieldTransactionID), v))
 	})
 }
 
-// TransactionIDInsiteContains applies the Contains predicate on the "transaction_id_insite" field.
-func TransactionIDInsiteContains(v string) predicate.Transaction {
+// TransactionIDContains applies the Contains predicate on the "transaction_id" field.
+func TransactionIDContains(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldTransactionIDInsite), v))
+		s.Where(sql.Contains(s.C(FieldTransactionID), v))
 	})
 }
 
-// TransactionIDInsiteHasPrefix applies the HasPrefix predicate on the "transaction_id_insite" field.
-func TransactionIDInsiteHasPrefix(v string) predicate.Transaction {
+// TransactionIDHasPrefix applies the HasPrefix predicate on the "transaction_id" field.
+func TransactionIDHasPrefix(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldTransactionIDInsite), v))
+		s.Where(sql.HasPrefix(s.C(FieldTransactionID), v))
 	})
 }
 
-// TransactionIDInsiteHasSuffix applies the HasSuffix predicate on the "transaction_id_insite" field.
-func TransactionIDInsiteHasSuffix(v string) predicate.Transaction {
+// TransactionIDHasSuffix applies the HasSuffix predicate on the "transaction_id" field.
+func TransactionIDHasSuffix(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldTransactionIDInsite), v))
+		s.Where(sql.HasSuffix(s.C(FieldTransactionID), v))
 	})
 }
 
-// TransactionIDInsiteEqualFold applies the EqualFold predicate on the "transaction_id_insite" field.
-func TransactionIDInsiteEqualFold(v string) predicate.Transaction {
+// TransactionIDEqualFold applies the EqualFold predicate on the "transaction_id" field.
+func TransactionIDEqualFold(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldTransactionIDInsite), v))
+		s.Where(sql.EqualFold(s.C(FieldTransactionID), v))
 	})
 }
 
-// TransactionIDInsiteContainsFold applies the ContainsFold predicate on the "transaction_id_insite" field.
-func TransactionIDInsiteContainsFold(v string) predicate.Transaction {
+// TransactionIDContainsFold applies the ContainsFold predicate on the "transaction_id" field.
+func TransactionIDContainsFold(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldTransactionIDInsite), v))
+		s.Where(sql.ContainsFold(s.C(FieldTransactionID), v))
+	})
+}
+
+// CidEQ applies the EQ predicate on the "cid" field.
+func CidEQ(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCid), v))
+	})
+}
+
+// CidNEQ applies the NEQ predicate on the "cid" field.
+func CidNEQ(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCid), v))
+	})
+}
+
+// CidIn applies the In predicate on the "cid" field.
+func CidIn(vs ...string) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCid), v...))
+	})
+}
+
+// CidNotIn applies the NotIn predicate on the "cid" field.
+func CidNotIn(vs ...string) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCid), v...))
+	})
+}
+
+// CidGT applies the GT predicate on the "cid" field.
+func CidGT(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCid), v))
+	})
+}
+
+// CidGTE applies the GTE predicate on the "cid" field.
+func CidGTE(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCid), v))
+	})
+}
+
+// CidLT applies the LT predicate on the "cid" field.
+func CidLT(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCid), v))
+	})
+}
+
+// CidLTE applies the LTE predicate on the "cid" field.
+func CidLTE(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCid), v))
+	})
+}
+
+// CidContains applies the Contains predicate on the "cid" field.
+func CidContains(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldCid), v))
+	})
+}
+
+// CidHasPrefix applies the HasPrefix predicate on the "cid" field.
+func CidHasPrefix(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldCid), v))
+	})
+}
+
+// CidHasSuffix applies the HasSuffix predicate on the "cid" field.
+func CidHasSuffix(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldCid), v))
+	})
+}
+
+// CidEqualFold applies the EqualFold predicate on the "cid" field.
+func CidEqualFold(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldCid), v))
+	})
+}
+
+// CidContainsFold applies the ContainsFold predicate on the "cid" field.
+func CidContainsFold(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldCid), v))
 	})
 }
 

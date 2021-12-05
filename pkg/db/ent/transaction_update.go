@@ -69,14 +69,14 @@ func (tu *TransactionUpdate) AddTransactionType(i int8) *TransactionUpdate {
 }
 
 // SetCoinType sets the "coin_type" field.
-func (tu *TransactionUpdate) SetCoinType(i int8) *TransactionUpdate {
+func (tu *TransactionUpdate) SetCoinType(i int32) *TransactionUpdate {
 	tu.mutation.ResetCoinType()
 	tu.mutation.SetCoinType(i)
 	return tu
 }
 
 // SetNillableCoinType sets the "coin_type" field if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableCoinType(i *int8) *TransactionUpdate {
+func (tu *TransactionUpdate) SetNillableCoinType(i *int32) *TransactionUpdate {
 	if i != nil {
 		tu.SetCoinType(*i)
 	}
@@ -84,21 +84,35 @@ func (tu *TransactionUpdate) SetNillableCoinType(i *int8) *TransactionUpdate {
 }
 
 // AddCoinType adds i to the "coin_type" field.
-func (tu *TransactionUpdate) AddCoinType(i int8) *TransactionUpdate {
+func (tu *TransactionUpdate) AddCoinType(i int32) *TransactionUpdate {
 	tu.mutation.AddCoinType(i)
 	return tu
 }
 
-// SetTransactionIDInsite sets the "transaction_id_insite" field.
-func (tu *TransactionUpdate) SetTransactionIDInsite(s string) *TransactionUpdate {
-	tu.mutation.SetTransactionIDInsite(s)
+// SetTransactionID sets the "transaction_id" field.
+func (tu *TransactionUpdate) SetTransactionID(s string) *TransactionUpdate {
+	tu.mutation.SetTransactionID(s)
 	return tu
 }
 
-// SetNillableTransactionIDInsite sets the "transaction_id_insite" field if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableTransactionIDInsite(s *string) *TransactionUpdate {
+// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableTransactionID(s *string) *TransactionUpdate {
 	if s != nil {
-		tu.SetTransactionIDInsite(*s)
+		tu.SetTransactionID(*s)
+	}
+	return tu
+}
+
+// SetCid sets the "cid" field.
+func (tu *TransactionUpdate) SetCid(s string) *TransactionUpdate {
+	tu.mutation.SetCid(s)
+	return tu
+}
+
+// SetNillableCid sets the "cid" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableCid(s *string) *TransactionUpdate {
+	if s != nil {
+		tu.SetCid(*s)
 	}
 	return tu
 }
@@ -289,9 +303,14 @@ func (tu *TransactionUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tu *TransactionUpdate) check() error {
-	if v, ok := tu.mutation.TransactionIDInsite(); ok {
-		if err := transaction.TransactionIDInsiteValidator(v); err != nil {
-			return &ValidationError{Name: "transaction_id_insite", err: fmt.Errorf("ent: validator failed for field \"transaction_id_insite\": %w", err)}
+	if v, ok := tu.mutation.TransactionID(); ok {
+		if err := transaction.TransactionIDValidator(v); err != nil {
+			return &ValidationError{Name: "transaction_id", err: fmt.Errorf("ent: validator failed for field \"transaction_id\": %w", err)}
+		}
+	}
+	if v, ok := tu.mutation.Cid(); ok {
+		if err := transaction.CidValidator(v); err != nil {
+			return &ValidationError{Name: "cid", err: fmt.Errorf("ent: validator failed for field \"cid\": %w", err)}
 		}
 	}
 	if v, ok := tu.mutation.From(); ok {
@@ -318,7 +337,7 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   transaction.Table,
 			Columns: transaction.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeUUID,
 				Column: transaction.FieldID,
 			},
 		},
@@ -360,23 +379,30 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tu.mutation.CoinType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: transaction.FieldCoinType,
 		})
 	}
 	if value, ok := tu.mutation.AddedCoinType(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: transaction.FieldCoinType,
 		})
 	}
-	if value, ok := tu.mutation.TransactionIDInsite(); ok {
+	if value, ok := tu.mutation.TransactionID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: transaction.FieldTransactionIDInsite,
+			Column: transaction.FieldTransactionID,
+		})
+	}
+	if value, ok := tu.mutation.Cid(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldCid,
 		})
 	}
 	if value, ok := tu.mutation.From(); ok {
@@ -518,14 +544,14 @@ func (tuo *TransactionUpdateOne) AddTransactionType(i int8) *TransactionUpdateOn
 }
 
 // SetCoinType sets the "coin_type" field.
-func (tuo *TransactionUpdateOne) SetCoinType(i int8) *TransactionUpdateOne {
+func (tuo *TransactionUpdateOne) SetCoinType(i int32) *TransactionUpdateOne {
 	tuo.mutation.ResetCoinType()
 	tuo.mutation.SetCoinType(i)
 	return tuo
 }
 
 // SetNillableCoinType sets the "coin_type" field if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableCoinType(i *int8) *TransactionUpdateOne {
+func (tuo *TransactionUpdateOne) SetNillableCoinType(i *int32) *TransactionUpdateOne {
 	if i != nil {
 		tuo.SetCoinType(*i)
 	}
@@ -533,21 +559,35 @@ func (tuo *TransactionUpdateOne) SetNillableCoinType(i *int8) *TransactionUpdate
 }
 
 // AddCoinType adds i to the "coin_type" field.
-func (tuo *TransactionUpdateOne) AddCoinType(i int8) *TransactionUpdateOne {
+func (tuo *TransactionUpdateOne) AddCoinType(i int32) *TransactionUpdateOne {
 	tuo.mutation.AddCoinType(i)
 	return tuo
 }
 
-// SetTransactionIDInsite sets the "transaction_id_insite" field.
-func (tuo *TransactionUpdateOne) SetTransactionIDInsite(s string) *TransactionUpdateOne {
-	tuo.mutation.SetTransactionIDInsite(s)
+// SetTransactionID sets the "transaction_id" field.
+func (tuo *TransactionUpdateOne) SetTransactionID(s string) *TransactionUpdateOne {
+	tuo.mutation.SetTransactionID(s)
 	return tuo
 }
 
-// SetNillableTransactionIDInsite sets the "transaction_id_insite" field if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableTransactionIDInsite(s *string) *TransactionUpdateOne {
+// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableTransactionID(s *string) *TransactionUpdateOne {
 	if s != nil {
-		tuo.SetTransactionIDInsite(*s)
+		tuo.SetTransactionID(*s)
+	}
+	return tuo
+}
+
+// SetCid sets the "cid" field.
+func (tuo *TransactionUpdateOne) SetCid(s string) *TransactionUpdateOne {
+	tuo.mutation.SetCid(s)
+	return tuo
+}
+
+// SetNillableCid sets the "cid" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableCid(s *string) *TransactionUpdateOne {
+	if s != nil {
+		tuo.SetCid(*s)
 	}
 	return tuo
 }
@@ -745,9 +785,14 @@ func (tuo *TransactionUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tuo *TransactionUpdateOne) check() error {
-	if v, ok := tuo.mutation.TransactionIDInsite(); ok {
-		if err := transaction.TransactionIDInsiteValidator(v); err != nil {
-			return &ValidationError{Name: "transaction_id_insite", err: fmt.Errorf("ent: validator failed for field \"transaction_id_insite\": %w", err)}
+	if v, ok := tuo.mutation.TransactionID(); ok {
+		if err := transaction.TransactionIDValidator(v); err != nil {
+			return &ValidationError{Name: "transaction_id", err: fmt.Errorf("ent: validator failed for field \"transaction_id\": %w", err)}
+		}
+	}
+	if v, ok := tuo.mutation.Cid(); ok {
+		if err := transaction.CidValidator(v); err != nil {
+			return &ValidationError{Name: "cid", err: fmt.Errorf("ent: validator failed for field \"cid\": %w", err)}
 		}
 	}
 	if v, ok := tuo.mutation.From(); ok {
@@ -774,7 +819,7 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Table:   transaction.Table,
 			Columns: transaction.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeUUID,
 				Column: transaction.FieldID,
 			},
 		},
@@ -833,23 +878,30 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	}
 	if value, ok := tuo.mutation.CoinType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: transaction.FieldCoinType,
 		})
 	}
 	if value, ok := tuo.mutation.AddedCoinType(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: transaction.FieldCoinType,
 		})
 	}
-	if value, ok := tuo.mutation.TransactionIDInsite(); ok {
+	if value, ok := tuo.mutation.TransactionID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: transaction.FieldTransactionIDInsite,
+			Column: transaction.FieldTransactionID,
+		})
+	}
+	if value, ok := tuo.mutation.Cid(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldCid,
 		})
 	}
 	if value, ok := tuo.mutation.From(); ok {

@@ -2,17 +2,19 @@ package check
 
 import (
 	"errors"
-	"strings"
 
-	"github.com/NpoolPlatform/message/npool/signproxy"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
+	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 )
 
 var (
-	ErrCoinTypeNotSupport        = errors.New("coin type not support")        // nolint
-	ErrTransactionTypeNotSupport = errors.New("transaction type not support") // nolint
+	// ErrCoinTypeNotSupport ..
+	ErrCoinTypeNotSupport = errors.New("coin type not support")
+	// ErrTransactionTypeNotSupport ..
+	ErrTransactionTypeNotSupport = errors.New("transaction type not support")
 )
 
+// CoinType ..
 func CoinType(coinType sphinxplugin.CoinType) error {
 	switch coinType {
 	case sphinxplugin.CoinType_CoinTypeBTC, sphinxplugin.CoinType_CoinTypeFIL:
@@ -22,17 +24,14 @@ func CoinType(coinType sphinxplugin.CoinType) error {
 	return nil
 }
 
-func TransactionType(transType signproxy.TransactionType) error {
+// TransactionType ..
+func TransactionType(transType sphinxproxy.TransactionType) error {
 	switch transType {
-	case signproxy.TransactionType_WalletNew,
-		signproxy.TransactionType_TransactionNew,
-		signproxy.TransactionType_Balance:
+	case sphinxproxy.TransactionType_WalletNew,
+		sphinxproxy.TransactionType_TransactionNew,
+		sphinxproxy.TransactionType_Balance:
 	default:
 		return ErrTransactionTypeNotSupport
 	}
 	return nil
-}
-
-func TruncateCoinTypePrefix(ct sphinxplugin.CoinType) string {
-	return strings.TrimPrefix(ct.String(), "CoinType")
 }

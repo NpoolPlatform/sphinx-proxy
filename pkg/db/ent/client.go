@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/migrate"
+	"github.com/google/uuid"
 
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 
@@ -161,7 +162,7 @@ func (c *TransactionClient) UpdateOne(t *Transaction) *TransactionUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TransactionClient) UpdateOneID(id string) *TransactionUpdateOne {
+func (c *TransactionClient) UpdateOneID(id uuid.UUID) *TransactionUpdateOne {
 	mutation := newTransactionMutation(c.config, OpUpdateOne, withTransactionID(id))
 	return &TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -178,7 +179,7 @@ func (c *TransactionClient) DeleteOne(t *Transaction) *TransactionDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *TransactionClient) DeleteOneID(id string) *TransactionDeleteOne {
+func (c *TransactionClient) DeleteOneID(id uuid.UUID) *TransactionDeleteOne {
 	builder := c.Delete().Where(transaction.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -193,12 +194,12 @@ func (c *TransactionClient) Query() *TransactionQuery {
 }
 
 // Get returns a Transaction entity by its id.
-func (c *TransactionClient) Get(ctx context.Context, id string) (*Transaction, error) {
+func (c *TransactionClient) Get(ctx context.Context, id uuid.UUID) (*Transaction, error) {
 	return c.Query().Where(transaction.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TransactionClient) GetX(ctx context.Context, id string) *Transaction {
+func (c *TransactionClient) GetX(ctx context.Context, id uuid.UUID) *Transaction {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)

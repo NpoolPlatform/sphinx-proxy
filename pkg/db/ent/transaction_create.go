@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
+	"github.com/google/uuid"
 )
 
 // TransactionCreate is the builder for creating a Transaction entity.
@@ -51,29 +52,43 @@ func (tc *TransactionCreate) SetNillableTransactionType(i *int8) *TransactionCre
 }
 
 // SetCoinType sets the "coin_type" field.
-func (tc *TransactionCreate) SetCoinType(i int8) *TransactionCreate {
+func (tc *TransactionCreate) SetCoinType(i int32) *TransactionCreate {
 	tc.mutation.SetCoinType(i)
 	return tc
 }
 
 // SetNillableCoinType sets the "coin_type" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableCoinType(i *int8) *TransactionCreate {
+func (tc *TransactionCreate) SetNillableCoinType(i *int32) *TransactionCreate {
 	if i != nil {
 		tc.SetCoinType(*i)
 	}
 	return tc
 }
 
-// SetTransactionIDInsite sets the "transaction_id_insite" field.
-func (tc *TransactionCreate) SetTransactionIDInsite(s string) *TransactionCreate {
-	tc.mutation.SetTransactionIDInsite(s)
+// SetTransactionID sets the "transaction_id" field.
+func (tc *TransactionCreate) SetTransactionID(s string) *TransactionCreate {
+	tc.mutation.SetTransactionID(s)
 	return tc
 }
 
-// SetNillableTransactionIDInsite sets the "transaction_id_insite" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableTransactionIDInsite(s *string) *TransactionCreate {
+// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableTransactionID(s *string) *TransactionCreate {
 	if s != nil {
-		tc.SetTransactionIDInsite(*s)
+		tc.SetTransactionID(*s)
+	}
+	return tc
+}
+
+// SetCid sets the "cid" field.
+func (tc *TransactionCreate) SetCid(s string) *TransactionCreate {
+	tc.mutation.SetCid(s)
+	return tc
+}
+
+// SetNillableCid sets the "cid" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableCid(s *string) *TransactionCreate {
+	if s != nil {
+		tc.SetCid(*s)
 	}
 	return tc
 }
@@ -169,16 +184,8 @@ func (tc *TransactionCreate) SetNillableDeleteAt(u *uint32) *TransactionCreate {
 }
 
 // SetID sets the "id" field.
-func (tc *TransactionCreate) SetID(s string) *TransactionCreate {
-	tc.mutation.SetID(s)
-	return tc
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableID(s *string) *TransactionCreate {
-	if s != nil {
-		tc.SetID(*s)
-	}
+func (tc *TransactionCreate) SetID(u uuid.UUID) *TransactionCreate {
+	tc.mutation.SetID(u)
 	return tc
 }
 
@@ -265,9 +272,13 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultCoinType
 		tc.mutation.SetCoinType(v)
 	}
-	if _, ok := tc.mutation.TransactionIDInsite(); !ok {
-		v := transaction.DefaultTransactionIDInsite
-		tc.mutation.SetTransactionIDInsite(v)
+	if _, ok := tc.mutation.TransactionID(); !ok {
+		v := transaction.DefaultTransactionID
+		tc.mutation.SetTransactionID(v)
+	}
+	if _, ok := tc.mutation.Cid(); !ok {
+		v := transaction.DefaultCid
+		tc.mutation.SetCid(v)
 	}
 	if _, ok := tc.mutation.From(); !ok {
 		v := transaction.DefaultFrom
@@ -310,12 +321,20 @@ func (tc *TransactionCreate) check() error {
 	if _, ok := tc.mutation.CoinType(); !ok {
 		return &ValidationError{Name: "coin_type", err: errors.New(`ent: missing required field "coin_type"`)}
 	}
-	if _, ok := tc.mutation.TransactionIDInsite(); !ok {
-		return &ValidationError{Name: "transaction_id_insite", err: errors.New(`ent: missing required field "transaction_id_insite"`)}
+	if _, ok := tc.mutation.TransactionID(); !ok {
+		return &ValidationError{Name: "transaction_id", err: errors.New(`ent: missing required field "transaction_id"`)}
 	}
-	if v, ok := tc.mutation.TransactionIDInsite(); ok {
-		if err := transaction.TransactionIDInsiteValidator(v); err != nil {
-			return &ValidationError{Name: "transaction_id_insite", err: fmt.Errorf(`ent: validator failed for field "transaction_id_insite": %w`, err)}
+	if v, ok := tc.mutation.TransactionID(); ok {
+		if err := transaction.TransactionIDValidator(v); err != nil {
+			return &ValidationError{Name: "transaction_id", err: fmt.Errorf(`ent: validator failed for field "transaction_id": %w`, err)}
+		}
+	}
+	if _, ok := tc.mutation.Cid(); !ok {
+		return &ValidationError{Name: "cid", err: errors.New(`ent: missing required field "cid"`)}
+	}
+	if v, ok := tc.mutation.Cid(); ok {
+		if err := transaction.CidValidator(v); err != nil {
+			return &ValidationError{Name: "cid", err: fmt.Errorf(`ent: validator failed for field "cid": %w`, err)}
 		}
 	}
 	if _, ok := tc.mutation.From(); !ok {
@@ -366,7 +385,7 @@ func (tc *TransactionCreate) sqlSave(ctx context.Context) (*Transaction, error) 
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(string)
+		_node.ID = _spec.ID.Value.(uuid.UUID)
 	}
 	return _node, nil
 }
@@ -377,7 +396,7 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: transaction.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
+				Type:   field.TypeUUID,
 				Column: transaction.FieldID,
 			},
 		}
@@ -405,19 +424,27 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := tc.mutation.CoinType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: transaction.FieldCoinType,
 		})
 		_node.CoinType = value
 	}
-	if value, ok := tc.mutation.TransactionIDInsite(); ok {
+	if value, ok := tc.mutation.TransactionID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: transaction.FieldTransactionIDInsite,
+			Column: transaction.FieldTransactionID,
 		})
-		_node.TransactionIDInsite = value
+		_node.TransactionID = value
+	}
+	if value, ok := tc.mutation.Cid(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldCid,
+		})
+		_node.Cid = value
 	}
 	if value, ok := tc.mutation.From(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -554,7 +581,7 @@ func (u *TransactionUpsert) UpdateTransactionType() *TransactionUpsert {
 }
 
 // SetCoinType sets the "coin_type" field.
-func (u *TransactionUpsert) SetCoinType(v int8) *TransactionUpsert {
+func (u *TransactionUpsert) SetCoinType(v int32) *TransactionUpsert {
 	u.Set(transaction.FieldCoinType, v)
 	return u
 }
@@ -565,15 +592,27 @@ func (u *TransactionUpsert) UpdateCoinType() *TransactionUpsert {
 	return u
 }
 
-// SetTransactionIDInsite sets the "transaction_id_insite" field.
-func (u *TransactionUpsert) SetTransactionIDInsite(v string) *TransactionUpsert {
-	u.Set(transaction.FieldTransactionIDInsite, v)
+// SetTransactionID sets the "transaction_id" field.
+func (u *TransactionUpsert) SetTransactionID(v string) *TransactionUpsert {
+	u.Set(transaction.FieldTransactionID, v)
 	return u
 }
 
-// UpdateTransactionIDInsite sets the "transaction_id_insite" field to the value that was provided on create.
-func (u *TransactionUpsert) UpdateTransactionIDInsite() *TransactionUpsert {
-	u.SetExcluded(transaction.FieldTransactionIDInsite)
+// UpdateTransactionID sets the "transaction_id" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateTransactionID() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldTransactionID)
+	return u
+}
+
+// SetCid sets the "cid" field.
+func (u *TransactionUpsert) SetCid(v string) *TransactionUpsert {
+	u.Set(transaction.FieldCid, v)
+	return u
+}
+
+// UpdateCid sets the "cid" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateCid() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldCid)
 	return u
 }
 
@@ -740,7 +779,7 @@ func (u *TransactionUpsertOne) UpdateTransactionType() *TransactionUpsertOne {
 }
 
 // SetCoinType sets the "coin_type" field.
-func (u *TransactionUpsertOne) SetCoinType(v int8) *TransactionUpsertOne {
+func (u *TransactionUpsertOne) SetCoinType(v int32) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.SetCoinType(v)
 	})
@@ -753,17 +792,31 @@ func (u *TransactionUpsertOne) UpdateCoinType() *TransactionUpsertOne {
 	})
 }
 
-// SetTransactionIDInsite sets the "transaction_id_insite" field.
-func (u *TransactionUpsertOne) SetTransactionIDInsite(v string) *TransactionUpsertOne {
+// SetTransactionID sets the "transaction_id" field.
+func (u *TransactionUpsertOne) SetTransactionID(v string) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
-		s.SetTransactionIDInsite(v)
+		s.SetTransactionID(v)
 	})
 }
 
-// UpdateTransactionIDInsite sets the "transaction_id_insite" field to the value that was provided on create.
-func (u *TransactionUpsertOne) UpdateTransactionIDInsite() *TransactionUpsertOne {
+// UpdateTransactionID sets the "transaction_id" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateTransactionID() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateTransactionIDInsite()
+		s.UpdateTransactionID()
+	})
+}
+
+// SetCid sets the "cid" field.
+func (u *TransactionUpsertOne) SetCid(v string) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetCid(v)
+	})
+}
+
+// UpdateCid sets the "cid" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateCid() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateCid()
 	})
 }
 
@@ -881,7 +934,7 @@ func (u *TransactionUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *TransactionUpsertOne) ID(ctx context.Context) (id string, err error) {
+func (u *TransactionUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
 	if u.create.driver.Dialect() == dialect.MySQL {
 		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
 		// fields from the database since MySQL does not support the RETURNING clause.
@@ -895,7 +948,7 @@ func (u *TransactionUpsertOne) ID(ctx context.Context) (id string, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *TransactionUpsertOne) IDX(ctx context.Context) string {
+func (u *TransactionUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -1110,7 +1163,7 @@ func (u *TransactionUpsertBulk) UpdateTransactionType() *TransactionUpsertBulk {
 }
 
 // SetCoinType sets the "coin_type" field.
-func (u *TransactionUpsertBulk) SetCoinType(v int8) *TransactionUpsertBulk {
+func (u *TransactionUpsertBulk) SetCoinType(v int32) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.SetCoinType(v)
 	})
@@ -1123,17 +1176,31 @@ func (u *TransactionUpsertBulk) UpdateCoinType() *TransactionUpsertBulk {
 	})
 }
 
-// SetTransactionIDInsite sets the "transaction_id_insite" field.
-func (u *TransactionUpsertBulk) SetTransactionIDInsite(v string) *TransactionUpsertBulk {
+// SetTransactionID sets the "transaction_id" field.
+func (u *TransactionUpsertBulk) SetTransactionID(v string) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
-		s.SetTransactionIDInsite(v)
+		s.SetTransactionID(v)
 	})
 }
 
-// UpdateTransactionIDInsite sets the "transaction_id_insite" field to the value that was provided on create.
-func (u *TransactionUpsertBulk) UpdateTransactionIDInsite() *TransactionUpsertBulk {
+// UpdateTransactionID sets the "transaction_id" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateTransactionID() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateTransactionIDInsite()
+		s.UpdateTransactionID()
+	})
+}
+
+// SetCid sets the "cid" field.
+func (u *TransactionUpsertBulk) SetCid(v string) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetCid(v)
+	})
+}
+
+// UpdateCid sets the "cid" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateCid() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateCid()
 	})
 }
 

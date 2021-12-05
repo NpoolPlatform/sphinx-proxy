@@ -9,6 +9,7 @@ import (
 
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/predicate"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
+	"github.com/google/uuid"
 
 	"entgo.io/ent"
 )
@@ -28,31 +29,32 @@ const (
 // TransactionMutation represents an operation that mutates the Transaction nodes in the graph.
 type TransactionMutation struct {
 	config
-	op                    Op
-	typ                   string
-	id                    *string
-	nonce                 *uint64
-	addnonce              *uint64
-	transaction_type      *int8
-	addtransaction_type   *int8
-	coin_type             *int8
-	addcoin_type          *int8
-	transaction_id_insite *string
-	from                  *string
-	to                    *string
-	value                 *float64
-	addvalue              *float64
-	state                 *transaction.State
-	create_at             *uint32
-	addcreate_at          *uint32
-	update_at             *uint32
-	addupdate_at          *uint32
-	delete_at             *uint32
-	adddelete_at          *uint32
-	clearedFields         map[string]struct{}
-	done                  bool
-	oldValue              func(context.Context) (*Transaction, error)
-	predicates            []predicate.Transaction
+	op                  Op
+	typ                 string
+	id                  *uuid.UUID
+	nonce               *uint64
+	addnonce            *uint64
+	transaction_type    *int8
+	addtransaction_type *int8
+	coin_type           *int32
+	addcoin_type        *int32
+	transaction_id      *string
+	cid                 *string
+	from                *string
+	to                  *string
+	value               *float64
+	addvalue            *float64
+	state               *transaction.State
+	create_at           *uint32
+	addcreate_at        *uint32
+	update_at           *uint32
+	addupdate_at        *uint32
+	delete_at           *uint32
+	adddelete_at        *uint32
+	clearedFields       map[string]struct{}
+	done                bool
+	oldValue            func(context.Context) (*Transaction, error)
+	predicates          []predicate.Transaction
 }
 
 var _ ent.Mutation = (*TransactionMutation)(nil)
@@ -75,7 +77,7 @@ func newTransactionMutation(c config, op Op, opts ...transactionOption) *Transac
 }
 
 // withTransactionID sets the ID field of the mutation.
-func withTransactionID(id string) transactionOption {
+func withTransactionID(id uuid.UUID) transactionOption {
 	return func(m *TransactionMutation) {
 		var (
 			err   error
@@ -127,13 +129,13 @@ func (m TransactionMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Transaction entities.
-func (m *TransactionMutation) SetID(id string) {
+func (m *TransactionMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *TransactionMutation) ID() (id string, exists bool) {
+func (m *TransactionMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -253,13 +255,13 @@ func (m *TransactionMutation) ResetTransactionType() {
 }
 
 // SetCoinType sets the "coin_type" field.
-func (m *TransactionMutation) SetCoinType(i int8) {
+func (m *TransactionMutation) SetCoinType(i int32) {
 	m.coin_type = &i
 	m.addcoin_type = nil
 }
 
 // CoinType returns the value of the "coin_type" field in the mutation.
-func (m *TransactionMutation) CoinType() (r int8, exists bool) {
+func (m *TransactionMutation) CoinType() (r int32, exists bool) {
 	v := m.coin_type
 	if v == nil {
 		return
@@ -270,7 +272,7 @@ func (m *TransactionMutation) CoinType() (r int8, exists bool) {
 // OldCoinType returns the old "coin_type" field's value of the Transaction entity.
 // If the Transaction object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TransactionMutation) OldCoinType(ctx context.Context) (v int8, err error) {
+func (m *TransactionMutation) OldCoinType(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldCoinType is only allowed on UpdateOne operations")
 	}
@@ -285,7 +287,7 @@ func (m *TransactionMutation) OldCoinType(ctx context.Context) (v int8, err erro
 }
 
 // AddCoinType adds i to the "coin_type" field.
-func (m *TransactionMutation) AddCoinType(i int8) {
+func (m *TransactionMutation) AddCoinType(i int32) {
 	if m.addcoin_type != nil {
 		*m.addcoin_type += i
 	} else {
@@ -294,7 +296,7 @@ func (m *TransactionMutation) AddCoinType(i int8) {
 }
 
 // AddedCoinType returns the value that was added to the "coin_type" field in this mutation.
-func (m *TransactionMutation) AddedCoinType() (r int8, exists bool) {
+func (m *TransactionMutation) AddedCoinType() (r int32, exists bool) {
 	v := m.addcoin_type
 	if v == nil {
 		return
@@ -308,40 +310,76 @@ func (m *TransactionMutation) ResetCoinType() {
 	m.addcoin_type = nil
 }
 
-// SetTransactionIDInsite sets the "transaction_id_insite" field.
-func (m *TransactionMutation) SetTransactionIDInsite(s string) {
-	m.transaction_id_insite = &s
+// SetTransactionID sets the "transaction_id" field.
+func (m *TransactionMutation) SetTransactionID(s string) {
+	m.transaction_id = &s
 }
 
-// TransactionIDInsite returns the value of the "transaction_id_insite" field in the mutation.
-func (m *TransactionMutation) TransactionIDInsite() (r string, exists bool) {
-	v := m.transaction_id_insite
+// TransactionID returns the value of the "transaction_id" field in the mutation.
+func (m *TransactionMutation) TransactionID() (r string, exists bool) {
+	v := m.transaction_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldTransactionIDInsite returns the old "transaction_id_insite" field's value of the Transaction entity.
+// OldTransactionID returns the old "transaction_id" field's value of the Transaction entity.
 // If the Transaction object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TransactionMutation) OldTransactionIDInsite(ctx context.Context) (v string, err error) {
+func (m *TransactionMutation) OldTransactionID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldTransactionIDInsite is only allowed on UpdateOne operations")
+		return v, fmt.Errorf("OldTransactionID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldTransactionIDInsite requires an ID field in the mutation")
+		return v, fmt.Errorf("OldTransactionID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTransactionIDInsite: %w", err)
+		return v, fmt.Errorf("querying old value for OldTransactionID: %w", err)
 	}
-	return oldValue.TransactionIDInsite, nil
+	return oldValue.TransactionID, nil
 }
 
-// ResetTransactionIDInsite resets all changes to the "transaction_id_insite" field.
-func (m *TransactionMutation) ResetTransactionIDInsite() {
-	m.transaction_id_insite = nil
+// ResetTransactionID resets all changes to the "transaction_id" field.
+func (m *TransactionMutation) ResetTransactionID() {
+	m.transaction_id = nil
+}
+
+// SetCid sets the "cid" field.
+func (m *TransactionMutation) SetCid(s string) {
+	m.cid = &s
+}
+
+// Cid returns the value of the "cid" field in the mutation.
+func (m *TransactionMutation) Cid() (r string, exists bool) {
+	v := m.cid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCid returns the old "cid" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldCid(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCid: %w", err)
+	}
+	return oldValue.Cid, nil
+}
+
+// ResetCid resets all changes to the "cid" field.
+func (m *TransactionMutation) ResetCid() {
+	m.cid = nil
 }
 
 // SetFrom sets the "from" field.
@@ -695,7 +733,7 @@ func (m *TransactionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TransactionMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.nonce != nil {
 		fields = append(fields, transaction.FieldNonce)
 	}
@@ -705,8 +743,11 @@ func (m *TransactionMutation) Fields() []string {
 	if m.coin_type != nil {
 		fields = append(fields, transaction.FieldCoinType)
 	}
-	if m.transaction_id_insite != nil {
-		fields = append(fields, transaction.FieldTransactionIDInsite)
+	if m.transaction_id != nil {
+		fields = append(fields, transaction.FieldTransactionID)
+	}
+	if m.cid != nil {
+		fields = append(fields, transaction.FieldCid)
 	}
 	if m.from != nil {
 		fields = append(fields, transaction.FieldFrom)
@@ -743,8 +784,10 @@ func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 		return m.TransactionType()
 	case transaction.FieldCoinType:
 		return m.CoinType()
-	case transaction.FieldTransactionIDInsite:
-		return m.TransactionIDInsite()
+	case transaction.FieldTransactionID:
+		return m.TransactionID()
+	case transaction.FieldCid:
+		return m.Cid()
 	case transaction.FieldFrom:
 		return m.From()
 	case transaction.FieldTo:
@@ -774,8 +817,10 @@ func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldTransactionType(ctx)
 	case transaction.FieldCoinType:
 		return m.OldCoinType(ctx)
-	case transaction.FieldTransactionIDInsite:
-		return m.OldTransactionIDInsite(ctx)
+	case transaction.FieldTransactionID:
+		return m.OldTransactionID(ctx)
+	case transaction.FieldCid:
+		return m.OldCid(ctx)
 	case transaction.FieldFrom:
 		return m.OldFrom(ctx)
 	case transaction.FieldTo:
@@ -814,18 +859,25 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 		m.SetTransactionType(v)
 		return nil
 	case transaction.FieldCoinType:
-		v, ok := value.(int8)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCoinType(v)
 		return nil
-	case transaction.FieldTransactionIDInsite:
+	case transaction.FieldTransactionID:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetTransactionIDInsite(v)
+		m.SetTransactionID(v)
+		return nil
+	case transaction.FieldCid:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCid(v)
 		return nil
 	case transaction.FieldFrom:
 		v, ok := value.(string)
@@ -951,7 +1003,7 @@ func (m *TransactionMutation) AddField(name string, value ent.Value) error {
 		m.AddTransactionType(v)
 		return nil
 	case transaction.FieldCoinType:
-		v, ok := value.(int8)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1021,8 +1073,11 @@ func (m *TransactionMutation) ResetField(name string) error {
 	case transaction.FieldCoinType:
 		m.ResetCoinType()
 		return nil
-	case transaction.FieldTransactionIDInsite:
-		m.ResetTransactionIDInsite()
+	case transaction.FieldTransactionID:
+		m.ResetTransactionID()
+		return nil
+	case transaction.FieldCid:
+		m.ResetCid()
 		return nil
 	case transaction.FieldFrom:
 		m.ResetFrom()

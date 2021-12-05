@@ -1,8 +1,8 @@
 package api
 
-import "github.com/NpoolPlatform/message/npool/signproxy"
+import "github.com/NpoolPlatform/message/npool/sphinxproxy"
 
-func (s *Server) ProxyPlugin(stream signproxy.SignProxy_ProxyPluginServer) error {
+func (s *Server) ProxyPlugin(stream sphinxproxy.SphinxProxy_ProxyPluginServer) error {
 	newPluginStream(stream)
 	return nil
 }

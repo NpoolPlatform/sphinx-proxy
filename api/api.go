@@ -1,15 +1,15 @@
 package api
 
 import (
-	"github.com/NpoolPlatform/message/npool/signproxy"
+	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	"google.golang.org/grpc"
 )
 
 // Server ..
 type Server struct {
-	signproxy.UnimplementedSignProxyServer
+	sphinxproxy.UnimplementedSphinxProxyServer
 }
 
 func Register(server grpc.ServiceRegistrar) {
-	signproxy.RegisterSignProxyServer(server, &Server{})
+	sphinxproxy.RegisterSphinxProxyServer(server, &Server{})
 }
