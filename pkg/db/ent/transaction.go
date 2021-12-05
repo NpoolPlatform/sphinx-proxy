@@ -34,12 +34,12 @@ type Transaction struct {
 	Value float64 `json:"value,omitempty"`
 	// State holds the value of the "state" field.
 	State transaction.State `json:"state,omitempty"`
-	// CreateAt holds the value of the "create_at" field.
-	CreateAt uint32 `json:"create_at,omitempty"`
-	// UpdateAt holds the value of the "update_at" field.
-	UpdateAt uint32 `json:"update_at,omitempty"`
-	// DeleteAt holds the value of the "delete_at" field.
-	DeleteAt uint32 `json:"delete_at,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt uint32 `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt uint32 `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt uint32 `json:"deleted_at,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -49,7 +49,7 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case transaction.FieldValue:
 			values[i] = new(sql.NullFloat64)
-		case transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldCoinType, transaction.FieldCreateAt, transaction.FieldUpdateAt, transaction.FieldDeleteAt:
+		case transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldCoinType, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
 		case transaction.FieldTransactionID, transaction.FieldCid, transaction.FieldFrom, transaction.FieldTo, transaction.FieldState:
 			values[i] = new(sql.NullString)
@@ -130,23 +130,23 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 			} else if value.Valid {
 				t.State = transaction.State(value.String)
 			}
-		case transaction.FieldCreateAt:
+		case transaction.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field create_at", values[i])
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				t.CreateAt = uint32(value.Int64)
+				t.CreatedAt = uint32(value.Int64)
 			}
-		case transaction.FieldUpdateAt:
+		case transaction.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field update_at", values[i])
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				t.UpdateAt = uint32(value.Int64)
+				t.UpdatedAt = uint32(value.Int64)
 			}
-		case transaction.FieldDeleteAt:
+		case transaction.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field delete_at", values[i])
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
-				t.DeleteAt = uint32(value.Int64)
+				t.DeletedAt = uint32(value.Int64)
 			}
 		}
 	}
@@ -194,12 +194,12 @@ func (t *Transaction) String() string {
 	builder.WriteString(fmt.Sprintf("%v", t.Value))
 	builder.WriteString(", state=")
 	builder.WriteString(fmt.Sprintf("%v", t.State))
-	builder.WriteString(", create_at=")
-	builder.WriteString(fmt.Sprintf("%v", t.CreateAt))
-	builder.WriteString(", update_at=")
-	builder.WriteString(fmt.Sprintf("%v", t.UpdateAt))
-	builder.WriteString(", delete_at=")
-	builder.WriteString(fmt.Sprintf("%v", t.DeleteAt))
+	builder.WriteString(", created_at=")
+	builder.WriteString(fmt.Sprintf("%v", t.CreatedAt))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(fmt.Sprintf("%v", t.UpdatedAt))
+	builder.WriteString(", deleted_at=")
+	builder.WriteString(fmt.Sprintf("%v", t.DeletedAt))
 	builder.WriteByte(')')
 	return builder.String()
 }

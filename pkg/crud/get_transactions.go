@@ -21,7 +21,7 @@ func GetTransactions(ctx context.Context, param GetTransactionsParams) ([]*ent.T
 		Where(
 			transaction.StateEQ(param.State),
 		).
-		Order(ent.Asc(transaction.FieldCreateAt, transaction.FieldNonce)).
+		Order(ent.Asc(transaction.FieldCreatedAt, transaction.FieldNonce)).
 		Limit(constant.DefaultPageSize).
 		All(ctx)
 }

@@ -95,14 +95,6 @@ func (tu *TransactionUpdate) SetTransactionID(s string) *TransactionUpdate {
 	return tu
 }
 
-// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableTransactionID(s *string) *TransactionUpdate {
-	if s != nil {
-		tu.SetTransactionID(*s)
-	}
-	return tu
-}
-
 // SetCid sets the "cid" field.
 func (tu *TransactionUpdate) SetCid(s string) *TransactionUpdate {
 	tu.mutation.SetCid(s)
@@ -172,58 +164,58 @@ func (tu *TransactionUpdate) SetState(t transaction.State) *TransactionUpdate {
 	return tu
 }
 
-// SetCreateAt sets the "create_at" field.
-func (tu *TransactionUpdate) SetCreateAt(u uint32) *TransactionUpdate {
-	tu.mutation.ResetCreateAt()
-	tu.mutation.SetCreateAt(u)
+// SetCreatedAt sets the "created_at" field.
+func (tu *TransactionUpdate) SetCreatedAt(u uint32) *TransactionUpdate {
+	tu.mutation.ResetCreatedAt()
+	tu.mutation.SetCreatedAt(u)
 	return tu
 }
 
-// SetNillableCreateAt sets the "create_at" field if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableCreateAt(u *uint32) *TransactionUpdate {
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableCreatedAt(u *uint32) *TransactionUpdate {
 	if u != nil {
-		tu.SetCreateAt(*u)
+		tu.SetCreatedAt(*u)
 	}
 	return tu
 }
 
-// AddCreateAt adds u to the "create_at" field.
-func (tu *TransactionUpdate) AddCreateAt(u uint32) *TransactionUpdate {
-	tu.mutation.AddCreateAt(u)
+// AddCreatedAt adds u to the "created_at" field.
+func (tu *TransactionUpdate) AddCreatedAt(u uint32) *TransactionUpdate {
+	tu.mutation.AddCreatedAt(u)
 	return tu
 }
 
-// SetUpdateAt sets the "update_at" field.
-func (tu *TransactionUpdate) SetUpdateAt(u uint32) *TransactionUpdate {
-	tu.mutation.ResetUpdateAt()
-	tu.mutation.SetUpdateAt(u)
+// SetUpdatedAt sets the "updated_at" field.
+func (tu *TransactionUpdate) SetUpdatedAt(u uint32) *TransactionUpdate {
+	tu.mutation.ResetUpdatedAt()
+	tu.mutation.SetUpdatedAt(u)
 	return tu
 }
 
-// AddUpdateAt adds u to the "update_at" field.
-func (tu *TransactionUpdate) AddUpdateAt(u uint32) *TransactionUpdate {
-	tu.mutation.AddUpdateAt(u)
+// AddUpdatedAt adds u to the "updated_at" field.
+func (tu *TransactionUpdate) AddUpdatedAt(u uint32) *TransactionUpdate {
+	tu.mutation.AddUpdatedAt(u)
 	return tu
 }
 
-// SetDeleteAt sets the "delete_at" field.
-func (tu *TransactionUpdate) SetDeleteAt(u uint32) *TransactionUpdate {
-	tu.mutation.ResetDeleteAt()
-	tu.mutation.SetDeleteAt(u)
+// SetDeletedAt sets the "deleted_at" field.
+func (tu *TransactionUpdate) SetDeletedAt(u uint32) *TransactionUpdate {
+	tu.mutation.ResetDeletedAt()
+	tu.mutation.SetDeletedAt(u)
 	return tu
 }
 
-// SetNillableDeleteAt sets the "delete_at" field if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableDeleteAt(u *uint32) *TransactionUpdate {
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableDeletedAt(u *uint32) *TransactionUpdate {
 	if u != nil {
-		tu.SetDeleteAt(*u)
+		tu.SetDeletedAt(*u)
 	}
 	return tu
 }
 
-// AddDeleteAt adds u to the "delete_at" field.
-func (tu *TransactionUpdate) AddDeleteAt(u uint32) *TransactionUpdate {
-	tu.mutation.AddDeleteAt(u)
+// AddDeletedAt adds u to the "deleted_at" field.
+func (tu *TransactionUpdate) AddDeletedAt(u uint32) *TransactionUpdate {
+	tu.mutation.AddDeletedAt(u)
 	return tu
 }
 
@@ -295,9 +287,9 @@ func (tu *TransactionUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tu *TransactionUpdate) defaults() {
-	if _, ok := tu.mutation.UpdateAt(); !ok {
-		v := transaction.UpdateDefaultUpdateAt()
-		tu.mutation.SetUpdateAt(v)
+	if _, ok := tu.mutation.UpdatedAt(); !ok {
+		v := transaction.UpdateDefaultUpdatedAt()
+		tu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -440,46 +432,46 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: transaction.FieldState,
 		})
 	}
-	if value, ok := tu.mutation.CreateAt(); ok {
+	if value, ok := tu.mutation.CreatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldCreateAt,
+			Column: transaction.FieldCreatedAt,
 		})
 	}
-	if value, ok := tu.mutation.AddedCreateAt(); ok {
+	if value, ok := tu.mutation.AddedCreatedAt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldCreateAt,
+			Column: transaction.FieldCreatedAt,
 		})
 	}
-	if value, ok := tu.mutation.UpdateAt(); ok {
+	if value, ok := tu.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldUpdateAt,
+			Column: transaction.FieldUpdatedAt,
 		})
 	}
-	if value, ok := tu.mutation.AddedUpdateAt(); ok {
+	if value, ok := tu.mutation.AddedUpdatedAt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldUpdateAt,
+			Column: transaction.FieldUpdatedAt,
 		})
 	}
-	if value, ok := tu.mutation.DeleteAt(); ok {
+	if value, ok := tu.mutation.DeletedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldDeleteAt,
+			Column: transaction.FieldDeletedAt,
 		})
 	}
-	if value, ok := tu.mutation.AddedDeleteAt(); ok {
+	if value, ok := tu.mutation.AddedDeletedAt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldDeleteAt,
+			Column: transaction.FieldDeletedAt,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
@@ -570,14 +562,6 @@ func (tuo *TransactionUpdateOne) SetTransactionID(s string) *TransactionUpdateOn
 	return tuo
 }
 
-// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableTransactionID(s *string) *TransactionUpdateOne {
-	if s != nil {
-		tuo.SetTransactionID(*s)
-	}
-	return tuo
-}
-
 // SetCid sets the "cid" field.
 func (tuo *TransactionUpdateOne) SetCid(s string) *TransactionUpdateOne {
 	tuo.mutation.SetCid(s)
@@ -647,58 +631,58 @@ func (tuo *TransactionUpdateOne) SetState(t transaction.State) *TransactionUpdat
 	return tuo
 }
 
-// SetCreateAt sets the "create_at" field.
-func (tuo *TransactionUpdateOne) SetCreateAt(u uint32) *TransactionUpdateOne {
-	tuo.mutation.ResetCreateAt()
-	tuo.mutation.SetCreateAt(u)
+// SetCreatedAt sets the "created_at" field.
+func (tuo *TransactionUpdateOne) SetCreatedAt(u uint32) *TransactionUpdateOne {
+	tuo.mutation.ResetCreatedAt()
+	tuo.mutation.SetCreatedAt(u)
 	return tuo
 }
 
-// SetNillableCreateAt sets the "create_at" field if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableCreateAt(u *uint32) *TransactionUpdateOne {
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableCreatedAt(u *uint32) *TransactionUpdateOne {
 	if u != nil {
-		tuo.SetCreateAt(*u)
+		tuo.SetCreatedAt(*u)
 	}
 	return tuo
 }
 
-// AddCreateAt adds u to the "create_at" field.
-func (tuo *TransactionUpdateOne) AddCreateAt(u uint32) *TransactionUpdateOne {
-	tuo.mutation.AddCreateAt(u)
+// AddCreatedAt adds u to the "created_at" field.
+func (tuo *TransactionUpdateOne) AddCreatedAt(u uint32) *TransactionUpdateOne {
+	tuo.mutation.AddCreatedAt(u)
 	return tuo
 }
 
-// SetUpdateAt sets the "update_at" field.
-func (tuo *TransactionUpdateOne) SetUpdateAt(u uint32) *TransactionUpdateOne {
-	tuo.mutation.ResetUpdateAt()
-	tuo.mutation.SetUpdateAt(u)
+// SetUpdatedAt sets the "updated_at" field.
+func (tuo *TransactionUpdateOne) SetUpdatedAt(u uint32) *TransactionUpdateOne {
+	tuo.mutation.ResetUpdatedAt()
+	tuo.mutation.SetUpdatedAt(u)
 	return tuo
 }
 
-// AddUpdateAt adds u to the "update_at" field.
-func (tuo *TransactionUpdateOne) AddUpdateAt(u uint32) *TransactionUpdateOne {
-	tuo.mutation.AddUpdateAt(u)
+// AddUpdatedAt adds u to the "updated_at" field.
+func (tuo *TransactionUpdateOne) AddUpdatedAt(u uint32) *TransactionUpdateOne {
+	tuo.mutation.AddUpdatedAt(u)
 	return tuo
 }
 
-// SetDeleteAt sets the "delete_at" field.
-func (tuo *TransactionUpdateOne) SetDeleteAt(u uint32) *TransactionUpdateOne {
-	tuo.mutation.ResetDeleteAt()
-	tuo.mutation.SetDeleteAt(u)
+// SetDeletedAt sets the "deleted_at" field.
+func (tuo *TransactionUpdateOne) SetDeletedAt(u uint32) *TransactionUpdateOne {
+	tuo.mutation.ResetDeletedAt()
+	tuo.mutation.SetDeletedAt(u)
 	return tuo
 }
 
-// SetNillableDeleteAt sets the "delete_at" field if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableDeleteAt(u *uint32) *TransactionUpdateOne {
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableDeletedAt(u *uint32) *TransactionUpdateOne {
 	if u != nil {
-		tuo.SetDeleteAt(*u)
+		tuo.SetDeletedAt(*u)
 	}
 	return tuo
 }
 
-// AddDeleteAt adds u to the "delete_at" field.
-func (tuo *TransactionUpdateOne) AddDeleteAt(u uint32) *TransactionUpdateOne {
-	tuo.mutation.AddDeleteAt(u)
+// AddDeletedAt adds u to the "deleted_at" field.
+func (tuo *TransactionUpdateOne) AddDeletedAt(u uint32) *TransactionUpdateOne {
+	tuo.mutation.AddDeletedAt(u)
 	return tuo
 }
 
@@ -777,9 +761,9 @@ func (tuo *TransactionUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tuo *TransactionUpdateOne) defaults() {
-	if _, ok := tuo.mutation.UpdateAt(); !ok {
-		v := transaction.UpdateDefaultUpdateAt()
-		tuo.mutation.SetUpdateAt(v)
+	if _, ok := tuo.mutation.UpdatedAt(); !ok {
+		v := transaction.UpdateDefaultUpdatedAt()
+		tuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -939,46 +923,46 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Column: transaction.FieldState,
 		})
 	}
-	if value, ok := tuo.mutation.CreateAt(); ok {
+	if value, ok := tuo.mutation.CreatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldCreateAt,
+			Column: transaction.FieldCreatedAt,
 		})
 	}
-	if value, ok := tuo.mutation.AddedCreateAt(); ok {
+	if value, ok := tuo.mutation.AddedCreatedAt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldCreateAt,
+			Column: transaction.FieldCreatedAt,
 		})
 	}
-	if value, ok := tuo.mutation.UpdateAt(); ok {
+	if value, ok := tuo.mutation.UpdatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldUpdateAt,
+			Column: transaction.FieldUpdatedAt,
 		})
 	}
-	if value, ok := tuo.mutation.AddedUpdateAt(); ok {
+	if value, ok := tuo.mutation.AddedUpdatedAt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldUpdateAt,
+			Column: transaction.FieldUpdatedAt,
 		})
 	}
-	if value, ok := tuo.mutation.DeleteAt(); ok {
+	if value, ok := tuo.mutation.DeletedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldDeleteAt,
+			Column: transaction.FieldDeletedAt,
 		})
 	}
-	if value, ok := tuo.mutation.AddedDeleteAt(); ok {
+	if value, ok := tuo.mutation.AddedDeletedAt(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldDeleteAt,
+			Column: transaction.FieldDeletedAt,
 		})
 	}
 	_node = &Transaction{config: tuo.config}

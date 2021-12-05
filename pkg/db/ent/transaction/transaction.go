@@ -31,12 +31,12 @@ const (
 	FieldValue = "value"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
-	// FieldCreateAt holds the string denoting the create_at field in the database.
-	FieldCreateAt = "create_at"
-	// FieldUpdateAt holds the string denoting the update_at field in the database.
-	FieldUpdateAt = "update_at"
-	// FieldDeleteAt holds the string denoting the delete_at field in the database.
-	FieldDeleteAt = "delete_at"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// Table holds the table name of the transaction in the database.
 	Table = "transactions"
 )
@@ -53,9 +53,9 @@ var Columns = []string{
 	FieldTo,
 	FieldValue,
 	FieldState,
-	FieldCreateAt,
-	FieldUpdateAt,
-	FieldDeleteAt,
+	FieldCreatedAt,
+	FieldUpdatedAt,
+	FieldDeletedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -75,8 +75,6 @@ var (
 	DefaultTransactionType int8
 	// DefaultCoinType holds the default value on creation for the "coin_type" field.
 	DefaultCoinType int32
-	// DefaultTransactionID holds the default value on creation for the "transaction_id" field.
-	DefaultTransactionID string
 	// TransactionIDValidator is a validator for the "transaction_id" field. It is called by the builders before save.
 	TransactionIDValidator func(string) error
 	// DefaultCid holds the default value on creation for the "cid" field.
@@ -93,14 +91,14 @@ var (
 	ToValidator func(string) error
 	// DefaultValue holds the default value on creation for the "value" field.
 	DefaultValue float64
-	// DefaultCreateAt holds the default value on creation for the "create_at" field.
-	DefaultCreateAt func() uint32
-	// DefaultUpdateAt holds the default value on creation for the "update_at" field.
-	DefaultUpdateAt func() uint32
-	// UpdateDefaultUpdateAt holds the default value on update for the "update_at" field.
-	UpdateDefaultUpdateAt func() uint32
-	// DefaultDeleteAt holds the default value on creation for the "delete_at" field.
-	DefaultDeleteAt func() uint32
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() uint32
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() uint32
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() uint32
+	// DefaultDeletedAt holds the default value on creation for the "deleted_at" field.
+	DefaultDeletedAt func() uint32
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

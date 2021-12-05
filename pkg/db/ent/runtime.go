@@ -28,8 +28,6 @@ func init() {
 	transaction.DefaultCoinType = transactionDescCoinType.Default.(int32)
 	// transactionDescTransactionID is the schema descriptor for transaction_id field.
 	transactionDescTransactionID := transactionFields[4].Descriptor()
-	// transaction.DefaultTransactionID holds the default value on creation for the transaction_id field.
-	transaction.DefaultTransactionID = transactionDescTransactionID.Default.(string)
 	// transaction.TransactionIDValidator is a validator for the "transaction_id" field. It is called by the builders before save.
 	transaction.TransactionIDValidator = transactionDescTransactionID.Validators[0].(func(string) error)
 	// transactionDescCid is the schema descriptor for cid field.
@@ -54,20 +52,20 @@ func init() {
 	transactionDescValue := transactionFields[8].Descriptor()
 	// transaction.DefaultValue holds the default value on creation for the value field.
 	transaction.DefaultValue = transactionDescValue.Default.(float64)
-	// transactionDescCreateAt is the schema descriptor for create_at field.
-	transactionDescCreateAt := transactionFields[10].Descriptor()
-	// transaction.DefaultCreateAt holds the default value on creation for the create_at field.
-	transaction.DefaultCreateAt = transactionDescCreateAt.Default.(func() uint32)
-	// transactionDescUpdateAt is the schema descriptor for update_at field.
-	transactionDescUpdateAt := transactionFields[11].Descriptor()
-	// transaction.DefaultUpdateAt holds the default value on creation for the update_at field.
-	transaction.DefaultUpdateAt = transactionDescUpdateAt.Default.(func() uint32)
-	// transaction.UpdateDefaultUpdateAt holds the default value on update for the update_at field.
-	transaction.UpdateDefaultUpdateAt = transactionDescUpdateAt.UpdateDefault.(func() uint32)
-	// transactionDescDeleteAt is the schema descriptor for delete_at field.
-	transactionDescDeleteAt := transactionFields[12].Descriptor()
-	// transaction.DefaultDeleteAt holds the default value on creation for the delete_at field.
-	transaction.DefaultDeleteAt = transactionDescDeleteAt.Default.(func() uint32)
+	// transactionDescCreatedAt is the schema descriptor for created_at field.
+	transactionDescCreatedAt := transactionFields[10].Descriptor()
+	// transaction.DefaultCreatedAt holds the default value on creation for the created_at field.
+	transaction.DefaultCreatedAt = transactionDescCreatedAt.Default.(func() uint32)
+	// transactionDescUpdatedAt is the schema descriptor for updated_at field.
+	transactionDescUpdatedAt := transactionFields[11].Descriptor()
+	// transaction.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	transaction.DefaultUpdatedAt = transactionDescUpdatedAt.Default.(func() uint32)
+	// transaction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	transaction.UpdateDefaultUpdatedAt = transactionDescUpdatedAt.UpdateDefault.(func() uint32)
+	// transactionDescDeletedAt is the schema descriptor for deleted_at field.
+	transactionDescDeletedAt := transactionFields[12].Descriptor()
+	// transaction.DefaultDeletedAt holds the default value on creation for the deleted_at field.
+	transaction.DefaultDeletedAt = transactionDescDeletedAt.Default.(func() uint32)
 	// transactionDescID is the schema descriptor for id field.
 	transactionDescID := transactionFields[0].Descriptor()
 	// transaction.DefaultID holds the default value on creation for the id field.

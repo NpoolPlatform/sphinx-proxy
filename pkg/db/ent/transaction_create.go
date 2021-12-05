@@ -71,14 +71,6 @@ func (tc *TransactionCreate) SetTransactionID(s string) *TransactionCreate {
 	return tc
 }
 
-// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableTransactionID(s *string) *TransactionCreate {
-	if s != nil {
-		tc.SetTransactionID(*s)
-	}
-	return tc
-}
-
 // SetCid sets the "cid" field.
 func (tc *TransactionCreate) SetCid(s string) *TransactionCreate {
 	tc.mutation.SetCid(s)
@@ -141,44 +133,44 @@ func (tc *TransactionCreate) SetState(t transaction.State) *TransactionCreate {
 	return tc
 }
 
-// SetCreateAt sets the "create_at" field.
-func (tc *TransactionCreate) SetCreateAt(u uint32) *TransactionCreate {
-	tc.mutation.SetCreateAt(u)
+// SetCreatedAt sets the "created_at" field.
+func (tc *TransactionCreate) SetCreatedAt(u uint32) *TransactionCreate {
+	tc.mutation.SetCreatedAt(u)
 	return tc
 }
 
-// SetNillableCreateAt sets the "create_at" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableCreateAt(u *uint32) *TransactionCreate {
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableCreatedAt(u *uint32) *TransactionCreate {
 	if u != nil {
-		tc.SetCreateAt(*u)
+		tc.SetCreatedAt(*u)
 	}
 	return tc
 }
 
-// SetUpdateAt sets the "update_at" field.
-func (tc *TransactionCreate) SetUpdateAt(u uint32) *TransactionCreate {
-	tc.mutation.SetUpdateAt(u)
+// SetUpdatedAt sets the "updated_at" field.
+func (tc *TransactionCreate) SetUpdatedAt(u uint32) *TransactionCreate {
+	tc.mutation.SetUpdatedAt(u)
 	return tc
 }
 
-// SetNillableUpdateAt sets the "update_at" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableUpdateAt(u *uint32) *TransactionCreate {
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableUpdatedAt(u *uint32) *TransactionCreate {
 	if u != nil {
-		tc.SetUpdateAt(*u)
+		tc.SetUpdatedAt(*u)
 	}
 	return tc
 }
 
-// SetDeleteAt sets the "delete_at" field.
-func (tc *TransactionCreate) SetDeleteAt(u uint32) *TransactionCreate {
-	tc.mutation.SetDeleteAt(u)
+// SetDeletedAt sets the "deleted_at" field.
+func (tc *TransactionCreate) SetDeletedAt(u uint32) *TransactionCreate {
+	tc.mutation.SetDeletedAt(u)
 	return tc
 }
 
-// SetNillableDeleteAt sets the "delete_at" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableDeleteAt(u *uint32) *TransactionCreate {
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableDeletedAt(u *uint32) *TransactionCreate {
 	if u != nil {
-		tc.SetDeleteAt(*u)
+		tc.SetDeletedAt(*u)
 	}
 	return tc
 }
@@ -272,10 +264,6 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultCoinType
 		tc.mutation.SetCoinType(v)
 	}
-	if _, ok := tc.mutation.TransactionID(); !ok {
-		v := transaction.DefaultTransactionID
-		tc.mutation.SetTransactionID(v)
-	}
 	if _, ok := tc.mutation.Cid(); !ok {
 		v := transaction.DefaultCid
 		tc.mutation.SetCid(v)
@@ -292,17 +280,17 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultValue
 		tc.mutation.SetValue(v)
 	}
-	if _, ok := tc.mutation.CreateAt(); !ok {
-		v := transaction.DefaultCreateAt()
-		tc.mutation.SetCreateAt(v)
+	if _, ok := tc.mutation.CreatedAt(); !ok {
+		v := transaction.DefaultCreatedAt()
+		tc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := tc.mutation.UpdateAt(); !ok {
-		v := transaction.DefaultUpdateAt()
-		tc.mutation.SetUpdateAt(v)
+	if _, ok := tc.mutation.UpdatedAt(); !ok {
+		v := transaction.DefaultUpdatedAt()
+		tc.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := tc.mutation.DeleteAt(); !ok {
-		v := transaction.DefaultDeleteAt()
-		tc.mutation.SetDeleteAt(v)
+	if _, ok := tc.mutation.DeletedAt(); !ok {
+		v := transaction.DefaultDeletedAt()
+		tc.mutation.SetDeletedAt(v)
 	}
 	if _, ok := tc.mutation.ID(); !ok {
 		v := transaction.DefaultID()
@@ -364,14 +352,14 @@ func (tc *TransactionCreate) check() error {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "state": %w`, err)}
 		}
 	}
-	if _, ok := tc.mutation.CreateAt(); !ok {
-		return &ValidationError{Name: "create_at", err: errors.New(`ent: missing required field "create_at"`)}
+	if _, ok := tc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
 	}
-	if _, ok := tc.mutation.UpdateAt(); !ok {
-		return &ValidationError{Name: "update_at", err: errors.New(`ent: missing required field "update_at"`)}
+	if _, ok := tc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
 	}
-	if _, ok := tc.mutation.DeleteAt(); !ok {
-		return &ValidationError{Name: "delete_at", err: errors.New(`ent: missing required field "delete_at"`)}
+	if _, ok := tc.mutation.DeletedAt(); !ok {
+		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "deleted_at"`)}
 	}
 	return nil
 }
@@ -478,29 +466,29 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		})
 		_node.State = value
 	}
-	if value, ok := tc.mutation.CreateAt(); ok {
+	if value, ok := tc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldCreateAt,
+			Column: transaction.FieldCreatedAt,
 		})
-		_node.CreateAt = value
+		_node.CreatedAt = value
 	}
-	if value, ok := tc.mutation.UpdateAt(); ok {
+	if value, ok := tc.mutation.UpdatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldUpdateAt,
+			Column: transaction.FieldUpdatedAt,
 		})
-		_node.UpdateAt = value
+		_node.UpdatedAt = value
 	}
-	if value, ok := tc.mutation.DeleteAt(); ok {
+	if value, ok := tc.mutation.DeletedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint32,
 			Value:  value,
-			Column: transaction.FieldDeleteAt,
+			Column: transaction.FieldDeletedAt,
 		})
-		_node.DeleteAt = value
+		_node.DeletedAt = value
 	}
 	return _node, _spec
 }
@@ -664,39 +652,39 @@ func (u *TransactionUpsert) UpdateState() *TransactionUpsert {
 	return u
 }
 
-// SetCreateAt sets the "create_at" field.
-func (u *TransactionUpsert) SetCreateAt(v uint32) *TransactionUpsert {
-	u.Set(transaction.FieldCreateAt, v)
+// SetCreatedAt sets the "created_at" field.
+func (u *TransactionUpsert) SetCreatedAt(v uint32) *TransactionUpsert {
+	u.Set(transaction.FieldCreatedAt, v)
 	return u
 }
 
-// UpdateCreateAt sets the "create_at" field to the value that was provided on create.
-func (u *TransactionUpsert) UpdateCreateAt() *TransactionUpsert {
-	u.SetExcluded(transaction.FieldCreateAt)
+// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateCreatedAt() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldCreatedAt)
 	return u
 }
 
-// SetUpdateAt sets the "update_at" field.
-func (u *TransactionUpsert) SetUpdateAt(v uint32) *TransactionUpsert {
-	u.Set(transaction.FieldUpdateAt, v)
+// SetUpdatedAt sets the "updated_at" field.
+func (u *TransactionUpsert) SetUpdatedAt(v uint32) *TransactionUpsert {
+	u.Set(transaction.FieldUpdatedAt, v)
 	return u
 }
 
-// UpdateUpdateAt sets the "update_at" field to the value that was provided on create.
-func (u *TransactionUpsert) UpdateUpdateAt() *TransactionUpsert {
-	u.SetExcluded(transaction.FieldUpdateAt)
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateUpdatedAt() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldUpdatedAt)
 	return u
 }
 
-// SetDeleteAt sets the "delete_at" field.
-func (u *TransactionUpsert) SetDeleteAt(v uint32) *TransactionUpsert {
-	u.Set(transaction.FieldDeleteAt, v)
+// SetDeletedAt sets the "deleted_at" field.
+func (u *TransactionUpsert) SetDeletedAt(v uint32) *TransactionUpsert {
+	u.Set(transaction.FieldDeletedAt, v)
 	return u
 }
 
-// UpdateDeleteAt sets the "delete_at" field to the value that was provided on create.
-func (u *TransactionUpsert) UpdateDeleteAt() *TransactionUpsert {
-	u.SetExcluded(transaction.FieldDeleteAt)
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateDeletedAt() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldDeletedAt)
 	return u
 }
 
@@ -876,45 +864,45 @@ func (u *TransactionUpsertOne) UpdateState() *TransactionUpsertOne {
 	})
 }
 
-// SetCreateAt sets the "create_at" field.
-func (u *TransactionUpsertOne) SetCreateAt(v uint32) *TransactionUpsertOne {
+// SetCreatedAt sets the "created_at" field.
+func (u *TransactionUpsertOne) SetCreatedAt(v uint32) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
-		s.SetCreateAt(v)
+		s.SetCreatedAt(v)
 	})
 }
 
-// UpdateCreateAt sets the "create_at" field to the value that was provided on create.
-func (u *TransactionUpsertOne) UpdateCreateAt() *TransactionUpsertOne {
+// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateCreatedAt() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateCreateAt()
+		s.UpdateCreatedAt()
 	})
 }
 
-// SetUpdateAt sets the "update_at" field.
-func (u *TransactionUpsertOne) SetUpdateAt(v uint32) *TransactionUpsertOne {
+// SetUpdatedAt sets the "updated_at" field.
+func (u *TransactionUpsertOne) SetUpdatedAt(v uint32) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
-		s.SetUpdateAt(v)
+		s.SetUpdatedAt(v)
 	})
 }
 
-// UpdateUpdateAt sets the "update_at" field to the value that was provided on create.
-func (u *TransactionUpsertOne) UpdateUpdateAt() *TransactionUpsertOne {
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateUpdatedAt() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateUpdateAt()
+		s.UpdateUpdatedAt()
 	})
 }
 
-// SetDeleteAt sets the "delete_at" field.
-func (u *TransactionUpsertOne) SetDeleteAt(v uint32) *TransactionUpsertOne {
+// SetDeletedAt sets the "deleted_at" field.
+func (u *TransactionUpsertOne) SetDeletedAt(v uint32) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
-		s.SetDeleteAt(v)
+		s.SetDeletedAt(v)
 	})
 }
 
-// UpdateDeleteAt sets the "delete_at" field to the value that was provided on create.
-func (u *TransactionUpsertOne) UpdateDeleteAt() *TransactionUpsertOne {
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateDeletedAt() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateDeleteAt()
+		s.UpdateDeletedAt()
 	})
 }
 
@@ -1260,45 +1248,45 @@ func (u *TransactionUpsertBulk) UpdateState() *TransactionUpsertBulk {
 	})
 }
 
-// SetCreateAt sets the "create_at" field.
-func (u *TransactionUpsertBulk) SetCreateAt(v uint32) *TransactionUpsertBulk {
+// SetCreatedAt sets the "created_at" field.
+func (u *TransactionUpsertBulk) SetCreatedAt(v uint32) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
-		s.SetCreateAt(v)
+		s.SetCreatedAt(v)
 	})
 }
 
-// UpdateCreateAt sets the "create_at" field to the value that was provided on create.
-func (u *TransactionUpsertBulk) UpdateCreateAt() *TransactionUpsertBulk {
+// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateCreatedAt() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateCreateAt()
+		s.UpdateCreatedAt()
 	})
 }
 
-// SetUpdateAt sets the "update_at" field.
-func (u *TransactionUpsertBulk) SetUpdateAt(v uint32) *TransactionUpsertBulk {
+// SetUpdatedAt sets the "updated_at" field.
+func (u *TransactionUpsertBulk) SetUpdatedAt(v uint32) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
-		s.SetUpdateAt(v)
+		s.SetUpdatedAt(v)
 	})
 }
 
-// UpdateUpdateAt sets the "update_at" field to the value that was provided on create.
-func (u *TransactionUpsertBulk) UpdateUpdateAt() *TransactionUpsertBulk {
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateUpdatedAt() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateUpdateAt()
+		s.UpdateUpdatedAt()
 	})
 }
 
-// SetDeleteAt sets the "delete_at" field.
-func (u *TransactionUpsertBulk) SetDeleteAt(v uint32) *TransactionUpsertBulk {
+// SetDeletedAt sets the "deleted_at" field.
+func (u *TransactionUpsertBulk) SetDeletedAt(v uint32) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
-		s.SetDeleteAt(v)
+		s.SetDeletedAt(v)
 	})
 }
 
-// UpdateDeleteAt sets the "delete_at" field to the value that was provided on create.
-func (u *TransactionUpsertBulk) UpdateDeleteAt() *TransactionUpsertBulk {
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateDeletedAt() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateDeleteAt()
+		s.UpdateDeletedAt()
 	})
 }
 

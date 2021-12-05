@@ -9,7 +9,6 @@ require (
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211118034400-6a6ad84fc182
 	github.com/filecoin-project/go-state-types v0.1.1 // indirect
 	github.com/filecoin-project/lotus v1.13.1
-	github.com/filecoin-project/specs-actors v0.9.14
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
