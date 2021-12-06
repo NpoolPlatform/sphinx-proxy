@@ -12,9 +12,9 @@ const (
 	ServiceName = "sphinx-proxy.npool.top"
 
 	// DefaultPageSize ..
-	DefaultPageSize = 100
+	DefaultPageSize = 50
 	// TaskDuration ..
-	TaskDuration = time.Second * 1
+	TaskDuration = time.Second * 5
 	// TaskTimeout ..
 	TaskTimeout = time.Second * 10
 )

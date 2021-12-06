@@ -26,8 +26,10 @@ func UpdateTransaction(ctx context.Context, t UpdateTransactionParams) error {
 	switch t.State {
 	case transaction.StateSign:
 		stm.SetNonce(t.Nonce)
+		stm.Where(transaction.StateEQ(transaction.StateWait))
 	case transaction.StateDone:
 		stm.SetCid(t.Cid)
+		stm.Where(transaction.StateEQ(transaction.StateSign))
 	case transaction.StateFail:
 	}
 
