@@ -3,9 +3,11 @@ package api
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
+	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
@@ -20,7 +22,7 @@ type walletDoneInfo struct {
 
 var walletDoneChannel = sync.Map{}
 
-func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletRequest) (out *sphinxproxy.CreateWalletReponse, err error) {
+func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletRequest) (out *sphinxproxy.CreateWalletResponse, err error) {
 	if in.GetName() == "" {
 		logger.Sugar().Errorf("CreateWallet Name: %v empty", in.GetName())
 		return out, status.Error(codes.InvalidArgument, "Name empty")
@@ -50,14 +52,20 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		TransactionID:   uid,
 	}
 
-	// block wait done
-	info := <-done
-	if !info.success {
-		logger.Sugar().Errorf("wait create wallet done error: %v", info.message)
+	// timeout, block wait done
+	select {
+	case <-time.After(sconst.GrpcTimeout):
+		walletDoneChannel.Delete(uid)
+		logger.Sugar().Error("create wallet wait response timeout")
 		return out, status.Error(codes.Internal, "internal server error")
+	case info := <-done:
+		if !info.success {
+			logger.Sugar().Errorf("wait create wallet done error: %v", info.message)
+			return out, status.Error(codes.Internal, "internal server error")
+		}
+		out.Info.Address = info.address
+		walletDoneChannel.Delete(uid)
 	}
 
-	out.Info.Address = info.address
-	walletDoneChannel.Delete(uid)
 	return out, nil
 }

@@ -6,6 +6,6 @@ import (
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 )
 
-func (s *Server) GetTransaction(ctx context.Context, in *sphinxproxy.GetTransactionRequest) (out *sphinxproxy.GetTransactionReponse, err error) {
+func (s *Server) GetTransaction(ctx context.Context, in *sphinxproxy.GetTransactionRequest) (out *sphinxproxy.GetTransactionResponse, err error) {
 	return nil, nil
 }

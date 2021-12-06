@@ -22,6 +22,7 @@ func UpdateTransaction(ctx context.Context, t UpdateTransactionParams) error {
 		Transaction.
 		Update().
 		Where(transaction.TransactionIDEQ(t.TransactionID))
+
 	switch t.State {
 	case transaction.StateSign:
 		stm.SetNonce(t.Nonce)

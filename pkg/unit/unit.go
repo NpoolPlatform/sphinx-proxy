@@ -1,34 +1,19 @@
 package unit
 
 import (
-	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/filecoin-project/lotus/build"
 	"github.com/shopspring/decimal"
 )
 
-const (
-	FIL      = 1               // nolint
-	MilliFIL = FIL * 1000      // nolint
-	MicroFIL = MilliFIL * 1000 // nolint
-	NanoFIL  = MicroFIL * 1000 // nolint
-	PicoFIL  = NanoFIL * 1000  // nolint
-	FemtoFIL = PicoFIL * 1000  // nolint
-	AttoFIL  = FemtoFIL * 1000 // nolint
-)
-
-func FIL2AttoFIL(value float64) float64 {
-	return value * AttoFIL
-}
-
-func AttoFIL2FIL(value string) (float64, bool) {
-	v, err := decimal.NewFromString(value)
-	if err != nil {
-		// TODO not occur
-		return 0, false
-	}
-	return v.Div(decimal.NewFromFloat(AttoFIL)).
+// FIL2AttoFIL not used, at sphinx sign deal
+func FIL2AttoFIL(value float64) (float64, bool) {
+	return decimal.NewFromFloat(value).
+		Mul(decimal.NewFromInt(int64(build.FilecoinPrecision))).
 		Float64()
 }
 
-func ParseFIL(s string) (types.FIL, error) {
-	return types.ParseFIL(s)
+func AttoFIL2FIL(value float64) (float64, bool) {
+	return decimal.NewFromFloat(value).
+		Div(decimal.NewFromInt(int64(build.FilecoinPrecision))).
+		Float64()
 }

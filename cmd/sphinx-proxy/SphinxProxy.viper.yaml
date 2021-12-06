@@ -5,5 +5,6 @@ config:
   grpc_port: 50001
   prometheus_port: 50002
   appid: "89089012783789789719823798127398"
+  serviceid: "8908901278378978971982379812739a"
   logdir: "/var/log"
   apolloAccessKey: "0147fb70b815403790e8634b899fac07"

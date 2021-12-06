@@ -19,7 +19,9 @@ import (
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
+	"github.com/NpoolPlatform/sphinx-proxy/pkg/unit"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
+	"github.com/filecoin-project/specs-actors/actors/builtin"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -35,10 +37,11 @@ var (
 	// rand stream client
 	rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	slk      sync.RWMutex
-	plk      sync.RWMutex
-	lmSign   = make([]*mSign, 0)
-	lmPlugin = make(lmPluginType)
+	slk            sync.RWMutex
+	plk            sync.RWMutex
+	lmSign         = make([]*mSign, 0)
+	lmPlugin       = make(lmPluginType)
+	channelBufSize = 100
 )
 
 func getProxySign() (*mSign, error) {
@@ -74,8 +77,8 @@ func newSignStream(stream sphinxproxy.SphinxProxy_ProxySignServer) {
 		signServer:   stream,
 		closeFlag:    false,
 		closeChannel: make(chan struct{}),
-		walletNew:    make(chan *sphinxproxy.ProxySignRequest),
-		sign:         make(chan *sphinxproxy.ProxySignRequest),
+		walletNew:    make(chan *sphinxproxy.ProxySignRequest, channelBufSize),
+		sign:         make(chan *sphinxproxy.ProxySignRequest, channelBufSize),
 	}
 	slk.Lock()
 	lmSign = append(lmSign, lc)
@@ -222,9 +225,9 @@ func newPluginStream(stream sphinxproxy.SphinxProxy_ProxyPluginServer) {
 		pluginServer: stream,
 		closeFlag:    false,
 		closeChannel: make(chan struct{}),
-		balance:      make(chan *sphinxproxy.ProxyPluginRequest),
-		preSign:      make(chan *sphinxproxy.ProxyPluginRequest),
-		mpoolPush:    make(chan *sphinxproxy.ProxyPluginRequest),
+		balance:      make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
+		preSign:      make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
+		mpoolPush:    make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
 		registerCoin: make(chan *sphinxproxy.ProxyPluginResponse),
 	}
 	wg := &sync.WaitGroup{}
@@ -355,10 +358,15 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			}
 			logger.Sugar().Infof("plugin register new coin: %v ok", psResponse.GetCoinType())
 		case sphinxproxy.TransactionType_Balance:
+			v, exact := unit.AttoFIL2FIL(psResponse.GetBalance())
+			if !exact {
+				logger.Sugar().Warnf("AttoFIL2FIL balance from->to(%v->%v) not exact", psResponse.GetBalance(), v)
+			}
+
 			if ch, ok := balanceDoneChannel.Load(psResponse.GetTransactionID()); ok {
 				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
 					success: true,
-					balance: psResponse.GetBalance(),
+					balance: v,
 				}
 			}
 			logger.Sugar().Infof("TransactionID: %v Addr: %v get balance ok", psResponse.GetTransactionID(), psResponse)
@@ -406,7 +414,7 @@ func (p *mPlugin) close(wg *sync.WaitGroup) {
 // Transaction from db fetch transactions
 // multi wallet can parall
 func Transaction() {
-	for range time.NewTicker(time.Second).C {
+	for range time.NewTicker(constant.TaskDuration).C {
 		func() {
 			ctx, cancel := context.WithTimeout(context.Background(), constant.TaskTimeout)
 			defer cancel()
@@ -418,68 +426,56 @@ func Transaction() {
 
 			// priority deal sign
 			// TODO if one wallet error will block all
-			trans, err = crud.GetTransactions(ctx, crud.GetTransactionsParams{
-				State: transaction.StateSign,
-			})
+			// here should wait all done
+			trans, err = crud.GetTransactions(ctx)
 			if err != nil {
 				logger.Sugar().Errorf("call GetTransactions get transaction error: %v", err)
 				return
 			}
 
-			if len(trans) == 0 {
-				trans, err = crud.GetTransactions(ctx, crud.GetTransactionsParams{
-					State: transaction.StateWait,
-				})
-				if err != nil {
-					logger.Sugar().Errorf("call GetTransactions get transaction error: %v", err)
-					return
+			for _, tran := range trans {
+				switch tran.State {
+				case transaction.StateWait:
+					// from wallet get nonce/utxo
+					coinType := sphinxplugin.CoinType(tran.TransactionType)
+					pluginProxy, err := getProxyPlugin(coinType)
+					if err != nil {
+						logger.Sugar().Error("proxy->plugin no invalid connection")
+						continue
+					}
+					pluginProxy.preSign <- &sphinxproxy.ProxyPluginRequest{
+						CoinType:        coinType,
+						TransactionType: sphinxproxy.TransactionType_PreSign,
+						TransactionID:   tran.TransactionID,
+						Address:         tran.From,
+					}
+				case transaction.StateSign:
+					// sign -> broadcast
+					signProxy, err := getProxySign()
+					if err != nil {
+						logger.Sugar().Error("proxy->sign no invalid connection")
+						continue
+					}
+					coinType := sphinxplugin.CoinType(tran.TransactionType)
+
+					signProxy.sign <- &sphinxproxy.ProxySignRequest{
+						TransactionType: sphinxproxy.TransactionType_Signature,
+						CoinType:        coinType,
+						TransactionID:   tran.TransactionID,
+						Message: &sphinxplugin.UnsignedMessage{
+							To:    tran.To,
+							From:  tran.From,
+							Nonce: tran.Nonce,
+							Value: tran.Value,
+							// TODO from chain get
+							GasLimit:   655063,
+							GasFeeCap:  2300,
+							GasPremium: 2250,
+							Method:     uint64(builtin.MethodSend),
+						},
+					}
 				}
 			}
-
-			fmt.Println(len(trans))
-
-			// nolint
-			// for _, tran := range trans {
-			// 	switch tran.State {
-			// 	case transaction.StateWait:
-			// 		// from wallet get nonce/utxo
-			// 		coinType := sphinxplugin.CoinType(tran.TransactionType)
-			// 		pluginProxy, err := getProxyPlugin(coinType)
-			// 		if err != nil {
-			// 			logger.Sugar().Error("proxy->plugin no invalid connection")
-			// 			continue
-			// 		}
-			// 		pluginProxy.preSign <- &sphinxproxy.ProxyPluginRequest{
-			// 			CoinType:        coinType,
-			// 			TransactionType: sphinxproxy.TransactionType_PreSign,
-			// 			TransactionID:   tran.TransactionID,
-			// 			Address:         tran.From,
-			// 		}
-			// 	case transaction.StateSign:
-			// 		// sign -> broadcast
-			// 		signProxy, err := getProxySign()
-			// 		if err != nil {
-			// 			logger.Sugar().Error("proxy->sign no invalid connection")
-			// 			continue
-			// 		}
-			// 		coinType := sphinxplugin.CoinType(tran.TransactionType)
-			// 		signProxy.sign <- &sphinxproxy.ProxySignRequest{
-			// 			TransactionType: sphinxproxy.TransactionType_Signature,
-			// 			CoinType:        coinType,
-			// 			TransactionID:   tran.TransactionID,
-			// 			Message: &sphinxplugin.UnsignedMessage{
-			// 				To:         tran.To,
-			// 				From:       tran.From,
-			// 				Nonce:      tran.Nonce,
-			// 				Value:      uint64(unit.FIL2AttoFIL(tran.Value)),
-			// 				GasLimit:   655063,
-			// 				GasFeeCap:  2300,
-			// 				GasPremium: 2250,
-			// 				Method:     uint64(builtin.MethodSend),
-			// 			},
-			// 		}
-			// 	}
-			// }
 		}()
 	}
 }

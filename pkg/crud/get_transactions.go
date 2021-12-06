@@ -9,17 +9,13 @@ import (
 	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 )
 
-type GetTransactionsParams struct {
-	State transaction.State
-}
-
 // GetTransactions ..
-func GetTransactions(ctx context.Context, param GetTransactionsParams) ([]*ent.Transaction, error) {
+func GetTransactions(ctx context.Context) ([]*ent.Transaction, error) {
 	return db.Client().
 		Transaction.
 		Query().
 		Where(
-			transaction.StateEQ(param.State),
+			transaction.StateIn(transaction.StateWait, transaction.StateSign),
 		).
 		Order(ent.Asc(transaction.FieldCreatedAt, transaction.FieldNonce)).
 		Limit(constant.DefaultPageSize).
