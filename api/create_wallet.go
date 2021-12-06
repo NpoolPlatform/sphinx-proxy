@@ -63,7 +63,11 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 			logger.Sugar().Errorf("wait create wallet done error: %v", info.message)
 			return out, status.Error(codes.Internal, "internal server error")
 		}
-		out.Info.Address = info.address
+		out = &sphinxproxy.CreateWalletResponse{
+			Info: &sphinxproxy.WalletInfo{
+				Address: info.address,
+			},
+		}
 		walletDoneChannel.Delete(uid)
 	}
 

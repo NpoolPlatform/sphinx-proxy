@@ -69,7 +69,11 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 			logger.Sugar().Errorf("wait get wallet balance done error: %v", info.message)
 			return out, status.Error(codes.Internal, "internal server error")
 		}
-		out.Info.Balance = info.balance
+		out = &sphinxproxy.GetBalanceResponse{
+			Info: &sphinxproxy.BalanceInfo{
+				Balance: info.balance,
+			},
+		}
 		balanceDoneChannel.Delete(uid)
 	}
 
