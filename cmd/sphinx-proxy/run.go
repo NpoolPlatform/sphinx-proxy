@@ -20,7 +20,7 @@ var runCmd = &cli.Command{
 		return logger.Sync()
 	},
 	Action: func(c *cli.Context) error {
-		api.Transaction()
+		go api.Transaction()
 		return grpc2.RunGRPC(rpcRegister)
 	},
 }
