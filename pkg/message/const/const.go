@@ -14,7 +14,7 @@ const (
 	// DefaultPageSize ..
 	DefaultPageSize = 100
 	// TaskDuration ..
-	TaskDuration = time.Second * 5
+	TaskDuration = time.Second * 1
 	// TaskTimeout ..
 	TaskTimeout = time.Second * 10
 )

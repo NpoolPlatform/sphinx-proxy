@@ -5,6 +5,8 @@
 [目录](#目录)
 - [Npool go service app template](#npool-go-service-app-template)
     - [功能](#功能)
+      - [sync](#sync)
+      - [async](#async)
     - [设计](#设计)
     - [命令](#命令)
     - [步骤](#步骤)
@@ -13,8 +15,12 @@
 
 -----------
 ### 功能
-- [x] 创建钱包账号
+
+#### sync
+- [x] 创建钱包
 - [x] 查询余额
+
+#### async
 - [x] 转账
 - [x] 上报币种
 
@@ -27,7 +33,7 @@ Transaction:
 | id                    | string            | true   | false    | false    | true    | false         | false     | json:"id,omitempty"                    | 0          |
 | nonce                 | uint64            | false  | false    | false    | true    | false         | false     | json:"nonce,omitempty"                 | 0          |
 | coin_type             | int8              | false  | false    | false    | true    | false         | false     | json:"coin_type,omitempty"             | 0          |
-| transaction_id_insite | string            | false  | false    | false    | true    | false         | false     | json:"transaction_id_insite,omitempty" | 1          |
+| transaction_id | string            | false  | false    | false    | true    | false         | false     | json:"transaction_id,omitempty" | 1          |
 | from                  | string            | false  | false    | false    | true    | false         | false     | json:"from,omitempty"                  | 1          |
 | to                    | string            | false  | false    | false    | true    | false         | false     | json:"to,omitempty"                    | 1          |
 | value                 | float64           | false  | false    | false    | true    | false         | false     | json:"value,omitempty"                 | 0          |

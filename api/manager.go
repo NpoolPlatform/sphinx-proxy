@@ -365,8 +365,9 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 
 			if ch, ok := balanceDoneChannel.Load(psResponse.GetTransactionID()); ok {
 				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
-					success: true,
-					balance: v,
+					success:    true,
+					balance:    v,
+					balanceStr: psResponse.GetBalanceStr(),
 				}
 			}
 			logger.Sugar().Infof("TransactionID: %v Addr: %v get balance ok", psResponse.GetTransactionID(), psResponse)

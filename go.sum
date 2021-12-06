@@ -81,8 +81,9 @@ github.com/Masterminds/vcs v1.13.0/go.mod h1:N09YCmOQr6RLxC6UNHzuVwAdodYbbnycGHS
 github.com/NpoolPlatform/go-service-framework v0.0.0-20211124111341-7f1b2f908552/go.mod h1:6OR9IRTWXpkr7Igky6a7zbnDG2o5Vmx9zuIzNJ3M9xs=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20211204042807-786e5a616191 h1:FBtw/ZrovfAZZfp2wTtaXPzGuUTTE20y/CYO9EK+yoA=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20211204042807-786e5a616191/go.mod h1:6OR9IRTWXpkr7Igky6a7zbnDG2o5Vmx9zuIzNJ3M9xs=
-github.com/NpoolPlatform/message v0.0.0-20211205171224-cc5aef287e1a h1:8aS135D3rd4PmV77eVcGqrDc2yx8Fnc2E/GrcgA40VE=
 github.com/NpoolPlatform/message v0.0.0-20211205171224-cc5aef287e1a/go.mod h1:1sfQHL02lIkzK1ObQRbNi0UAkSZWcBw/rsK5hn9Perg=
+github.com/NpoolPlatform/message v0.0.0-20211206134826-9b12ab3902b1 h1:FolHpGKsKUugV9faK6UpLL78rs6b2m0dbRj3gHE5S/Q=
+github.com/NpoolPlatform/message v0.0.0-20211206134826-9b12ab3902b1/go.mod h1:1sfQHL02lIkzK1ObQRbNi0UAkSZWcBw/rsK5hn9Perg=
 github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996 h1:H/IlyiBuGXPNwhvKxMLFFmeamzg+fmmdf8ZERbVZjtM=
 github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996/go.mod h1:w203lHGAaRvZqEMLxJI8wBxAoVvE3RHMU3jtwN/AdgE=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=

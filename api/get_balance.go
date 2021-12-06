@@ -15,9 +15,10 @@ import (
 )
 
 type balanceDoneInfo struct {
-	success bool
-	message string
-	balance float64
+	success    bool
+	message    string
+	balance    float64
+	balanceStr string
 }
 
 var balanceDoneChannel = sync.Map{}
@@ -71,7 +72,8 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 		}
 		out = &sphinxproxy.GetBalanceResponse{
 			Info: &sphinxproxy.BalanceInfo{
-				Balance: info.balance,
+				Balance:    info.balance,
+				BalanceStr: info.balanceStr,
 			},
 		}
 		balanceDoneChannel.Delete(uid)

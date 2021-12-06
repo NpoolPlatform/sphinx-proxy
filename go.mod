@@ -5,7 +5,7 @@ go 1.16
 require (
 	entgo.io/ent v0.9.1
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20211204042807-786e5a616191
-	github.com/NpoolPlatform/message v0.0.0-20211205171224-cc5aef287e1a
+	github.com/NpoolPlatform/message v0.0.0-20211206134826-9b12ab3902b1
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996
 	github.com/filecoin-project/go-state-types v0.1.1 // indirect
 	github.com/filecoin-project/lotus v1.13.1
