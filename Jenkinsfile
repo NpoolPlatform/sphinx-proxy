@@ -231,6 +231,15 @@ pipeline {
       }
     }
 
+    stage('Release docker image for testing or production') {
+      when {
+        expression { RELEASE_TARGET == 'true' }
+      }
+      steps {
+        sh 'DEVELOPMENT=other make release-docker-images'
+      }
+    }
+
     stage('Deploy for development') {
       when {
         expression { DEPLOY_TARGET == 'true' }
