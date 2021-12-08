@@ -13,6 +13,7 @@ type UpdateTransactionParams struct {
 	State         transaction.State
 	Nonce         uint64
 	Cid           string
+	ExitCode      int64
 }
 
 // UpdateTransaction update transaction info
@@ -27,10 +28,12 @@ func UpdateTransaction(ctx context.Context, t UpdateTransactionParams) error {
 	case transaction.StateSign:
 		stm.SetNonce(t.Nonce)
 		stm.Where(transaction.StateEQ(transaction.StateWait))
-	case transaction.StateDone:
+	case transaction.StateSync:
 		stm.SetCid(t.Cid)
 		stm.Where(transaction.StateEQ(transaction.StateSign))
-	case transaction.StateFail:
+	case transaction.StateDone:
+		stm.SetExitCode(t.ExitCode)
+		stm.Where(transaction.StateEQ(transaction.StateSync))
 	}
 
 	_, err := stm.SetState(t.State).

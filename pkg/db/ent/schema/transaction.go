@@ -30,8 +30,9 @@ func (Transaction) Fields() []ent.Field {
 			Unique().
 			NotEmpty(),
 		field.String("cid").
-			NotEmpty().
 			Default(""),
+		field.Int64("exit_code").
+			Default(-1),
 		field.String("from").
 			NotEmpty().
 			Default(""),
@@ -39,9 +40,10 @@ func (Transaction) Fields() []ent.Field {
 			NotEmpty().
 			Default(""),
 		field.Float("value").
+			Positive().
 			Default(0),
 		field.Enum("state").
-			Values("wait", "sign", "done", "fail"), // nonce/utxo,sign,done/fail
+			Values("wait", "sign", "sync", "done", "fail"), // nonce/utxo,sign,sync,done/fail
 		field.Uint32("created_at").
 			DefaultFunc(func() uint32 {
 				return uint32(time.Now().Unix())

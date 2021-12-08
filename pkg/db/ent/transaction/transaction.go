@@ -23,6 +23,8 @@ const (
 	FieldTransactionID = "transaction_id"
 	// FieldCid holds the string denoting the cid field in the database.
 	FieldCid = "cid"
+	// FieldExitCode holds the string denoting the exit_code field in the database.
+	FieldExitCode = "exit_code"
 	// FieldFrom holds the string denoting the from field in the database.
 	FieldFrom = "from"
 	// FieldTo holds the string denoting the to field in the database.
@@ -49,6 +51,7 @@ var Columns = []string{
 	FieldCoinType,
 	FieldTransactionID,
 	FieldCid,
+	FieldExitCode,
 	FieldFrom,
 	FieldTo,
 	FieldValue,
@@ -79,8 +82,8 @@ var (
 	TransactionIDValidator func(string) error
 	// DefaultCid holds the default value on creation for the "cid" field.
 	DefaultCid string
-	// CidValidator is a validator for the "cid" field. It is called by the builders before save.
-	CidValidator func(string) error
+	// DefaultExitCode holds the default value on creation for the "exit_code" field.
+	DefaultExitCode int64
 	// DefaultFrom holds the default value on creation for the "from" field.
 	DefaultFrom string
 	// FromValidator is a validator for the "from" field. It is called by the builders before save.
@@ -91,6 +94,8 @@ var (
 	ToValidator func(string) error
 	// DefaultValue holds the default value on creation for the "value" field.
 	DefaultValue float64
+	// ValueValidator is a validator for the "value" field. It is called by the builders before save.
+	ValueValidator func(float64) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() uint32
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -110,6 +115,7 @@ type State string
 const (
 	StateWait State = "wait"
 	StateSign State = "sign"
+	StateSync State = "sync"
 	StateDone State = "done"
 	StateFail State = "fail"
 )
@@ -121,7 +127,7 @@ func (s State) String() string {
 // StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
 func StateValidator(s State) error {
 	switch s {
-	case StateWait, StateSign, StateDone, StateFail:
+	case StateWait, StateSign, StateSync, StateDone, StateFail:
 		return nil
 	default:
 		return fmt.Errorf("transaction: invalid enum value for state field: %q", s)

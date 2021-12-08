@@ -16,10 +16,11 @@ var (
 		{Name: "coin_type", Type: field.TypeInt32, Default: 0},
 		{Name: "transaction_id", Type: field.TypeString, Unique: true},
 		{Name: "cid", Type: field.TypeString, Default: ""},
+		{Name: "exit_code", Type: field.TypeInt64, Default: -1},
 		{Name: "from", Type: field.TypeString, Default: ""},
 		{Name: "to", Type: field.TypeString, Default: ""},
 		{Name: "value", Type: field.TypeFloat64, Default: 0},
-		{Name: "state", Type: field.TypeEnum, Enums: []string{"wait", "sign", "done", "fail"}},
+		{Name: "state", Type: field.TypeEnum, Enums: []string{"wait", "sign", "sync", "done", "fail"}},
 		{Name: "created_at", Type: field.TypeUint32},
 		{Name: "updated_at", Type: field.TypeUint32},
 		{Name: "deleted_at", Type: field.TypeUint32},
@@ -33,7 +34,7 @@ var (
 			{
 				Name:    "transaction_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[10]},
+				Columns: []*schema.Column{TransactionsColumns[11]},
 			},
 		},
 	}

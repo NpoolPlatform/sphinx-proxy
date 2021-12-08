@@ -217,6 +217,7 @@ type mPlugin struct {
 	balance      chan *sphinxproxy.ProxyPluginRequest
 	preSign      chan *sphinxproxy.ProxyPluginRequest
 	mpoolPush    chan *sphinxproxy.ProxyPluginRequest
+	syncMsg      chan *sphinxproxy.ProxyPluginRequest
 	registerCoin chan *sphinxproxy.ProxyPluginResponse
 }
 
@@ -228,6 +229,7 @@ func newPluginStream(stream sphinxproxy.SphinxProxy_ProxyPluginServer) {
 		balance:      make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
 		preSign:      make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
 		mpoolPush:    make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
+		syncMsg:      make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
 		registerCoin: make(chan *sphinxproxy.ProxyPluginResponse),
 	}
 	wg := &sync.WaitGroup{}
@@ -326,6 +328,26 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 				continue
 			}
 			logger.Sugar().Infof("proxy->plugin TransactionID: %v ok", info.GetTransactionID())
+		case info := <-p.syncMsg:
+			if err := p.pluginServer.Send(&sphinxproxy.ProxyPluginRequest{
+				CoinType:        info.GetCoinType(),
+				TransactionType: info.GetTransactionType(),
+				TransactionID:   info.GetTransactionID(),
+				Message:         info.GetMessage(),
+				CID:             info.GetCID(),
+			}); err != nil {
+				logger.Sugar().Errorf(
+					"proxy->plugin TransactionID: %v TransactionType %v, CID: %v, CoinType: %v Message: %v error: %v",
+					info.GetTransactionID(),
+					info.GetTransactionType(),
+					info.GetCID(),
+					info.GetCoinType(),
+					info.GetMessage(),
+					err,
+				)
+				continue
+			}
+			logger.Sugar().Infof("proxy->plugin TransactionID: %v ok", info.GetTransactionID())
 		}
 	}
 }
@@ -384,13 +406,23 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 		case sphinxproxy.TransactionType_Broadcast:
 			if err := crud.UpdateTransaction(context.Background(), crud.UpdateTransactionParams{
 				TransactionID: psResponse.GetTransactionID(),
-				State:         transaction.StateDone,
+				State:         transaction.StateSync,
 				Cid:           psResponse.GetCID(),
 			}); err != nil {
 				logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
 				continue
 			}
 			logger.Sugar().Infof("Broadcast TransactionID: %v message ok", psResponse.GetTransactionID())
+		case sphinxproxy.TransactionType_SyncMsgState:
+			if err := crud.UpdateTransaction(context.Background(), crud.UpdateTransactionParams{
+				TransactionID: psResponse.GetTransactionID(),
+				State:         transaction.StateDone,
+				ExitCode:      psResponse.GetExitCode(),
+			}); err != nil {
+				logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
+				continue
+			}
+			logger.Sugar().Infof("SyncMsgState TransactionID: %v message ok", psResponse.GetTransactionID())
 		}
 	}
 }
@@ -438,7 +470,7 @@ func Transaction() {
 				switch tran.State {
 				case transaction.StateWait:
 					// from wallet get nonce/utxo
-					coinType := sphinxplugin.CoinType(tran.TransactionType)
+					coinType := sphinxplugin.CoinType(tran.CoinType)
 					pluginProxy, err := getProxyPlugin(coinType)
 					if err != nil {
 						logger.Sugar().Error("proxy->plugin no invalid connection")
@@ -470,9 +502,26 @@ func Transaction() {
 							Value: tran.Value,
 							// TODO from chain get
 							GasLimit:   655063,
-							GasFeeCap:  2300,
-							GasPremium: 2250,
+							GasFeeCap:  4300,
+							GasPremium: 4250,
 							Method:     uint64(builtin.MethodSend),
+						},
+					}
+				case transaction.StateSync:
+					coinType := sphinxplugin.CoinType(tran.CoinType)
+					pluginProxy, err := getProxyPlugin(coinType)
+					if err != nil {
+						logger.Sugar().Error("proxy->plugin no invalid connection")
+						continue
+					}
+					pluginProxy.syncMsg <- &sphinxproxy.ProxyPluginRequest{
+						CoinType:        coinType,
+						TransactionType: sphinxproxy.TransactionType_SyncMsgState,
+						TransactionID:   tran.TransactionID,
+						CID:             tran.Cid,
+						Message: &sphinxplugin.UnsignedMessage{
+							From: tran.From,
+							To:   tran.To,
 						},
 					}
 				}

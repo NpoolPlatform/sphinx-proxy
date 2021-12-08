@@ -109,6 +109,27 @@ func (tu *TransactionUpdate) SetNillableCid(s *string) *TransactionUpdate {
 	return tu
 }
 
+// SetExitCode sets the "exit_code" field.
+func (tu *TransactionUpdate) SetExitCode(i int64) *TransactionUpdate {
+	tu.mutation.ResetExitCode()
+	tu.mutation.SetExitCode(i)
+	return tu
+}
+
+// SetNillableExitCode sets the "exit_code" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableExitCode(i *int64) *TransactionUpdate {
+	if i != nil {
+		tu.SetExitCode(*i)
+	}
+	return tu
+}
+
+// AddExitCode adds i to the "exit_code" field.
+func (tu *TransactionUpdate) AddExitCode(i int64) *TransactionUpdate {
+	tu.mutation.AddExitCode(i)
+	return tu
+}
+
 // SetFrom sets the "from" field.
 func (tu *TransactionUpdate) SetFrom(s string) *TransactionUpdate {
 	tu.mutation.SetFrom(s)
@@ -300,11 +321,6 @@ func (tu *TransactionUpdate) check() error {
 			return &ValidationError{Name: "transaction_id", err: fmt.Errorf("ent: validator failed for field \"transaction_id\": %w", err)}
 		}
 	}
-	if v, ok := tu.mutation.Cid(); ok {
-		if err := transaction.CidValidator(v); err != nil {
-			return &ValidationError{Name: "cid", err: fmt.Errorf("ent: validator failed for field \"cid\": %w", err)}
-		}
-	}
 	if v, ok := tu.mutation.From(); ok {
 		if err := transaction.FromValidator(v); err != nil {
 			return &ValidationError{Name: "from", err: fmt.Errorf("ent: validator failed for field \"from\": %w", err)}
@@ -313,6 +329,11 @@ func (tu *TransactionUpdate) check() error {
 	if v, ok := tu.mutation.To(); ok {
 		if err := transaction.ToValidator(v); err != nil {
 			return &ValidationError{Name: "to", err: fmt.Errorf("ent: validator failed for field \"to\": %w", err)}
+		}
+	}
+	if v, ok := tu.mutation.Value(); ok {
+		if err := transaction.ValueValidator(v); err != nil {
+			return &ValidationError{Name: "value", err: fmt.Errorf("ent: validator failed for field \"value\": %w", err)}
 		}
 	}
 	if v, ok := tu.mutation.State(); ok {
@@ -395,6 +416,20 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: transaction.FieldCid,
+		})
+	}
+	if value, ok := tu.mutation.ExitCode(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: transaction.FieldExitCode,
+		})
+	}
+	if value, ok := tu.mutation.AddedExitCode(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: transaction.FieldExitCode,
 		})
 	}
 	if value, ok := tu.mutation.From(); ok {
@@ -573,6 +608,27 @@ func (tuo *TransactionUpdateOne) SetNillableCid(s *string) *TransactionUpdateOne
 	if s != nil {
 		tuo.SetCid(*s)
 	}
+	return tuo
+}
+
+// SetExitCode sets the "exit_code" field.
+func (tuo *TransactionUpdateOne) SetExitCode(i int64) *TransactionUpdateOne {
+	tuo.mutation.ResetExitCode()
+	tuo.mutation.SetExitCode(i)
+	return tuo
+}
+
+// SetNillableExitCode sets the "exit_code" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableExitCode(i *int64) *TransactionUpdateOne {
+	if i != nil {
+		tuo.SetExitCode(*i)
+	}
+	return tuo
+}
+
+// AddExitCode adds i to the "exit_code" field.
+func (tuo *TransactionUpdateOne) AddExitCode(i int64) *TransactionUpdateOne {
+	tuo.mutation.AddExitCode(i)
 	return tuo
 }
 
@@ -774,11 +830,6 @@ func (tuo *TransactionUpdateOne) check() error {
 			return &ValidationError{Name: "transaction_id", err: fmt.Errorf("ent: validator failed for field \"transaction_id\": %w", err)}
 		}
 	}
-	if v, ok := tuo.mutation.Cid(); ok {
-		if err := transaction.CidValidator(v); err != nil {
-			return &ValidationError{Name: "cid", err: fmt.Errorf("ent: validator failed for field \"cid\": %w", err)}
-		}
-	}
 	if v, ok := tuo.mutation.From(); ok {
 		if err := transaction.FromValidator(v); err != nil {
 			return &ValidationError{Name: "from", err: fmt.Errorf("ent: validator failed for field \"from\": %w", err)}
@@ -787,6 +838,11 @@ func (tuo *TransactionUpdateOne) check() error {
 	if v, ok := tuo.mutation.To(); ok {
 		if err := transaction.ToValidator(v); err != nil {
 			return &ValidationError{Name: "to", err: fmt.Errorf("ent: validator failed for field \"to\": %w", err)}
+		}
+	}
+	if v, ok := tuo.mutation.Value(); ok {
+		if err := transaction.ValueValidator(v); err != nil {
+			return &ValidationError{Name: "value", err: fmt.Errorf("ent: validator failed for field \"value\": %w", err)}
 		}
 	}
 	if v, ok := tuo.mutation.State(); ok {
@@ -886,6 +942,20 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Type:   field.TypeString,
 			Value:  value,
 			Column: transaction.FieldCid,
+		})
+	}
+	if value, ok := tuo.mutation.ExitCode(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: transaction.FieldExitCode,
+		})
+	}
+	if value, ok := tuo.mutation.AddedExitCode(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: transaction.FieldExitCode,
 		})
 	}
 	if value, ok := tuo.mutation.From(); ok {

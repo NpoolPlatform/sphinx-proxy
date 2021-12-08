@@ -126,6 +126,13 @@ func Cid(v string) predicate.Transaction {
 	})
 }
 
+// ExitCode applies equality check predicate on the "exit_code" field. It's identical to ExitCodeEQ.
+func ExitCode(v int64) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldExitCode), v))
+	})
+}
+
 // From applies equality check predicate on the "from" field. It's identical to FromEQ.
 func From(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -615,6 +622,82 @@ func CidEqualFold(v string) predicate.Transaction {
 func CidContainsFold(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldCid), v))
+	})
+}
+
+// ExitCodeEQ applies the EQ predicate on the "exit_code" field.
+func ExitCodeEQ(v int64) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldExitCode), v))
+	})
+}
+
+// ExitCodeNEQ applies the NEQ predicate on the "exit_code" field.
+func ExitCodeNEQ(v int64) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldExitCode), v))
+	})
+}
+
+// ExitCodeIn applies the In predicate on the "exit_code" field.
+func ExitCodeIn(vs ...int64) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldExitCode), v...))
+	})
+}
+
+// ExitCodeNotIn applies the NotIn predicate on the "exit_code" field.
+func ExitCodeNotIn(vs ...int64) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldExitCode), v...))
+	})
+}
+
+// ExitCodeGT applies the GT predicate on the "exit_code" field.
+func ExitCodeGT(v int64) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldExitCode), v))
+	})
+}
+
+// ExitCodeGTE applies the GTE predicate on the "exit_code" field.
+func ExitCodeGTE(v int64) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldExitCode), v))
+	})
+}
+
+// ExitCodeLT applies the LT predicate on the "exit_code" field.
+func ExitCodeLT(v int64) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldExitCode), v))
+	})
+}
+
+// ExitCodeLTE applies the LTE predicate on the "exit_code" field.
+func ExitCodeLTE(v int64) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldExitCode), v))
 	})
 }
 

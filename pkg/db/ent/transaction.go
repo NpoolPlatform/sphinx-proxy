@@ -26,6 +26,8 @@ type Transaction struct {
 	TransactionID string `json:"transaction_id,omitempty"`
 	// Cid holds the value of the "cid" field.
 	Cid string `json:"cid,omitempty"`
+	// ExitCode holds the value of the "exit_code" field.
+	ExitCode int64 `json:"exit_code,omitempty"`
 	// From holds the value of the "from" field.
 	From string `json:"from,omitempty"`
 	// To holds the value of the "to" field.
@@ -49,7 +51,7 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case transaction.FieldValue:
 			values[i] = new(sql.NullFloat64)
-		case transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldCoinType, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
+		case transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldCoinType, transaction.FieldExitCode, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
 		case transaction.FieldTransactionID, transaction.FieldCid, transaction.FieldFrom, transaction.FieldTo, transaction.FieldState:
 			values[i] = new(sql.NullString)
@@ -105,6 +107,12 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 				return fmt.Errorf("unexpected type %T for field cid", values[i])
 			} else if value.Valid {
 				t.Cid = value.String
+			}
+		case transaction.FieldExitCode:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field exit_code", values[i])
+			} else if value.Valid {
+				t.ExitCode = value.Int64
 			}
 		case transaction.FieldFrom:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -186,6 +194,8 @@ func (t *Transaction) String() string {
 	builder.WriteString(t.TransactionID)
 	builder.WriteString(", cid=")
 	builder.WriteString(t.Cid)
+	builder.WriteString(", exit_code=")
+	builder.WriteString(fmt.Sprintf("%v", t.ExitCode))
 	builder.WriteString(", from=")
 	builder.WriteString(t.From)
 	builder.WriteString(", to=")
