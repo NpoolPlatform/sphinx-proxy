@@ -18,3 +18,12 @@ func GetTransaction(ctx context.Context, transactionID string) (*ent.Transaction
 		).
 		Only(ctx)
 }
+
+func GetTransactionExist(ctx context.Context, transactionID string) (bool, error) {
+	return db.Client().
+		Transaction.
+		Query().
+		Where(
+			transaction.TransactionIDEQ(transactionID),
+		).Exist(ctx)
+}
