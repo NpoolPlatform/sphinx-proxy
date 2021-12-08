@@ -23,7 +23,7 @@ func (s *Server) GetTransaction(ctx context.Context, in *sphinxproxy.GetTransact
 
 	transInfo, err := crud.GetTransaction(ctx, in.GetTransactionID())
 	if ent.IsNotFound(err) {
-		logger.Sugar().Errorf("GetTransaction TransactionID: %v not found")
+		logger.Sugar().Errorf("GetTransaction TransactionID: %v not found", in.GetTransactionID())
 		return &sphinxproxy.GetTransactionResponse{}, status.Errorf(codes.NotFound, "TransactionID: %v not found", in.GetTransactionID())
 	}
 	if err != nil {
