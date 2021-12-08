@@ -489,7 +489,7 @@ func Transaction() {
 						logger.Sugar().Error("proxy->sign no invalid connection")
 						continue
 					}
-					coinType := sphinxplugin.CoinType(tran.TransactionType)
+					coinType := sphinxplugin.CoinType(tran.CoinType)
 
 					signProxy.sign <- &sphinxproxy.ProxySignRequest{
 						TransactionType: sphinxproxy.TransactionType_Signature,
