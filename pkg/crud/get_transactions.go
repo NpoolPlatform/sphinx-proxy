@@ -15,7 +15,7 @@ func GetTransactions(ctx context.Context) ([]*ent.Transaction, error) {
 		Transaction.
 		Query().
 		Where(
-			transaction.StateIn(transaction.StateWait, transaction.StateSign),
+			transaction.StateIn(transaction.StateWait, transaction.StateSign, transaction.StateSync),
 		).
 		Order(ent.Asc(transaction.FieldCreatedAt, transaction.FieldNonce)).
 		Limit(constant.DefaultPageSize).
