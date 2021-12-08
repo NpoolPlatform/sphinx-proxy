@@ -6,6 +6,7 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
+	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -42,6 +43,16 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 	if in.GetValue() <= 0 {
 		logger.Sugar().Errorf("CreateTransaction Value: %v invalid", in.GetValue())
 		return out, status.Error(codes.InvalidArgument, "Value Invalid")
+	}
+
+	_, err = crud.GetTransaction(ctx, in.GetTransactionID())
+	if !ent.IsNotFound(err) {
+		logger.Sugar().Errorf("CreateTransaction TransactionID: %v already exist", in.GetTransactionID())
+		return out, status.Errorf(codes.AlreadyExists, "TransactionID: %v already exist", in.GetTransactionID())
+	}
+	if err != nil {
+		logger.Sugar().Errorf("CreateTransaction cal GetTransaction error: %v", err)
+		return out, status.Error(codes.Internal, "internal server error")
 	}
 
 	// store to db
