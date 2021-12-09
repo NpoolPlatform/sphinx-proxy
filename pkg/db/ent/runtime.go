@@ -50,12 +50,12 @@ func init() {
 	transaction.DefaultTo = transactionDescTo.Default.(string)
 	// transaction.ToValidator is a validator for the "to" field. It is called by the builders before save.
 	transaction.ToValidator = transactionDescTo.Validators[0].(func(string) error)
-	// transactionDescValue is the schema descriptor for value field.
-	transactionDescValue := transactionFields[9].Descriptor()
-	// transaction.DefaultValue holds the default value on creation for the value field.
-	transaction.DefaultValue = transactionDescValue.Default.(float64)
-	// transaction.ValueValidator is a validator for the "value" field. It is called by the builders before save.
-	transaction.ValueValidator = transactionDescValue.Validators[0].(func(float64) error)
+	// transactionDescAmount is the schema descriptor for amount field.
+	transactionDescAmount := transactionFields[9].Descriptor()
+	// transaction.DefaultAmount holds the default value on creation for the amount field.
+	transaction.DefaultAmount = transactionDescAmount.Default.(uint64)
+	// transaction.AmountValidator is a validator for the "amount" field. It is called by the builders before save.
+	transaction.AmountValidator = transactionDescAmount.Validators[0].(func(uint64) error)
 	// transactionDescCreatedAt is the schema descriptor for created_at field.
 	transactionDescCreatedAt := transactionFields[11].Descriptor()
 	// transaction.DefaultCreatedAt holds the default value on creation for the created_at field.

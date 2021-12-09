@@ -44,8 +44,8 @@ type TransactionMutation struct {
 	addexit_code        *int64
 	from                *string
 	to                  *string
-	value               *float64
-	addvalue            *float64
+	amount              *uint64
+	addamount           *uint64
 	state               *transaction.State
 	created_at          *uint32
 	addcreated_at       *uint32
@@ -512,60 +512,60 @@ func (m *TransactionMutation) ResetTo() {
 	m.to = nil
 }
 
-// SetValue sets the "value" field.
-func (m *TransactionMutation) SetValue(f float64) {
-	m.value = &f
-	m.addvalue = nil
+// SetAmount sets the "amount" field.
+func (m *TransactionMutation) SetAmount(u uint64) {
+	m.amount = &u
+	m.addamount = nil
 }
 
-// Value returns the value of the "value" field in the mutation.
-func (m *TransactionMutation) Value() (r float64, exists bool) {
-	v := m.value
+// Amount returns the value of the "amount" field in the mutation.
+func (m *TransactionMutation) Amount() (r uint64, exists bool) {
+	v := m.amount
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldValue returns the old "value" field's value of the Transaction entity.
+// OldAmount returns the old "amount" field's value of the Transaction entity.
 // If the Transaction object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TransactionMutation) OldValue(ctx context.Context) (v float64, err error) {
+func (m *TransactionMutation) OldAmount(ctx context.Context) (v uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldValue is only allowed on UpdateOne operations")
+		return v, fmt.Errorf("OldAmount is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldValue requires an ID field in the mutation")
+		return v, fmt.Errorf("OldAmount requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldValue: %w", err)
+		return v, fmt.Errorf("querying old value for OldAmount: %w", err)
 	}
-	return oldValue.Value, nil
+	return oldValue.Amount, nil
 }
 
-// AddValue adds f to the "value" field.
-func (m *TransactionMutation) AddValue(f float64) {
-	if m.addvalue != nil {
-		*m.addvalue += f
+// AddAmount adds u to the "amount" field.
+func (m *TransactionMutation) AddAmount(u uint64) {
+	if m.addamount != nil {
+		*m.addamount += u
 	} else {
-		m.addvalue = &f
+		m.addamount = &u
 	}
 }
 
-// AddedValue returns the value that was added to the "value" field in this mutation.
-func (m *TransactionMutation) AddedValue() (r float64, exists bool) {
-	v := m.addvalue
+// AddedAmount returns the value that was added to the "amount" field in this mutation.
+func (m *TransactionMutation) AddedAmount() (r uint64, exists bool) {
+	v := m.addamount
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetValue resets all changes to the "value" field.
-func (m *TransactionMutation) ResetValue() {
-	m.value = nil
-	m.addvalue = nil
+// ResetAmount resets all changes to the "amount" field.
+func (m *TransactionMutation) ResetAmount() {
+	m.amount = nil
+	m.addamount = nil
 }
 
 // SetState sets the "state" field.
@@ -816,8 +816,8 @@ func (m *TransactionMutation) Fields() []string {
 	if m.to != nil {
 		fields = append(fields, transaction.FieldTo)
 	}
-	if m.value != nil {
-		fields = append(fields, transaction.FieldValue)
+	if m.amount != nil {
+		fields = append(fields, transaction.FieldAmount)
 	}
 	if m.state != nil {
 		fields = append(fields, transaction.FieldState)
@@ -855,8 +855,8 @@ func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 		return m.From()
 	case transaction.FieldTo:
 		return m.To()
-	case transaction.FieldValue:
-		return m.Value()
+	case transaction.FieldAmount:
+		return m.Amount()
 	case transaction.FieldState:
 		return m.State()
 	case transaction.FieldCreatedAt:
@@ -890,8 +890,8 @@ func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldFrom(ctx)
 	case transaction.FieldTo:
 		return m.OldTo(ctx)
-	case transaction.FieldValue:
-		return m.OldValue(ctx)
+	case transaction.FieldAmount:
+		return m.OldAmount(ctx)
 	case transaction.FieldState:
 		return m.OldState(ctx)
 	case transaction.FieldCreatedAt:
@@ -965,12 +965,12 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTo(v)
 		return nil
-	case transaction.FieldValue:
-		v, ok := value.(float64)
+	case transaction.FieldAmount:
+		v, ok := value.(uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetValue(v)
+		m.SetAmount(v)
 		return nil
 	case transaction.FieldState:
 		v, ok := value.(transaction.State)
@@ -1020,8 +1020,8 @@ func (m *TransactionMutation) AddedFields() []string {
 	if m.addexit_code != nil {
 		fields = append(fields, transaction.FieldExitCode)
 	}
-	if m.addvalue != nil {
-		fields = append(fields, transaction.FieldValue)
+	if m.addamount != nil {
+		fields = append(fields, transaction.FieldAmount)
 	}
 	if m.addcreated_at != nil {
 		fields = append(fields, transaction.FieldCreatedAt)
@@ -1048,8 +1048,8 @@ func (m *TransactionMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedCoinType()
 	case transaction.FieldExitCode:
 		return m.AddedExitCode()
-	case transaction.FieldValue:
-		return m.AddedValue()
+	case transaction.FieldAmount:
+		return m.AddedAmount()
 	case transaction.FieldCreatedAt:
 		return m.AddedCreatedAt()
 	case transaction.FieldUpdatedAt:
@@ -1093,12 +1093,12 @@ func (m *TransactionMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddExitCode(v)
 		return nil
-	case transaction.FieldValue:
-		v, ok := value.(float64)
+	case transaction.FieldAmount:
+		v, ok := value.(uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddValue(v)
+		m.AddAmount(v)
 		return nil
 	case transaction.FieldCreatedAt:
 		v, ok := value.(uint32)
@@ -1172,8 +1172,8 @@ func (m *TransactionMutation) ResetField(name string) error {
 	case transaction.FieldTo:
 		m.ResetTo()
 		return nil
-	case transaction.FieldValue:
-		m.ResetValue()
+	case transaction.FieldAmount:
+		m.ResetAmount()
 		return nil
 	case transaction.FieldState:
 		m.ResetState()

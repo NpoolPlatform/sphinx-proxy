@@ -147,10 +147,10 @@ func To(v string) predicate.Transaction {
 	})
 }
 
-// Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
-func Value(v float64) predicate.Transaction {
+// Amount applies equality check predicate on the "amount" field. It's identical to AmountEQ.
+func Amount(v uint64) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldValue), v))
+		s.Where(sql.EQ(s.C(FieldAmount), v))
 	})
 }
 
@@ -923,22 +923,22 @@ func ToContainsFold(v string) predicate.Transaction {
 	})
 }
 
-// ValueEQ applies the EQ predicate on the "value" field.
-func ValueEQ(v float64) predicate.Transaction {
+// AmountEQ applies the EQ predicate on the "amount" field.
+func AmountEQ(v uint64) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldValue), v))
+		s.Where(sql.EQ(s.C(FieldAmount), v))
 	})
 }
 
-// ValueNEQ applies the NEQ predicate on the "value" field.
-func ValueNEQ(v float64) predicate.Transaction {
+// AmountNEQ applies the NEQ predicate on the "amount" field.
+func AmountNEQ(v uint64) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldValue), v))
+		s.Where(sql.NEQ(s.C(FieldAmount), v))
 	})
 }
 
-// ValueIn applies the In predicate on the "value" field.
-func ValueIn(vs ...float64) predicate.Transaction {
+// AmountIn applies the In predicate on the "amount" field.
+func AmountIn(vs ...uint64) predicate.Transaction {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -950,12 +950,12 @@ func ValueIn(vs ...float64) predicate.Transaction {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldValue), v...))
+		s.Where(sql.In(s.C(FieldAmount), v...))
 	})
 }
 
-// ValueNotIn applies the NotIn predicate on the "value" field.
-func ValueNotIn(vs ...float64) predicate.Transaction {
+// AmountNotIn applies the NotIn predicate on the "amount" field.
+func AmountNotIn(vs ...uint64) predicate.Transaction {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -967,35 +967,35 @@ func ValueNotIn(vs ...float64) predicate.Transaction {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldValue), v...))
+		s.Where(sql.NotIn(s.C(FieldAmount), v...))
 	})
 }
 
-// ValueGT applies the GT predicate on the "value" field.
-func ValueGT(v float64) predicate.Transaction {
+// AmountGT applies the GT predicate on the "amount" field.
+func AmountGT(v uint64) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldValue), v))
+		s.Where(sql.GT(s.C(FieldAmount), v))
 	})
 }
 
-// ValueGTE applies the GTE predicate on the "value" field.
-func ValueGTE(v float64) predicate.Transaction {
+// AmountGTE applies the GTE predicate on the "amount" field.
+func AmountGTE(v uint64) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldValue), v))
+		s.Where(sql.GTE(s.C(FieldAmount), v))
 	})
 }
 
-// ValueLT applies the LT predicate on the "value" field.
-func ValueLT(v float64) predicate.Transaction {
+// AmountLT applies the LT predicate on the "amount" field.
+func AmountLT(v uint64) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldValue), v))
+		s.Where(sql.LT(s.C(FieldAmount), v))
 	})
 }
 
-// ValueLTE applies the LTE predicate on the "value" field.
-func ValueLTE(v float64) predicate.Transaction {
+// AmountLTE applies the LTE predicate on the "amount" field.
+func AmountLTE(v uint64) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldValue), v))
+		s.Where(sql.LTE(s.C(FieldAmount), v))
 	})
 }
 

@@ -29,8 +29,8 @@ const (
 	FieldFrom = "from"
 	// FieldTo holds the string denoting the to field in the database.
 	FieldTo = "to"
-	// FieldValue holds the string denoting the value field in the database.
-	FieldValue = "value"
+	// FieldAmount holds the string denoting the amount field in the database.
+	FieldAmount = "amount"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -54,7 +54,7 @@ var Columns = []string{
 	FieldExitCode,
 	FieldFrom,
 	FieldTo,
-	FieldValue,
+	FieldAmount,
 	FieldState,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -92,10 +92,10 @@ var (
 	DefaultTo string
 	// ToValidator is a validator for the "to" field. It is called by the builders before save.
 	ToValidator func(string) error
-	// DefaultValue holds the default value on creation for the "value" field.
-	DefaultValue float64
-	// ValueValidator is a validator for the "value" field. It is called by the builders before save.
-	ValueValidator func(float64) error
+	// DefaultAmount holds the default value on creation for the "amount" field.
+	DefaultAmount uint64
+	// AmountValidator is a validator for the "amount" field. It is called by the builders before save.
+	AmountValidator func(uint64) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() uint32
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -113,11 +113,14 @@ type State string
 
 // State values.
 const (
-	StateWait State = "wait"
-	StateSign State = "sign"
-	StateSync State = "sync"
-	StateDone State = "done"
-	StateFail State = "fail"
+	StatePendingReview State = "pending_review"
+	StateConfirm       State = "confirm"
+	StateRejected      State = "rejected"
+	StateWait          State = "wait"
+	StateSign          State = "sign"
+	StateSync          State = "sync"
+	StateDone          State = "done"
+	StateFail          State = "fail"
 )
 
 func (s State) String() string {
@@ -127,7 +130,7 @@ func (s State) String() string {
 // StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
 func StateValidator(s State) error {
 	switch s {
-	case StateWait, StateSign, StateSync, StateDone, StateFail:
+	case StatePendingReview, StateConfirm, StateRejected, StateWait, StateSign, StateSync, StateDone, StateFail:
 		return nil
 	default:
 		return fmt.Errorf("transaction: invalid enum value for state field: %q", s)

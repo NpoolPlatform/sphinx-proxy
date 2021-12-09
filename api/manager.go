@@ -11,6 +11,7 @@ import (
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	"github.com/NpoolPlatform/go-service-framework/pkg/price"
 	"github.com/NpoolPlatform/message/npool/coininfo"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
@@ -499,7 +500,7 @@ func Transaction() {
 							To:    tran.To,
 							From:  tran.From,
 							Nonce: tran.Nonce,
-							Value: tran.Value,
+							Value: price.DBPriceToVisualPrice(tran.Amount),
 							// TODO from chain get
 							GasLimit:   10000000,
 							GasFeeCap:  1000000,

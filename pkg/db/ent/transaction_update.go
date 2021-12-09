@@ -158,24 +158,24 @@ func (tu *TransactionUpdate) SetNillableTo(s *string) *TransactionUpdate {
 	return tu
 }
 
-// SetValue sets the "value" field.
-func (tu *TransactionUpdate) SetValue(f float64) *TransactionUpdate {
-	tu.mutation.ResetValue()
-	tu.mutation.SetValue(f)
+// SetAmount sets the "amount" field.
+func (tu *TransactionUpdate) SetAmount(u uint64) *TransactionUpdate {
+	tu.mutation.ResetAmount()
+	tu.mutation.SetAmount(u)
 	return tu
 }
 
-// SetNillableValue sets the "value" field if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableValue(f *float64) *TransactionUpdate {
-	if f != nil {
-		tu.SetValue(*f)
+// SetNillableAmount sets the "amount" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableAmount(u *uint64) *TransactionUpdate {
+	if u != nil {
+		tu.SetAmount(*u)
 	}
 	return tu
 }
 
-// AddValue adds f to the "value" field.
-func (tu *TransactionUpdate) AddValue(f float64) *TransactionUpdate {
-	tu.mutation.AddValue(f)
+// AddAmount adds u to the "amount" field.
+func (tu *TransactionUpdate) AddAmount(u uint64) *TransactionUpdate {
+	tu.mutation.AddAmount(u)
 	return tu
 }
 
@@ -331,9 +331,9 @@ func (tu *TransactionUpdate) check() error {
 			return &ValidationError{Name: "to", err: fmt.Errorf("ent: validator failed for field \"to\": %w", err)}
 		}
 	}
-	if v, ok := tu.mutation.Value(); ok {
-		if err := transaction.ValueValidator(v); err != nil {
-			return &ValidationError{Name: "value", err: fmt.Errorf("ent: validator failed for field \"value\": %w", err)}
+	if v, ok := tu.mutation.Amount(); ok {
+		if err := transaction.AmountValidator(v); err != nil {
+			return &ValidationError{Name: "amount", err: fmt.Errorf("ent: validator failed for field \"amount\": %w", err)}
 		}
 	}
 	if v, ok := tu.mutation.State(); ok {
@@ -446,18 +446,18 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: transaction.FieldTo,
 		})
 	}
-	if value, ok := tu.mutation.Value(); ok {
+	if value, ok := tu.mutation.Amount(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
+			Type:   field.TypeUint64,
 			Value:  value,
-			Column: transaction.FieldValue,
+			Column: transaction.FieldAmount,
 		})
 	}
-	if value, ok := tu.mutation.AddedValue(); ok {
+	if value, ok := tu.mutation.AddedAmount(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
+			Type:   field.TypeUint64,
 			Value:  value,
-			Column: transaction.FieldValue,
+			Column: transaction.FieldAmount,
 		})
 	}
 	if value, ok := tu.mutation.State(); ok {
@@ -660,24 +660,24 @@ func (tuo *TransactionUpdateOne) SetNillableTo(s *string) *TransactionUpdateOne 
 	return tuo
 }
 
-// SetValue sets the "value" field.
-func (tuo *TransactionUpdateOne) SetValue(f float64) *TransactionUpdateOne {
-	tuo.mutation.ResetValue()
-	tuo.mutation.SetValue(f)
+// SetAmount sets the "amount" field.
+func (tuo *TransactionUpdateOne) SetAmount(u uint64) *TransactionUpdateOne {
+	tuo.mutation.ResetAmount()
+	tuo.mutation.SetAmount(u)
 	return tuo
 }
 
-// SetNillableValue sets the "value" field if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableValue(f *float64) *TransactionUpdateOne {
-	if f != nil {
-		tuo.SetValue(*f)
+// SetNillableAmount sets the "amount" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableAmount(u *uint64) *TransactionUpdateOne {
+	if u != nil {
+		tuo.SetAmount(*u)
 	}
 	return tuo
 }
 
-// AddValue adds f to the "value" field.
-func (tuo *TransactionUpdateOne) AddValue(f float64) *TransactionUpdateOne {
-	tuo.mutation.AddValue(f)
+// AddAmount adds u to the "amount" field.
+func (tuo *TransactionUpdateOne) AddAmount(u uint64) *TransactionUpdateOne {
+	tuo.mutation.AddAmount(u)
 	return tuo
 }
 
@@ -840,9 +840,9 @@ func (tuo *TransactionUpdateOne) check() error {
 			return &ValidationError{Name: "to", err: fmt.Errorf("ent: validator failed for field \"to\": %w", err)}
 		}
 	}
-	if v, ok := tuo.mutation.Value(); ok {
-		if err := transaction.ValueValidator(v); err != nil {
-			return &ValidationError{Name: "value", err: fmt.Errorf("ent: validator failed for field \"value\": %w", err)}
+	if v, ok := tuo.mutation.Amount(); ok {
+		if err := transaction.AmountValidator(v); err != nil {
+			return &ValidationError{Name: "amount", err: fmt.Errorf("ent: validator failed for field \"amount\": %w", err)}
 		}
 	}
 	if v, ok := tuo.mutation.State(); ok {
@@ -972,18 +972,18 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Column: transaction.FieldTo,
 		})
 	}
-	if value, ok := tuo.mutation.Value(); ok {
+	if value, ok := tuo.mutation.Amount(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
+			Type:   field.TypeUint64,
 			Value:  value,
-			Column: transaction.FieldValue,
+			Column: transaction.FieldAmount,
 		})
 	}
-	if value, ok := tuo.mutation.AddedValue(); ok {
+	if value, ok := tuo.mutation.AddedAmount(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
+			Type:   field.TypeUint64,
 			Value:  value,
-			Column: transaction.FieldValue,
+			Column: transaction.FieldAmount,
 		})
 	}
 	if value, ok := tuo.mutation.State(); ok {

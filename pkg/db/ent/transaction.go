@@ -32,8 +32,8 @@ type Transaction struct {
 	From string `json:"from,omitempty"`
 	// To holds the value of the "to" field.
 	To string `json:"to,omitempty"`
-	// Value holds the value of the "value" field.
-	Value float64 `json:"value,omitempty"`
+	// Amount holds the value of the "amount" field.
+	Amount uint64 `json:"amount,omitempty"`
 	// State holds the value of the "state" field.
 	State transaction.State `json:"state,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -49,9 +49,7 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case transaction.FieldValue:
-			values[i] = new(sql.NullFloat64)
-		case transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldCoinType, transaction.FieldExitCode, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
+		case transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldCoinType, transaction.FieldExitCode, transaction.FieldAmount, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
 		case transaction.FieldTransactionID, transaction.FieldCid, transaction.FieldFrom, transaction.FieldTo, transaction.FieldState:
 			values[i] = new(sql.NullString)
@@ -126,11 +124,11 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 			} else if value.Valid {
 				t.To = value.String
 			}
-		case transaction.FieldValue:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field value", values[i])
+		case transaction.FieldAmount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field amount", values[i])
 			} else if value.Valid {
-				t.Value = value.Float64
+				t.Amount = uint64(value.Int64)
 			}
 		case transaction.FieldState:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -200,8 +198,8 @@ func (t *Transaction) String() string {
 	builder.WriteString(t.From)
 	builder.WriteString(", to=")
 	builder.WriteString(t.To)
-	builder.WriteString(", value=")
-	builder.WriteString(fmt.Sprintf("%v", t.Value))
+	builder.WriteString(", amount=")
+	builder.WriteString(fmt.Sprintf("%v", t.Amount))
 	builder.WriteString(", state=")
 	builder.WriteString(fmt.Sprintf("%v", t.State))
 	builder.WriteString(", created_at=")

@@ -41,8 +41,8 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		return out, status.Error(codes.InvalidArgument, "To Invalid")
 	}
 
-	if in.GetValue() <= 0 {
-		logger.Sugar().Errorf("CreateTransaction Value: %v invalid", in.GetValue())
+	if in.GetAmount() <= 0 {
+		logger.Sugar().Errorf("CreateTransaction Value: %v invalid", in.GetAmount())
 		return out, status.Error(codes.InvalidArgument, "Value Invalid")
 	}
 
@@ -63,7 +63,7 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		TransactionID: in.GetTransactionID(),
 		From:          in.GetFrom(),
 		To:            in.GetTo(),
-		Value:         in.GetValue(),
+		Value:         in.GetAmount(),
 	}); err != nil {
 		logger.Sugar().Errorf("CreateTransaction save to db error: %v", err)
 		return out, status.Error(codes.Internal, "internal server error")

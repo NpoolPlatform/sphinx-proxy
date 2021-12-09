@@ -3,6 +3,7 @@ package crud
 import (
 	"context"
 
+	"github.com/NpoolPlatform/go-service-framework/pkg/price"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
@@ -25,7 +26,7 @@ func CreateTransaction(ctx context.Context, t CreateTransactionParam) error {
 		SetTransactionID(t.TransactionID).
 		SetFrom(t.From).
 		SetTo(t.To).
-		SetValue(t.Value).
+		SetAmount(price.VisualPriceToDBPrice(t.Value)).
 		SetState(transaction.StateWait).
 		Save(ctx)
 	return err

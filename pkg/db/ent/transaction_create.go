@@ -127,16 +127,16 @@ func (tc *TransactionCreate) SetNillableTo(s *string) *TransactionCreate {
 	return tc
 }
 
-// SetValue sets the "value" field.
-func (tc *TransactionCreate) SetValue(f float64) *TransactionCreate {
-	tc.mutation.SetValue(f)
+// SetAmount sets the "amount" field.
+func (tc *TransactionCreate) SetAmount(u uint64) *TransactionCreate {
+	tc.mutation.SetAmount(u)
 	return tc
 }
 
-// SetNillableValue sets the "value" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableValue(f *float64) *TransactionCreate {
-	if f != nil {
-		tc.SetValue(*f)
+// SetNillableAmount sets the "amount" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableAmount(u *uint64) *TransactionCreate {
+	if u != nil {
+		tc.SetAmount(*u)
 	}
 	return tc
 }
@@ -294,9 +294,9 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultTo
 		tc.mutation.SetTo(v)
 	}
-	if _, ok := tc.mutation.Value(); !ok {
-		v := transaction.DefaultValue
-		tc.mutation.SetValue(v)
+	if _, ok := tc.mutation.Amount(); !ok {
+		v := transaction.DefaultAmount
+		tc.mutation.SetAmount(v)
 	}
 	if _, ok := tc.mutation.CreatedAt(); !ok {
 		v := transaction.DefaultCreatedAt()
@@ -357,12 +357,12 @@ func (tc *TransactionCreate) check() error {
 			return &ValidationError{Name: "to", err: fmt.Errorf(`ent: validator failed for field "to": %w`, err)}
 		}
 	}
-	if _, ok := tc.mutation.Value(); !ok {
-		return &ValidationError{Name: "value", err: errors.New(`ent: missing required field "value"`)}
+	if _, ok := tc.mutation.Amount(); !ok {
+		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "amount"`)}
 	}
-	if v, ok := tc.mutation.Value(); ok {
-		if err := transaction.ValueValidator(v); err != nil {
-			return &ValidationError{Name: "value", err: fmt.Errorf(`ent: validator failed for field "value": %w`, err)}
+	if v, ok := tc.mutation.Amount(); ok {
+		if err := transaction.AmountValidator(v); err != nil {
+			return &ValidationError{Name: "amount", err: fmt.Errorf(`ent: validator failed for field "amount": %w`, err)}
 		}
 	}
 	if _, ok := tc.mutation.State(); !ok {
@@ -479,13 +479,13 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		})
 		_node.To = value
 	}
-	if value, ok := tc.mutation.Value(); ok {
+	if value, ok := tc.mutation.Amount(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
+			Type:   field.TypeUint64,
 			Value:  value,
-			Column: transaction.FieldValue,
+			Column: transaction.FieldAmount,
 		})
-		_node.Value = value
+		_node.Amount = value
 	}
 	if value, ok := tc.mutation.State(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -669,15 +669,15 @@ func (u *TransactionUpsert) UpdateTo() *TransactionUpsert {
 	return u
 }
 
-// SetValue sets the "value" field.
-func (u *TransactionUpsert) SetValue(v float64) *TransactionUpsert {
-	u.Set(transaction.FieldValue, v)
+// SetAmount sets the "amount" field.
+func (u *TransactionUpsert) SetAmount(v uint64) *TransactionUpsert {
+	u.Set(transaction.FieldAmount, v)
 	return u
 }
 
-// UpdateValue sets the "value" field to the value that was provided on create.
-func (u *TransactionUpsert) UpdateValue() *TransactionUpsert {
-	u.SetExcluded(transaction.FieldValue)
+// UpdateAmount sets the "amount" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateAmount() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldAmount)
 	return u
 }
 
@@ -891,17 +891,17 @@ func (u *TransactionUpsertOne) UpdateTo() *TransactionUpsertOne {
 	})
 }
 
-// SetValue sets the "value" field.
-func (u *TransactionUpsertOne) SetValue(v float64) *TransactionUpsertOne {
+// SetAmount sets the "amount" field.
+func (u *TransactionUpsertOne) SetAmount(v uint64) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
-		s.SetValue(v)
+		s.SetAmount(v)
 	})
 }
 
-// UpdateValue sets the "value" field to the value that was provided on create.
-func (u *TransactionUpsertOne) UpdateValue() *TransactionUpsertOne {
+// UpdateAmount sets the "amount" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateAmount() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateValue()
+		s.UpdateAmount()
 	})
 }
 
@@ -1289,17 +1289,17 @@ func (u *TransactionUpsertBulk) UpdateTo() *TransactionUpsertBulk {
 	})
 }
 
-// SetValue sets the "value" field.
-func (u *TransactionUpsertBulk) SetValue(v float64) *TransactionUpsertBulk {
+// SetAmount sets the "amount" field.
+func (u *TransactionUpsertBulk) SetAmount(v uint64) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
-		s.SetValue(v)
+		s.SetAmount(v)
 	})
 }
 
-// UpdateValue sets the "value" field to the value that was provided on create.
-func (u *TransactionUpsertBulk) UpdateValue() *TransactionUpsertBulk {
+// UpdateAmount sets the "amount" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateAmount() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateValue()
+		s.UpdateAmount()
 	})
 }
 
