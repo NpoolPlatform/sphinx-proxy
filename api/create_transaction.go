@@ -42,8 +42,8 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 	}
 
 	if in.GetAmount() <= 0 {
-		logger.Sugar().Errorf("CreateTransaction Value: %v invalid", in.GetAmount())
-		return out, status.Error(codes.InvalidArgument, "Value Invalid")
+		logger.Sugar().Errorf("CreateTransaction Amount: %v invalid", in.GetAmount())
+		return out, status.Error(codes.InvalidArgument, "Amount Invalid")
 	}
 
 	exist, err := crud.GetTransactionExist(ctx, crud.GetTransactionExistParam{TransactionID: in.GetTransactionID()})
