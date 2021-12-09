@@ -7,7 +7,7 @@ require (
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20211207121121-adb2402676f0
 	github.com/NpoolPlatform/message v0.0.0-20211209105313-0e3b812f0809
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996
-	github.com/filecoin-project/go-state-types v0.1.1 // indirect
+	github.com/filecoin-project/go-state-types v0.1.1
 	github.com/filecoin-project/lotus v1.13.1
 	github.com/filecoin-project/specs-actors v0.9.14
 	github.com/google/uuid v1.3.0

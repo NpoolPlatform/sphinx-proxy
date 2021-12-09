@@ -21,6 +21,7 @@ import (
 	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/unit"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
+	"github.com/filecoin-project/go-state-types/exitcode"
 	"github.com/filecoin-project/specs-actors/actors/builtin"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -414,9 +415,13 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			}
 			logger.Sugar().Infof("Broadcast TransactionID: %v message ok", psResponse.GetTransactionID())
 		case sphinxproxy.TransactionType_SyncMsgState:
+			_state := sphinxproxy.TransactionState_TransactionStateFail
+			if psResponse.GetExitCode() == int64(exitcode.Ok) {
+				_state = sphinxproxy.TransactionState_TransactionStateDone
+			}
 			if err := crud.UpdateTransaction(context.Background(), crud.UpdateTransactionParams{
 				TransactionID: psResponse.GetTransactionID(),
-				State:         sphinxproxy.TransactionState_TransactionStateDone,
+				State:         _state,
 				ExitCode:      psResponse.GetExitCode(),
 			}); err != nil {
 				logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
