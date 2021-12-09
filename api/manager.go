@@ -422,7 +422,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
 				continue
 			}
-			logger.Sugar().Infof("SyncMsgState TransactionID: %v message ok", psResponse.GetTransactionID())
+			logger.Sugar().Infof("SyncMsgState TransactionID: %v ExitCode: %v message ok", psResponse.GetTransactionID(), psResponse.GetExitCode())
 		}
 	}
 }
