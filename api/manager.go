@@ -501,9 +501,9 @@ func Transaction() {
 							Nonce: tran.Nonce,
 							Value: price.DBPriceToVisualPrice(tran.Amount),
 							// TODO from chain get
-							GasLimit:   10000000,
-							GasFeeCap:  1000000,
-							GasPremium: 50000,
+							GasLimit:   200000000,
+							GasFeeCap:  10000000,
+							GasPremium: 1000000,
 							Method:     uint64(builtin.MethodSend),
 						},
 					}
