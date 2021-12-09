@@ -18,7 +18,6 @@ import (
 	scconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent"
-	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/unit"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
@@ -397,7 +396,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 		case sphinxproxy.TransactionType_PreSign:
 			if err := crud.UpdateTransaction(context.Background(), crud.UpdateTransactionParams{
 				TransactionID: psResponse.GetTransactionID(),
-				State:         transaction.StateSign,
+				State:         sphinxproxy.TransactionState_TransactionStateSign,
 				Nonce:         psResponse.GetNonce(),
 			}); err != nil {
 				logger.Sugar().Infof("TransactionID: %v get nonce: %v error: %v", psResponse.GetTransactionID(), psResponse.GetNonce(), err)
@@ -407,7 +406,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 		case sphinxproxy.TransactionType_Broadcast:
 			if err := crud.UpdateTransaction(context.Background(), crud.UpdateTransactionParams{
 				TransactionID: psResponse.GetTransactionID(),
-				State:         transaction.StateSync,
+				State:         sphinxproxy.TransactionState_TransactionStateSync,
 				Cid:           psResponse.GetCID(),
 			}); err != nil {
 				logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
@@ -417,7 +416,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 		case sphinxproxy.TransactionType_SyncMsgState:
 			if err := crud.UpdateTransaction(context.Background(), crud.UpdateTransactionParams{
 				TransactionID: psResponse.GetTransactionID(),
-				State:         transaction.StateDone,
+				State:         sphinxproxy.TransactionState_TransactionStateDone,
 				ExitCode:      psResponse.GetExitCode(),
 			}); err != nil {
 				logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
@@ -469,7 +468,7 @@ func Transaction() {
 
 			for _, tran := range trans {
 				switch tran.State {
-				case transaction.StateWait:
+				case uint8(sphinxproxy.TransactionState_TransactionStateWait):
 					// from wallet get nonce/utxo
 					coinType := sphinxplugin.CoinType(tran.CoinType)
 					pluginProxy, err := getProxyPlugin(coinType)
@@ -483,7 +482,7 @@ func Transaction() {
 						TransactionID:   tran.TransactionID,
 						Address:         tran.From,
 					}
-				case transaction.StateSign:
+				case uint8(sphinxproxy.TransactionState_TransactionStateSign):
 					// sign -> broadcast
 					signProxy, err := getProxySign()
 					if err != nil {
@@ -508,7 +507,7 @@ func Transaction() {
 							Method:     uint64(builtin.MethodSend),
 						},
 					}
-				case transaction.StateSync:
+				case uint8(sphinxproxy.TransactionState_TransactionStateSync):
 					coinType := sphinxplugin.CoinType(tran.CoinType)
 					pluginProxy, err := getProxyPlugin(coinType)
 					if err != nil {

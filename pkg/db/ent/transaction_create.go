@@ -142,8 +142,8 @@ func (tc *TransactionCreate) SetNillableAmount(u *uint64) *TransactionCreate {
 }
 
 // SetState sets the "state" field.
-func (tc *TransactionCreate) SetState(t transaction.State) *TransactionCreate {
-	tc.mutation.SetState(t)
+func (tc *TransactionCreate) SetState(u uint8) *TransactionCreate {
+	tc.mutation.SetState(u)
 	return tc
 }
 
@@ -368,11 +368,6 @@ func (tc *TransactionCreate) check() error {
 	if _, ok := tc.mutation.State(); !ok {
 		return &ValidationError{Name: "state", err: errors.New(`ent: missing required field "state"`)}
 	}
-	if v, ok := tc.mutation.State(); ok {
-		if err := transaction.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "state": %w`, err)}
-		}
-	}
 	if _, ok := tc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
 	}
@@ -489,7 +484,7 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := tc.mutation.State(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
+			Type:   field.TypeUint8,
 			Value:  value,
 			Column: transaction.FieldState,
 		})
@@ -682,7 +677,7 @@ func (u *TransactionUpsert) UpdateAmount() *TransactionUpsert {
 }
 
 // SetState sets the "state" field.
-func (u *TransactionUpsert) SetState(v transaction.State) *TransactionUpsert {
+func (u *TransactionUpsert) SetState(v uint8) *TransactionUpsert {
 	u.Set(transaction.FieldState, v)
 	return u
 }
@@ -906,7 +901,7 @@ func (u *TransactionUpsertOne) UpdateAmount() *TransactionUpsertOne {
 }
 
 // SetState sets the "state" field.
-func (u *TransactionUpsertOne) SetState(v transaction.State) *TransactionUpsertOne {
+func (u *TransactionUpsertOne) SetState(v uint8) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.SetState(v)
 	})
@@ -1304,7 +1299,7 @@ func (u *TransactionUpsertBulk) UpdateAmount() *TransactionUpsertBulk {
 }
 
 // SetState sets the "state" field.
-func (u *TransactionUpsertBulk) SetState(v transaction.State) *TransactionUpsertBulk {
+func (u *TransactionUpsertBulk) SetState(v uint8) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.SetState(v)
 	})

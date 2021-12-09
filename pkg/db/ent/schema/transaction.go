@@ -42,8 +42,7 @@ func (Transaction) Fields() []ent.Field {
 		field.Uint64("amount").
 			Positive().
 			Default(0),
-		field.Enum("state").
-			Values("pending_review", "confirm", "rejected", "wait", "sign", "sync", "done", "fail"), // nonce/utxo,sign,sync,done/fail
+		field.Uint8("state"),
 		field.Uint32("created_at").
 			DefaultFunc(func() uint32 {
 				return uint32(time.Now().Unix())

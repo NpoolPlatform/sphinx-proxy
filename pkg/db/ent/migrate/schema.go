@@ -20,7 +20,7 @@ var (
 		{Name: "from", Type: field.TypeString, Default: ""},
 		{Name: "to", Type: field.TypeString, Default: ""},
 		{Name: "amount", Type: field.TypeUint64, Default: 0},
-		{Name: "state", Type: field.TypeEnum, Enums: []string{"pending_review", "confirm", "rejected", "wait", "sign", "sync", "done", "fail"}},
+		{Name: "state", Type: field.TypeUint8},
 		{Name: "created_at", Type: field.TypeUint32},
 		{Name: "updated_at", Type: field.TypeUint32},
 		{Name: "deleted_at", Type: field.TypeUint32},

@@ -154,6 +154,13 @@ func Amount(v uint64) predicate.Transaction {
 	})
 }
 
+// State applies equality check predicate on the "state" field. It's identical to StateEQ.
+func State(v uint8) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldState), v))
+	})
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v uint32) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -1000,21 +1007,21 @@ func AmountLTE(v uint64) predicate.Transaction {
 }
 
 // StateEQ applies the EQ predicate on the "state" field.
-func StateEQ(v State) predicate.Transaction {
+func StateEQ(v uint8) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldState), v))
 	})
 }
 
 // StateNEQ applies the NEQ predicate on the "state" field.
-func StateNEQ(v State) predicate.Transaction {
+func StateNEQ(v uint8) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldState), v))
 	})
 }
 
 // StateIn applies the In predicate on the "state" field.
-func StateIn(vs ...State) predicate.Transaction {
+func StateIn(vs ...uint8) predicate.Transaction {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -1031,7 +1038,7 @@ func StateIn(vs ...State) predicate.Transaction {
 }
 
 // StateNotIn applies the NotIn predicate on the "state" field.
-func StateNotIn(vs ...State) predicate.Transaction {
+func StateNotIn(vs ...uint8) predicate.Transaction {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -1044,6 +1051,34 @@ func StateNotIn(vs ...State) predicate.Transaction {
 			return
 		}
 		s.Where(sql.NotIn(s.C(FieldState), v...))
+	})
+}
+
+// StateGT applies the GT predicate on the "state" field.
+func StateGT(v uint8) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldState), v))
+	})
+}
+
+// StateGTE applies the GTE predicate on the "state" field.
+func StateGTE(v uint8) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldState), v))
+	})
+}
+
+// StateLT applies the LT predicate on the "state" field.
+func StateLT(v uint8) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldState), v))
+	})
+}
+
+// StateLTE applies the LTE predicate on the "state" field.
+func StateLTE(v uint8) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldState), v))
 	})
 }
 

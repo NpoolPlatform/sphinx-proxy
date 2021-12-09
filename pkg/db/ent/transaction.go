@@ -35,7 +35,7 @@ type Transaction struct {
 	// Amount holds the value of the "amount" field.
 	Amount uint64 `json:"amount,omitempty"`
 	// State holds the value of the "state" field.
-	State transaction.State `json:"state,omitempty"`
+	State uint8 `json:"state,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt uint32 `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -49,9 +49,9 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldCoinType, transaction.FieldExitCode, transaction.FieldAmount, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
+		case transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldCoinType, transaction.FieldExitCode, transaction.FieldAmount, transaction.FieldState, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
-		case transaction.FieldTransactionID, transaction.FieldCid, transaction.FieldFrom, transaction.FieldTo, transaction.FieldState:
+		case transaction.FieldTransactionID, transaction.FieldCid, transaction.FieldFrom, transaction.FieldTo:
 			values[i] = new(sql.NullString)
 		case transaction.FieldID:
 			values[i] = new(uuid.UUID)
@@ -131,10 +131,10 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 				t.Amount = uint64(value.Int64)
 			}
 		case transaction.FieldState:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field state", values[i])
 			} else if value.Valid {
-				t.State = transaction.State(value.String)
+				t.State = uint8(value.Int64)
 			}
 		case transaction.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {

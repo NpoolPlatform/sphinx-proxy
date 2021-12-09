@@ -5,8 +5,8 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/price"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
+	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db"
-	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 )
 
 type CreateTransactionParam struct {
@@ -27,7 +27,8 @@ func CreateTransaction(ctx context.Context, t CreateTransactionParam) error {
 		SetFrom(t.From).
 		SetTo(t.To).
 		SetAmount(price.VisualPriceToDBPrice(t.Value)).
-		SetState(transaction.StateWait).
+		// review confirm
+		SetState(uint8(sphinxproxy.TransactionState_TransactionStateWait)).
 		Save(ctx)
 	return err
 }

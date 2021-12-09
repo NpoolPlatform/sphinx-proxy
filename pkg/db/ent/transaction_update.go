@@ -180,8 +180,15 @@ func (tu *TransactionUpdate) AddAmount(u uint64) *TransactionUpdate {
 }
 
 // SetState sets the "state" field.
-func (tu *TransactionUpdate) SetState(t transaction.State) *TransactionUpdate {
-	tu.mutation.SetState(t)
+func (tu *TransactionUpdate) SetState(u uint8) *TransactionUpdate {
+	tu.mutation.ResetState()
+	tu.mutation.SetState(u)
+	return tu
+}
+
+// AddState adds u to the "state" field.
+func (tu *TransactionUpdate) AddState(u uint8) *TransactionUpdate {
+	tu.mutation.AddState(u)
 	return tu
 }
 
@@ -336,11 +343,6 @@ func (tu *TransactionUpdate) check() error {
 			return &ValidationError{Name: "amount", err: fmt.Errorf("ent: validator failed for field \"amount\": %w", err)}
 		}
 	}
-	if v, ok := tu.mutation.State(); ok {
-		if err := transaction.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
-		}
-	}
 	return nil
 }
 
@@ -462,7 +464,14 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tu.mutation.State(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
+			Type:   field.TypeUint8,
+			Value:  value,
+			Column: transaction.FieldState,
+		})
+	}
+	if value, ok := tu.mutation.AddedState(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint8,
 			Value:  value,
 			Column: transaction.FieldState,
 		})
@@ -682,8 +691,15 @@ func (tuo *TransactionUpdateOne) AddAmount(u uint64) *TransactionUpdateOne {
 }
 
 // SetState sets the "state" field.
-func (tuo *TransactionUpdateOne) SetState(t transaction.State) *TransactionUpdateOne {
-	tuo.mutation.SetState(t)
+func (tuo *TransactionUpdateOne) SetState(u uint8) *TransactionUpdateOne {
+	tuo.mutation.ResetState()
+	tuo.mutation.SetState(u)
+	return tuo
+}
+
+// AddState adds u to the "state" field.
+func (tuo *TransactionUpdateOne) AddState(u uint8) *TransactionUpdateOne {
+	tuo.mutation.AddState(u)
 	return tuo
 }
 
@@ -845,11 +861,6 @@ func (tuo *TransactionUpdateOne) check() error {
 			return &ValidationError{Name: "amount", err: fmt.Errorf("ent: validator failed for field \"amount\": %w", err)}
 		}
 	}
-	if v, ok := tuo.mutation.State(); ok {
-		if err := transaction.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
-		}
-	}
 	return nil
 }
 
@@ -988,7 +999,14 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	}
 	if value, ok := tuo.mutation.State(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
+			Type:   field.TypeUint8,
+			Value:  value,
+			Column: transaction.FieldState,
+		})
+	}
+	if value, ok := tuo.mutation.AddedState(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint8,
 			Value:  value,
 			Column: transaction.FieldState,
 		})

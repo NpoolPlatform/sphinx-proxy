@@ -46,9 +46,9 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		return out, status.Error(codes.InvalidArgument, "Value Invalid")
 	}
 
-	exist, err := crud.GetTransactionExist(ctx, in.GetTransactionID())
+	exist, err := crud.GetTransactionExist(ctx, crud.GetTransactionExistParam{TransactionID: in.GetTransactionID()})
 	if err != nil {
-		logger.Sugar().Errorf("CreateTransaction cal GetTransaction error: %v", err)
+		logger.Sugar().Errorf("CreateTransaction cal GetTransactionExist error: %v", err)
 		return out, status.Error(codes.Internal, "internal server error")
 	}
 

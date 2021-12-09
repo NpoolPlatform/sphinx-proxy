@@ -46,7 +46,8 @@ type TransactionMutation struct {
 	to                  *string
 	amount              *uint64
 	addamount           *uint64
-	state               *transaction.State
+	state               *uint8
+	addstate            *uint8
 	created_at          *uint32
 	addcreated_at       *uint32
 	updated_at          *uint32
@@ -569,12 +570,13 @@ func (m *TransactionMutation) ResetAmount() {
 }
 
 // SetState sets the "state" field.
-func (m *TransactionMutation) SetState(t transaction.State) {
-	m.state = &t
+func (m *TransactionMutation) SetState(u uint8) {
+	m.state = &u
+	m.addstate = nil
 }
 
 // State returns the value of the "state" field in the mutation.
-func (m *TransactionMutation) State() (r transaction.State, exists bool) {
+func (m *TransactionMutation) State() (r uint8, exists bool) {
 	v := m.state
 	if v == nil {
 		return
@@ -585,7 +587,7 @@ func (m *TransactionMutation) State() (r transaction.State, exists bool) {
 // OldState returns the old "state" field's value of the Transaction entity.
 // If the Transaction object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TransactionMutation) OldState(ctx context.Context) (v transaction.State, err error) {
+func (m *TransactionMutation) OldState(ctx context.Context) (v uint8, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldState is only allowed on UpdateOne operations")
 	}
@@ -599,9 +601,28 @@ func (m *TransactionMutation) OldState(ctx context.Context) (v transaction.State
 	return oldValue.State, nil
 }
 
+// AddState adds u to the "state" field.
+func (m *TransactionMutation) AddState(u uint8) {
+	if m.addstate != nil {
+		*m.addstate += u
+	} else {
+		m.addstate = &u
+	}
+}
+
+// AddedState returns the value that was added to the "state" field in this mutation.
+func (m *TransactionMutation) AddedState() (r uint8, exists bool) {
+	v := m.addstate
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetState resets all changes to the "state" field.
 func (m *TransactionMutation) ResetState() {
 	m.state = nil
+	m.addstate = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -973,7 +994,7 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 		m.SetAmount(v)
 		return nil
 	case transaction.FieldState:
-		v, ok := value.(transaction.State)
+		v, ok := value.(uint8)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1023,6 +1044,9 @@ func (m *TransactionMutation) AddedFields() []string {
 	if m.addamount != nil {
 		fields = append(fields, transaction.FieldAmount)
 	}
+	if m.addstate != nil {
+		fields = append(fields, transaction.FieldState)
+	}
 	if m.addcreated_at != nil {
 		fields = append(fields, transaction.FieldCreatedAt)
 	}
@@ -1050,6 +1074,8 @@ func (m *TransactionMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedExitCode()
 	case transaction.FieldAmount:
 		return m.AddedAmount()
+	case transaction.FieldState:
+		return m.AddedState()
 	case transaction.FieldCreatedAt:
 		return m.AddedCreatedAt()
 	case transaction.FieldUpdatedAt:
@@ -1099,6 +1125,13 @@ func (m *TransactionMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddAmount(v)
+		return nil
+	case transaction.FieldState:
+		v, ok := value.(uint8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddState(v)
 		return nil
 	case transaction.FieldCreatedAt:
 		v, ok := value.(uint32)

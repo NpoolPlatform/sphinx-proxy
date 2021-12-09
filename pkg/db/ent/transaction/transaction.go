@@ -3,8 +3,6 @@
 package transaction
 
 import (
-	"fmt"
-
 	"github.com/google/uuid"
 )
 
@@ -107,32 +105,3 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
-
-// State defines the type for the "state" enum field.
-type State string
-
-// State values.
-const (
-	StatePendingReview State = "pending_review"
-	StateConfirm       State = "confirm"
-	StateRejected      State = "rejected"
-	StateWait          State = "wait"
-	StateSign          State = "sign"
-	StateSync          State = "sync"
-	StateDone          State = "done"
-	StateFail          State = "fail"
-)
-
-func (s State) String() string {
-	return string(s)
-}
-
-// StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
-func StateValidator(s State) error {
-	switch s {
-	case StatePendingReview, StateConfirm, StateRejected, StateWait, StateSign, StateSync, StateDone, StateFail:
-		return nil
-	default:
-		return fmt.Errorf("transaction: invalid enum value for state field: %q", s)
-	}
-}
