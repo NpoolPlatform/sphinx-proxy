@@ -12,6 +12,7 @@ require (
 	github.com/filecoin-project/specs-actors v0.9.14
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/ugorji/go v1.2.6 // indirect
 	github.com/urfave/cli/v2 v2.3.0
