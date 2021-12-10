@@ -32,7 +32,8 @@ func UpdateTransaction(ctx context.Context, t UpdateTransactionParams) error {
 	case sphinxproxy.TransactionState_TransactionStateSync:
 		stm.SetCid(t.Cid)
 		stm.Where(transaction.StateEQ(uint8(sphinxproxy.TransactionState_TransactionStateSign)))
-	case sphinxproxy.TransactionState_TransactionStateDone:
+	case sphinxproxy.TransactionState_TransactionStateDone,
+		sphinxproxy.TransactionState_TransactionStateFail:
 		stm.SetExitCode(t.ExitCode)
 		stm.Where(transaction.StateEQ(uint8(sphinxproxy.TransactionState_TransactionStateSync)))
 	}
