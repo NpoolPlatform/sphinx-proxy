@@ -23,6 +23,12 @@ if [ ! $? -eq 0 ]; then
 fi
 set -e
 
+registry=uhub.service.ucloud.cn
+
+if [ "x" != $3 ]; then
+  registry=$3
+fi
+
 service_name=$1
 ## For development environment, pass the second variable
 if [ "xdevelopment" == "x$2" ]; then
@@ -43,7 +49,7 @@ cd $OUTPUT/.${service_name}.tmp
 
 user=`whoami`
 if [ "$user" == "root" ]; then
-    docker build -t entropypool/$service_name:$version .
+    docker build -t $registry/entropypool/$service_name:$version .
 else
-    sudo docker build -t entropypool/$service_name:$version .
+    sudo docker build -t $registry/entropypool/$service_name:$version .
 fi

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: sphinx-proxy
-        image: entropypool/sphinx-proxy:latest
+        image: uhub.service.ucloud.cn/entropypool/sphinx-proxy:latest
         imagePullPolicy: Always
         env:
         - name: ENV_ENVIRONMENT_TARGET
