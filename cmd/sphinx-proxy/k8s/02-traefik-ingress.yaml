@@ -18,7 +18,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: sphinx-proxy
+                name: sphinx-proxy-grpc
                 port:
                   number: 50001
     - host: sphinx.proxy.api.xpool.top

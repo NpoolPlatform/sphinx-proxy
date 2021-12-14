@@ -17,7 +17,7 @@ spec:
         paths:
           - path: /api/sphinx-proxy(/|$)(.*)
             backend:
-              serviceName: sphinx-proxy
+              serviceName: sphinx-proxy-http
               servicePort: 50000
     - host: sphinx.proxy.development.xpool.top
       http: *http_rules

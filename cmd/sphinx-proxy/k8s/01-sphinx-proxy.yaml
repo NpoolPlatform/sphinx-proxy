@@ -42,7 +42,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sphinx-proxy
+  name: sphinx-proxy-http
   namespace: kube-system
 
 spec:
@@ -56,7 +56,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sphinx-proxy
+  name: sphinx-proxy-grpc
   namespace: kube-system
   annotations:
     traefik.ingress.kubernetes.io/service.serversscheme: h2c
