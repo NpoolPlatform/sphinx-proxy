@@ -44,6 +44,20 @@ kind: Service
 metadata:
   name: sphinx-proxy
   namespace: kube-system
+
+spec:
+  ports:
+  - name: http
+    port: 50000
+  selector:
+    app: sphinx-proxy
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sphinx-proxy
+  namespace: kube-system
   annotations:
     traefik.ingress.kubernetes.io/service.serversscheme: h2c
 

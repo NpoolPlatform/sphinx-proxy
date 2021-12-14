@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sphinx-proxy-traefik-ingress
+  namespace: kube-system
+  annotations:
+    k8s.kuboard.cn/displayName: sphinx-proxy-traefik
+    k8s.kuboard.cn/workload: sphinx-proxy-traefik
+    kubernetes.io/ingress.class: "traefik-internet"
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+
+spec:
+  rules:
+    - host: sphinx.proxy.api.npool.top
+      http: &sphinx_proxy_grpc_rules
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sphinx-proxy
+                port:
+                  number: 50001
+    - host: sphinx.proxy.api.xpool.top
+      http: *sphinx_proxy_grpc_rules
