@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: sphinx-proxy-nginx-ingress
+  namespace: kube-system
+  annotations:
+    k8s.kuboard.cn/displayName: sphinx-proxy-nginx
+    k8s.kuboard.cn/workload: sphinx-proxy-nginx
+    kubernetes.io/ingress.class: "devops-vpn-nginx-internal"
+    nginx.com/sticky-cookie-services: "serviceName=kuboard srv_id expires=1h path=/"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+
+spec:
+  rules:
+    - host: api.internal-devops.development.npool.top
+      http: &http_rules
+        paths:
+          - path: /api/sphinx-proxy(/|$)(.*)
+            backend:
+              serviceName: sphinx-proxy
+              servicePort: 50000
+    - host: api.internal-devops.development.xpool.top
+      http: *http_rules
+    - host: www.internal-devops.development.npool.top
+      http: *http_rules
+    - host: www.internal-devops.development.xpool.top
+      http: *http_rules

@@ -4,3 +4,4 @@ commonLabels:
 resources:
 - 01-sphinx-proxy.yaml
 - 02-ingress.yaml
+- 03-nginx-ingress.yaml
