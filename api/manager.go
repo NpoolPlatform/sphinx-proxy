@@ -540,6 +540,7 @@ func registerCoin(coinInfo *coininfo.CreateCoinInfoRequest) error {
 	if err != nil {
 		return err
 	}
+	defer ackConn.Close()
 
 	client := coininfo.NewSphinxCoinInfoClient(ackConn)
 
