@@ -96,6 +96,7 @@ func newSignStream(stream sphinxproxy.SphinxProxy_ProxySignServer) {
 
 func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 	defer wg.Done()
+send:
 	for !s.closeFlag {
 		select {
 		case info := <-s.walletNew:
@@ -118,6 +119,10 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 						message: fmt.Sprintf("proxy->sign send create wallet error: %v", err),
 					}
 				}
+				if checkCode(err) {
+					s.closeChannel <- struct{}{}
+					break send
+				}
 				continue
 			}
 			logger.Sugar().Infof("proxy->sign TransactionID: %v ok", info.GetTransactionID())
@@ -137,6 +142,10 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 					info.GetMessage(),
 					err,
 				)
+				if checkCode(err) {
+					s.closeChannel <- struct{}{}
+					break send
+				}
 				continue
 			}
 			logger.Sugar().Infof("proxy->sign TransactionID: %v ok", info.GetTransactionID())
@@ -266,6 +275,7 @@ func (lp lmPluginType) append(coinType sphinxplugin.CoinType, lmp *mPlugin) {
 func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for !p.closeFlag {
+		var request *sphinxproxy.ProxyPluginRequest
 		select {
 		case info := <-p.balance:
 			if err := p.pluginServer.Send(&sphinxproxy.ProxyPluginRequest{
@@ -282,74 +292,63 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 					info.GetAddress(),
 					err,
 				)
-				if ch, ok := balanceDoneChannel.Load(info.GetTransactionID()); ok {
-					ch.(chan balanceDoneInfo) <- balanceDoneInfo{
-						success: false,
-						message: fmt.Sprintf("proxy->plugin send get wallet balance error: %v", err),
-					}
+				ch, ok := balanceDoneChannel.Load(info.GetTransactionID())
+				if !ok {
+					logger.Sugar().Warnf("TransactionID: %v Addr: %v get balance maybe timeout", info.GetTransactionID(), info.GetAddress())
 				}
-				continue
+
+				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
+					success: false,
+					message: fmt.Sprintf("proxy->plugin send get wallet balance error: %v", err),
+				}
+
+				if checkCode(err) {
+					p.closeChannel <- struct{}{}
+					break
+				}
 			}
 			logger.Sugar().Infof("proxy->plugin TransactionID: %v Addr: %v ok", info.GetTransactionID(), info.GetAddress())
+			continue
 		case info := <-p.preSign:
-			if err := p.pluginServer.Send(&sphinxproxy.ProxyPluginRequest{
+			request = &sphinxproxy.ProxyPluginRequest{
 				CoinType:        info.GetCoinType(),
 				TransactionType: info.GetTransactionType(),
 				TransactionID:   info.GetTransactionID(),
 				Address:         info.GetAddress(),
 				Message:         info.GetMessage(),
-			}); err != nil {
-				logger.Sugar().Errorf(
-					"proxy->plugin get nonce TransactionID: %v TransactionType %v, CoinType: %v Address: %v error: %v",
-					info.GetTransactionID(),
-					info.GetTransactionType(),
-					info.GetCoinType(),
-					info.GetAddress(),
-					err,
-				)
-				continue
 			}
-			logger.Sugar().Infof("proxy->plugin get nonce TransactionID: %v ok", info.GetTransactionID())
 		case info := <-p.mpoolPush:
-			if err := p.pluginServer.Send(&sphinxproxy.ProxyPluginRequest{
+			request = &sphinxproxy.ProxyPluginRequest{
 				CoinType:        info.GetCoinType(),
 				TransactionType: info.GetTransactionType(),
 				TransactionID:   info.GetTransactionID(),
 				Message:         info.GetMessage(),
 				Signature:       info.GetSignature(),
-			}); err != nil {
-				logger.Sugar().Errorf(
-					"proxy->plugin TransactionID: %v TransactionType %v, CoinType: %v Message: %v error: %v",
-					info.GetTransactionID(),
-					info.GetTransactionType(),
-					info.GetCoinType(),
-					info.GetMessage(),
-					err,
-				)
-				continue
 			}
-			logger.Sugar().Infof("proxy->plugin TransactionID: %v ok", info.GetTransactionID())
 		case info := <-p.syncMsg:
-			if err := p.pluginServer.Send(&sphinxproxy.ProxyPluginRequest{
+			request = &sphinxproxy.ProxyPluginRequest{
 				CoinType:        info.GetCoinType(),
 				TransactionType: info.GetTransactionType(),
 				TransactionID:   info.GetTransactionID(),
 				Message:         info.GetMessage(),
 				CID:             info.GetCID(),
-			}); err != nil {
-				logger.Sugar().Errorf(
-					"proxy->plugin TransactionID: %v TransactionType %v, CID: %v, CoinType: %v Message: %v error: %v",
-					info.GetTransactionID(),
-					info.GetTransactionType(),
-					info.GetCID(),
-					info.GetCoinType(),
-					info.GetMessage(),
-					err,
-				)
-				continue
 			}
-			logger.Sugar().Infof("proxy->plugin TransactionID: %v ok", info.GetTransactionID())
 		}
+		if err := p.pluginServer.Send(request); err != nil {
+			logger.Sugar().Errorf(
+				"proxy->plugin TransactionID: %v TransactionType: %v CoinType: %v Address: %v error: %v",
+				request.GetTransactionID(),
+				request.GetTransactionType(),
+				request.GetCoinType(),
+				request.GetAddress(),
+				err,
+			)
+			if checkCode(err) {
+				p.closeChannel <- struct{}{}
+				break
+			}
+		}
+		logger.Sugar().Infof("proxy->plugin TransactionType: %v TransactionID: %v Addr: %v ok", request.GetTransactionType(), request.GetTransactionID(), request.GetAddress())
 	}
 }
 
@@ -386,12 +385,15 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				logger.Sugar().Warnf("AttoFIL2FIL balance from->to(%v->%v) not exact", psResponse.GetBalance(), v)
 			}
 
-			if ch, ok := balanceDoneChannel.Load(psResponse.GetTransactionID()); ok {
-				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
-					success:    true,
-					balance:    v,
-					balanceStr: psResponse.GetBalanceStr(),
-				}
+			ch, ok := balanceDoneChannel.Load(psResponse.GetTransactionID())
+			if !ok {
+				logger.Sugar().Warnf("TransactionID: %v Addr: %v get balance maybe timeout", psResponse.GetTransactionID(), psResponse)
+				continue
+			}
+			ch.(chan balanceDoneInfo) <- balanceDoneInfo{
+				success:    true,
+				balance:    v,
+				balanceStr: psResponse.GetBalanceStr(),
 			}
 			logger.Sugar().Infof("TransactionID: %v Addr: %v get balance ok", psResponse.GetTransactionID(), psResponse)
 		case sphinxproxy.TransactionType_PreSign:
