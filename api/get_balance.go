@@ -63,11 +63,11 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 	select {
 	case <-time.After(sconst.GrpcTimeout):
 		balanceDoneChannel.Delete(uid)
-		logger.Sugar().Error("get wallet balance wait response timeout")
+		logger.Sugar().Errorf("get wallet: %v balance wait response timeout", in.GetAddress())
 		return out, status.Error(codes.Internal, "internal server error")
 	case info := <-done:
 		if !info.success {
-			logger.Sugar().Errorf("wait get wallet balance done error: %v", info.message)
+			logger.Sugar().Errorf("wait get wallet:%v balance done error: %v", in.GetAddress(), info.message)
 			return out, status.Error(codes.Internal, "internal server error")
 		}
 		out = &sphinxproxy.GetBalanceResponse{
