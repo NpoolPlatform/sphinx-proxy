@@ -8,6 +8,9 @@ import (
 const (
 	// GrpcTimeout ..
 	GrpcTimeout = time.Second * 10
+
+	// Test
+	TestGrpcTimeout = time.Minute * 10
 	// ServiceName ..
 	ServiceName = "sphinx-proxy.npool.top"
 

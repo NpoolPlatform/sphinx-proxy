@@ -51,6 +51,7 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 		done = make(chan balanceDoneInfo)
 	)
 
+	now := time.Now()
 	balanceDoneChannel.Store(uid, done)
 	pluginProxy.balance <- &sphinxproxy.ProxyPluginRequest{
 		CoinType:        coinType,
@@ -61,11 +62,13 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 
 	// timeout, block wait done
 	select {
-	case <-time.After(sconst.GrpcTimeout):
+	case <-time.After(sconst.TestGrpcTimeout):
 		balanceDoneChannel.Delete(uid)
 		logger.Sugar().Errorf("get transactionID: %v wallet: %v balance wait response timeout", uid, in.GetAddress())
 		return out, status.Error(codes.Internal, "internal server error")
 	case info := <-done:
+		elasp := time.Since(now).Seconds()
+		logger.Sugar().Warnf("get transactionID: %v wallet: %v balance wait response use: %vs", uid, in.GetAddress(), elasp)
 		balanceDoneChannel.Delete(uid)
 		if !info.success {
 			logger.Sugar().Errorf("wait get wallet:%v balance done error: %v", in.GetAddress(), info.message)
