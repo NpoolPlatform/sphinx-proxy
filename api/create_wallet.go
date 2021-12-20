@@ -59,6 +59,7 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		logger.Sugar().Error("create wallet wait response timeout")
 		return out, status.Error(codes.Internal, "internal server error")
 	case info := <-done:
+		walletDoneChannel.Delete(uid)
 		if !info.success {
 			logger.Sugar().Errorf("wait create wallet done error: %v", info.message)
 			return out, status.Error(codes.Internal, "internal server error")
@@ -68,7 +69,6 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 				Address: info.address,
 			},
 		}
-		walletDoneChannel.Delete(uid)
 	}
 
 	return out, nil
