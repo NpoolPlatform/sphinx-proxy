@@ -19,8 +19,11 @@ type UpdateTransactionParams struct {
 
 // UpdateTransaction update transaction info
 func UpdateTransaction(ctx context.Context, t UpdateTransactionParams) error {
-	stm := db.
-		Client().
+	client, err := db.Client()
+	if err != nil {
+		return err
+	}
+	stm := client.
 		Transaction.
 		Update().
 		Where(transaction.TransactionIDEQ(t.TransactionID))
@@ -38,14 +41,17 @@ func UpdateTransaction(ctx context.Context, t UpdateTransactionParams) error {
 		stm.Where(transaction.StateEQ(uint8(sphinxproxy.TransactionState_TransactionStateSync)))
 	}
 
-	_, err := stm.SetState(uint8(t.State)).
+	_, err = stm.SetState(uint8(t.State)).
 		Save(ctx)
 	return err
 }
 
 func ConfirmTransaction(ctx context.Context, transactionID string) error {
-	return db.
-		Client().
+	client, err := db.Client()
+	if err != nil {
+		return err
+	}
+	return client.
 		Transaction.
 		Update().
 		SetState(uint8(sphinxproxy.TransactionState_TransactionStateWait)).
@@ -53,8 +59,11 @@ func ConfirmTransaction(ctx context.Context, transactionID string) error {
 }
 
 func RejectTransaction(ctx context.Context, transactionID string) error {
-	return db.
-		Client().
+	client, err := db.Client()
+	if err != nil {
+		return err
+	}
+	return client.
 		Transaction.
 		Update().
 		SetState(uint8(sphinxproxy.TransactionState_TransactionStateRejected)).

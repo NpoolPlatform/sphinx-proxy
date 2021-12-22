@@ -18,10 +18,11 @@ type CreateTransactionParam struct {
 }
 
 func CreateTransaction(ctx context.Context, t CreateTransactionParam) error {
-	_, err := db.
-		Client().
-		Transaction.
-		Create().
+	client, err := db.Client()
+	if err != nil {
+		return err
+	}
+	_, err = client.Transaction.Create().
 		SetCoinType(int32(t.CoinType)).
 		SetTransactionID(t.TransactionID).
 		SetFrom(t.From).
