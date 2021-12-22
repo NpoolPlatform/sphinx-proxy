@@ -11,7 +11,11 @@ import (
 
 // GetTransaction ..
 func GetTransaction(ctx context.Context, transactionID string) (*ent.Transaction, error) {
-	return db.Client().
+	client, err := db.Client()
+	if err != nil {
+		return nil, err
+	}
+	return client.
 		Transaction.
 		Query().
 		Where(
@@ -26,7 +30,11 @@ type GetTransactionExistParam struct {
 }
 
 func GetTransactionExist(ctx context.Context, params GetTransactionExistParam) (bool, error) {
-	stm := db.Client().
+	client, err := db.Client()
+	if err != nil {
+		return false, err
+	}
+	stm := client.
 		Transaction.
 		Query().
 		Where(

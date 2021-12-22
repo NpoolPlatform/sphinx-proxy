@@ -12,7 +12,11 @@ import (
 
 // GetTransactions ..
 func GetTransactions(ctx context.Context) ([]*ent.Transaction, error) {
-	return db.Client().
+	client, err := db.Client()
+	if err != nil {
+		return nil, err
+	}
+	return client.
 		Transaction.
 		Query().
 		Where(
