@@ -6,6 +6,7 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
+	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -45,6 +46,9 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		logger.Sugar().Errorf("CreateTransaction Amount: %v invalid", in.GetAmount())
 		return out, status.Error(codes.InvalidArgument, "Amount Invalid")
 	}
+
+	ctx, cancel := context.WithTimeout(ctx, sconst.GrpcTimeout)
+	defer cancel()
 
 	exist, err := crud.GetTransactionExist(ctx, crud.GetTransactionExistParam{TransactionID: in.GetTransactionID()})
 	if err != nil {
