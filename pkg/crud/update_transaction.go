@@ -45,27 +45,3 @@ func UpdateTransaction(ctx context.Context, t UpdateTransactionParams) error {
 		Save(ctx)
 	return err
 }
-
-func ConfirmTransaction(ctx context.Context, transactionID string) error {
-	client, err := db.Client()
-	if err != nil {
-		return err
-	}
-	return client.
-		Transaction.
-		Update().
-		SetState(uint8(sphinxproxy.TransactionState_TransactionStateWait)).
-		Where(transaction.TransactionIDEQ(transactionID)).Exec(ctx)
-}
-
-func RejectTransaction(ctx context.Context, transactionID string) error {
-	client, err := db.Client()
-	if err != nil {
-		return err
-	}
-	return client.
-		Transaction.
-		Update().
-		SetState(uint8(sphinxproxy.TransactionState_TransactionStateRejected)).
-		Where(transaction.TransactionIDEQ(transactionID)).Exec(ctx)
-}
