@@ -28,7 +28,6 @@ func CreateTransaction(ctx context.Context, t CreateTransactionParam) error {
 		SetFrom(t.From).
 		SetTo(t.To).
 		SetAmount(price.VisualPriceToDBPrice(t.Value)).
-		// review confirm
 		SetState(uint8(sphinxproxy.TransactionState_TransactionStateWait)).
 		Save(ctx)
 	return err

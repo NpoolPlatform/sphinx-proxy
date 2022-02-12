@@ -373,7 +373,8 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			lmPlugin.append(psResponse.GetCoinType(), p)
 			if err := registerCoin(&coininfo.CreateCoinInfoRequest{
 				Name: utils.TruncateCoinTypePrefix(psResponse.GetCoinType()),
-				Unit: "FIL",
+				ENV:  psResponse.GetENV(),
+				Unit: psResponse.GetUnit(),
 			}); err != nil {
 				logger.Sugar().Infof("plugin register new coin: %v error: %v", psResponse.GetCoinType(), err)
 				continue
