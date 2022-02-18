@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 
@@ -33,7 +34,7 @@ type TransactionMutation struct {
 	typ                 string
 	id                  *uuid.UUID
 	nonce               *uint64
-	addnonce            *uint64
+	addnonce            *int64
 	transaction_type    *int8
 	addtransaction_type *int8
 	coin_type           *int32
@@ -45,15 +46,15 @@ type TransactionMutation struct {
 	from                *string
 	to                  *string
 	amount              *uint64
-	addamount           *uint64
+	addamount           *int64
 	state               *uint8
-	addstate            *uint8
+	addstate            *int8
 	created_at          *uint32
-	addcreated_at       *uint32
+	addcreated_at       *int32
 	updated_at          *uint32
-	addupdated_at       *uint32
+	addupdated_at       *int32
 	deleted_at          *uint32
-	adddeleted_at       *uint32
+	adddeleted_at       *int32
 	clearedFields       map[string]struct{}
 	done                bool
 	oldValue            func(context.Context) (*Transaction, error)
@@ -90,7 +91,7 @@ func withTransactionID(id uuid.UUID) transactionOption {
 		m.oldValue = func(ctx context.Context) (*Transaction, error) {
 			once.Do(func() {
 				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
+					err = errors.New("querying old values post mutation is not allowed")
 				} else {
 					value, err = m.Client().Transaction.Get(ctx, id)
 				}
@@ -123,7 +124,7 @@ func (m TransactionMutation) Client() *Client {
 // it returns an error otherwise.
 func (m TransactionMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
 	tx := &Tx{config: m.config}
 	tx.init()
@@ -143,6 +144,25 @@ func (m *TransactionMutation) ID() (id uuid.UUID, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TransactionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Transaction.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
 }
 
 // SetNonce sets the "nonce" field.
@@ -165,10 +185,10 @@ func (m *TransactionMutation) Nonce() (r uint64, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *TransactionMutation) OldNonce(ctx context.Context) (v uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldNonce is only allowed on UpdateOne operations")
+		return v, errors.New("OldNonce is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldNonce requires an ID field in the mutation")
+		return v, errors.New("OldNonce requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -178,7 +198,7 @@ func (m *TransactionMutation) OldNonce(ctx context.Context) (v uint64, err error
 }
 
 // AddNonce adds u to the "nonce" field.
-func (m *TransactionMutation) AddNonce(u uint64) {
+func (m *TransactionMutation) AddNonce(u int64) {
 	if m.addnonce != nil {
 		*m.addnonce += u
 	} else {
@@ -187,7 +207,7 @@ func (m *TransactionMutation) AddNonce(u uint64) {
 }
 
 // AddedNonce returns the value that was added to the "nonce" field in this mutation.
-func (m *TransactionMutation) AddedNonce() (r uint64, exists bool) {
+func (m *TransactionMutation) AddedNonce() (r int64, exists bool) {
 	v := m.addnonce
 	if v == nil {
 		return
@@ -221,10 +241,10 @@ func (m *TransactionMutation) TransactionType() (r int8, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *TransactionMutation) OldTransactionType(ctx context.Context) (v int8, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldTransactionType is only allowed on UpdateOne operations")
+		return v, errors.New("OldTransactionType is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldTransactionType requires an ID field in the mutation")
+		return v, errors.New("OldTransactionType requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -277,10 +297,10 @@ func (m *TransactionMutation) CoinType() (r int32, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *TransactionMutation) OldCoinType(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCoinType is only allowed on UpdateOne operations")
+		return v, errors.New("OldCoinType is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCoinType requires an ID field in the mutation")
+		return v, errors.New("OldCoinType requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -332,10 +352,10 @@ func (m *TransactionMutation) TransactionID() (r string, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *TransactionMutation) OldTransactionID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldTransactionID is only allowed on UpdateOne operations")
+		return v, errors.New("OldTransactionID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldTransactionID requires an ID field in the mutation")
+		return v, errors.New("OldTransactionID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -368,10 +388,10 @@ func (m *TransactionMutation) Cid() (r string, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *TransactionMutation) OldCid(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCid is only allowed on UpdateOne operations")
+		return v, errors.New("OldCid is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCid requires an ID field in the mutation")
+		return v, errors.New("OldCid requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -405,10 +425,10 @@ func (m *TransactionMutation) ExitCode() (r int64, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *TransactionMutation) OldExitCode(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldExitCode is only allowed on UpdateOne operations")
+		return v, errors.New("OldExitCode is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldExitCode requires an ID field in the mutation")
+		return v, errors.New("OldExitCode requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -460,10 +480,10 @@ func (m *TransactionMutation) From() (r string, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *TransactionMutation) OldFrom(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldFrom is only allowed on UpdateOne operations")
+		return v, errors.New("OldFrom is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldFrom requires an ID field in the mutation")
+		return v, errors.New("OldFrom requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -496,10 +516,10 @@ func (m *TransactionMutation) To() (r string, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *TransactionMutation) OldTo(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldTo is only allowed on UpdateOne operations")
+		return v, errors.New("OldTo is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldTo requires an ID field in the mutation")
+		return v, errors.New("OldTo requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -533,10 +553,10 @@ func (m *TransactionMutation) Amount() (r uint64, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *TransactionMutation) OldAmount(ctx context.Context) (v uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldAmount is only allowed on UpdateOne operations")
+		return v, errors.New("OldAmount is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldAmount requires an ID field in the mutation")
+		return v, errors.New("OldAmount requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -546,7 +566,7 @@ func (m *TransactionMutation) OldAmount(ctx context.Context) (v uint64, err erro
 }
 
 // AddAmount adds u to the "amount" field.
-func (m *TransactionMutation) AddAmount(u uint64) {
+func (m *TransactionMutation) AddAmount(u int64) {
 	if m.addamount != nil {
 		*m.addamount += u
 	} else {
@@ -555,7 +575,7 @@ func (m *TransactionMutation) AddAmount(u uint64) {
 }
 
 // AddedAmount returns the value that was added to the "amount" field in this mutation.
-func (m *TransactionMutation) AddedAmount() (r uint64, exists bool) {
+func (m *TransactionMutation) AddedAmount() (r int64, exists bool) {
 	v := m.addamount
 	if v == nil {
 		return
@@ -589,10 +609,10 @@ func (m *TransactionMutation) State() (r uint8, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *TransactionMutation) OldState(ctx context.Context) (v uint8, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldState is only allowed on UpdateOne operations")
+		return v, errors.New("OldState is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldState requires an ID field in the mutation")
+		return v, errors.New("OldState requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -602,7 +622,7 @@ func (m *TransactionMutation) OldState(ctx context.Context) (v uint8, err error)
 }
 
 // AddState adds u to the "state" field.
-func (m *TransactionMutation) AddState(u uint8) {
+func (m *TransactionMutation) AddState(u int8) {
 	if m.addstate != nil {
 		*m.addstate += u
 	} else {
@@ -611,7 +631,7 @@ func (m *TransactionMutation) AddState(u uint8) {
 }
 
 // AddedState returns the value that was added to the "state" field in this mutation.
-func (m *TransactionMutation) AddedState() (r uint8, exists bool) {
+func (m *TransactionMutation) AddedState() (r int8, exists bool) {
 	v := m.addstate
 	if v == nil {
 		return
@@ -645,10 +665,10 @@ func (m *TransactionMutation) CreatedAt() (r uint32, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *TransactionMutation) OldCreatedAt(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -658,7 +678,7 @@ func (m *TransactionMutation) OldCreatedAt(ctx context.Context) (v uint32, err e
 }
 
 // AddCreatedAt adds u to the "created_at" field.
-func (m *TransactionMutation) AddCreatedAt(u uint32) {
+func (m *TransactionMutation) AddCreatedAt(u int32) {
 	if m.addcreated_at != nil {
 		*m.addcreated_at += u
 	} else {
@@ -667,7 +687,7 @@ func (m *TransactionMutation) AddCreatedAt(u uint32) {
 }
 
 // AddedCreatedAt returns the value that was added to the "created_at" field in this mutation.
-func (m *TransactionMutation) AddedCreatedAt() (r uint32, exists bool) {
+func (m *TransactionMutation) AddedCreatedAt() (r int32, exists bool) {
 	v := m.addcreated_at
 	if v == nil {
 		return
@@ -701,10 +721,10 @@ func (m *TransactionMutation) UpdatedAt() (r uint32, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *TransactionMutation) OldUpdatedAt(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -714,7 +734,7 @@ func (m *TransactionMutation) OldUpdatedAt(ctx context.Context) (v uint32, err e
 }
 
 // AddUpdatedAt adds u to the "updated_at" field.
-func (m *TransactionMutation) AddUpdatedAt(u uint32) {
+func (m *TransactionMutation) AddUpdatedAt(u int32) {
 	if m.addupdated_at != nil {
 		*m.addupdated_at += u
 	} else {
@@ -723,7 +743,7 @@ func (m *TransactionMutation) AddUpdatedAt(u uint32) {
 }
 
 // AddedUpdatedAt returns the value that was added to the "updated_at" field in this mutation.
-func (m *TransactionMutation) AddedUpdatedAt() (r uint32, exists bool) {
+func (m *TransactionMutation) AddedUpdatedAt() (r int32, exists bool) {
 	v := m.addupdated_at
 	if v == nil {
 		return
@@ -757,10 +777,10 @@ func (m *TransactionMutation) DeletedAt() (r uint32, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *TransactionMutation) OldDeletedAt(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldDeletedAt is only allowed on UpdateOne operations")
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldDeletedAt requires an ID field in the mutation")
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -770,7 +790,7 @@ func (m *TransactionMutation) OldDeletedAt(ctx context.Context) (v uint32, err e
 }
 
 // AddDeletedAt adds u to the "deleted_at" field.
-func (m *TransactionMutation) AddDeletedAt(u uint32) {
+func (m *TransactionMutation) AddDeletedAt(u int32) {
 	if m.adddeleted_at != nil {
 		*m.adddeleted_at += u
 	} else {
@@ -779,7 +799,7 @@ func (m *TransactionMutation) AddDeletedAt(u uint32) {
 }
 
 // AddedDeletedAt returns the value that was added to the "deleted_at" field in this mutation.
-func (m *TransactionMutation) AddedDeletedAt() (r uint32, exists bool) {
+func (m *TransactionMutation) AddedDeletedAt() (r int32, exists bool) {
 	v := m.adddeleted_at
 	if v == nil {
 		return
@@ -1092,7 +1112,7 @@ func (m *TransactionMutation) AddedField(name string) (ent.Value, bool) {
 func (m *TransactionMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case transaction.FieldNonce:
-		v, ok := value.(uint64)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1120,35 +1140,35 @@ func (m *TransactionMutation) AddField(name string, value ent.Value) error {
 		m.AddExitCode(v)
 		return nil
 	case transaction.FieldAmount:
-		v, ok := value.(uint64)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddAmount(v)
 		return nil
 	case transaction.FieldState:
-		v, ok := value.(uint8)
+		v, ok := value.(int8)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddState(v)
 		return nil
 	case transaction.FieldCreatedAt:
-		v, ok := value.(uint32)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddCreatedAt(v)
 		return nil
 	case transaction.FieldUpdatedAt:
-		v, ok := value.(uint32)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddUpdatedAt(v)
 		return nil
 	case transaction.FieldDeletedAt:
-		v, ok := value.(uint32)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

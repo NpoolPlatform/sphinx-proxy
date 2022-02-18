@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -42,7 +43,7 @@ func (tu *TransactionUpdate) SetNillableNonce(u *uint64) *TransactionUpdate {
 }
 
 // AddNonce adds u to the "nonce" field.
-func (tu *TransactionUpdate) AddNonce(u uint64) *TransactionUpdate {
+func (tu *TransactionUpdate) AddNonce(u int64) *TransactionUpdate {
 	tu.mutation.AddNonce(u)
 	return tu
 }
@@ -174,7 +175,7 @@ func (tu *TransactionUpdate) SetNillableAmount(u *uint64) *TransactionUpdate {
 }
 
 // AddAmount adds u to the "amount" field.
-func (tu *TransactionUpdate) AddAmount(u uint64) *TransactionUpdate {
+func (tu *TransactionUpdate) AddAmount(u int64) *TransactionUpdate {
 	tu.mutation.AddAmount(u)
 	return tu
 }
@@ -187,7 +188,7 @@ func (tu *TransactionUpdate) SetState(u uint8) *TransactionUpdate {
 }
 
 // AddState adds u to the "state" field.
-func (tu *TransactionUpdate) AddState(u uint8) *TransactionUpdate {
+func (tu *TransactionUpdate) AddState(u int8) *TransactionUpdate {
 	tu.mutation.AddState(u)
 	return tu
 }
@@ -208,7 +209,7 @@ func (tu *TransactionUpdate) SetNillableCreatedAt(u *uint32) *TransactionUpdate 
 }
 
 // AddCreatedAt adds u to the "created_at" field.
-func (tu *TransactionUpdate) AddCreatedAt(u uint32) *TransactionUpdate {
+func (tu *TransactionUpdate) AddCreatedAt(u int32) *TransactionUpdate {
 	tu.mutation.AddCreatedAt(u)
 	return tu
 }
@@ -221,7 +222,7 @@ func (tu *TransactionUpdate) SetUpdatedAt(u uint32) *TransactionUpdate {
 }
 
 // AddUpdatedAt adds u to the "updated_at" field.
-func (tu *TransactionUpdate) AddUpdatedAt(u uint32) *TransactionUpdate {
+func (tu *TransactionUpdate) AddUpdatedAt(u int32) *TransactionUpdate {
 	tu.mutation.AddUpdatedAt(u)
 	return tu
 }
@@ -242,7 +243,7 @@ func (tu *TransactionUpdate) SetNillableDeletedAt(u *uint32) *TransactionUpdate 
 }
 
 // AddDeletedAt adds u to the "deleted_at" field.
-func (tu *TransactionUpdate) AddDeletedAt(u uint32) *TransactionUpdate {
+func (tu *TransactionUpdate) AddDeletedAt(u int32) *TransactionUpdate {
 	tu.mutation.AddDeletedAt(u)
 	return tu
 }
@@ -325,22 +326,22 @@ func (tu *TransactionUpdate) defaults() {
 func (tu *TransactionUpdate) check() error {
 	if v, ok := tu.mutation.TransactionID(); ok {
 		if err := transaction.TransactionIDValidator(v); err != nil {
-			return &ValidationError{Name: "transaction_id", err: fmt.Errorf("ent: validator failed for field \"transaction_id\": %w", err)}
+			return &ValidationError{Name: "transaction_id", err: fmt.Errorf(`ent: validator failed for field "Transaction.transaction_id": %w`, err)}
 		}
 	}
 	if v, ok := tu.mutation.From(); ok {
 		if err := transaction.FromValidator(v); err != nil {
-			return &ValidationError{Name: "from", err: fmt.Errorf("ent: validator failed for field \"from\": %w", err)}
+			return &ValidationError{Name: "from", err: fmt.Errorf(`ent: validator failed for field "Transaction.from": %w`, err)}
 		}
 	}
 	if v, ok := tu.mutation.To(); ok {
 		if err := transaction.ToValidator(v); err != nil {
-			return &ValidationError{Name: "to", err: fmt.Errorf("ent: validator failed for field \"to\": %w", err)}
+			return &ValidationError{Name: "to", err: fmt.Errorf(`ent: validator failed for field "Transaction.to": %w`, err)}
 		}
 	}
 	if v, ok := tu.mutation.Amount(); ok {
 		if err := transaction.AmountValidator(v); err != nil {
-			return &ValidationError{Name: "amount", err: fmt.Errorf("ent: validator failed for field \"amount\": %w", err)}
+			return &ValidationError{Name: "amount", err: fmt.Errorf(`ent: validator failed for field "Transaction.amount": %w`, err)}
 		}
 	}
 	return nil
@@ -553,7 +554,7 @@ func (tuo *TransactionUpdateOne) SetNillableNonce(u *uint64) *TransactionUpdateO
 }
 
 // AddNonce adds u to the "nonce" field.
-func (tuo *TransactionUpdateOne) AddNonce(u uint64) *TransactionUpdateOne {
+func (tuo *TransactionUpdateOne) AddNonce(u int64) *TransactionUpdateOne {
 	tuo.mutation.AddNonce(u)
 	return tuo
 }
@@ -685,7 +686,7 @@ func (tuo *TransactionUpdateOne) SetNillableAmount(u *uint64) *TransactionUpdate
 }
 
 // AddAmount adds u to the "amount" field.
-func (tuo *TransactionUpdateOne) AddAmount(u uint64) *TransactionUpdateOne {
+func (tuo *TransactionUpdateOne) AddAmount(u int64) *TransactionUpdateOne {
 	tuo.mutation.AddAmount(u)
 	return tuo
 }
@@ -698,7 +699,7 @@ func (tuo *TransactionUpdateOne) SetState(u uint8) *TransactionUpdateOne {
 }
 
 // AddState adds u to the "state" field.
-func (tuo *TransactionUpdateOne) AddState(u uint8) *TransactionUpdateOne {
+func (tuo *TransactionUpdateOne) AddState(u int8) *TransactionUpdateOne {
 	tuo.mutation.AddState(u)
 	return tuo
 }
@@ -719,7 +720,7 @@ func (tuo *TransactionUpdateOne) SetNillableCreatedAt(u *uint32) *TransactionUpd
 }
 
 // AddCreatedAt adds u to the "created_at" field.
-func (tuo *TransactionUpdateOne) AddCreatedAt(u uint32) *TransactionUpdateOne {
+func (tuo *TransactionUpdateOne) AddCreatedAt(u int32) *TransactionUpdateOne {
 	tuo.mutation.AddCreatedAt(u)
 	return tuo
 }
@@ -732,7 +733,7 @@ func (tuo *TransactionUpdateOne) SetUpdatedAt(u uint32) *TransactionUpdateOne {
 }
 
 // AddUpdatedAt adds u to the "updated_at" field.
-func (tuo *TransactionUpdateOne) AddUpdatedAt(u uint32) *TransactionUpdateOne {
+func (tuo *TransactionUpdateOne) AddUpdatedAt(u int32) *TransactionUpdateOne {
 	tuo.mutation.AddUpdatedAt(u)
 	return tuo
 }
@@ -753,7 +754,7 @@ func (tuo *TransactionUpdateOne) SetNillableDeletedAt(u *uint32) *TransactionUpd
 }
 
 // AddDeletedAt adds u to the "deleted_at" field.
-func (tuo *TransactionUpdateOne) AddDeletedAt(u uint32) *TransactionUpdateOne {
+func (tuo *TransactionUpdateOne) AddDeletedAt(u int32) *TransactionUpdateOne {
 	tuo.mutation.AddDeletedAt(u)
 	return tuo
 }
@@ -843,22 +844,22 @@ func (tuo *TransactionUpdateOne) defaults() {
 func (tuo *TransactionUpdateOne) check() error {
 	if v, ok := tuo.mutation.TransactionID(); ok {
 		if err := transaction.TransactionIDValidator(v); err != nil {
-			return &ValidationError{Name: "transaction_id", err: fmt.Errorf("ent: validator failed for field \"transaction_id\": %w", err)}
+			return &ValidationError{Name: "transaction_id", err: fmt.Errorf(`ent: validator failed for field "Transaction.transaction_id": %w`, err)}
 		}
 	}
 	if v, ok := tuo.mutation.From(); ok {
 		if err := transaction.FromValidator(v); err != nil {
-			return &ValidationError{Name: "from", err: fmt.Errorf("ent: validator failed for field \"from\": %w", err)}
+			return &ValidationError{Name: "from", err: fmt.Errorf(`ent: validator failed for field "Transaction.from": %w`, err)}
 		}
 	}
 	if v, ok := tuo.mutation.To(); ok {
 		if err := transaction.ToValidator(v); err != nil {
-			return &ValidationError{Name: "to", err: fmt.Errorf("ent: validator failed for field \"to\": %w", err)}
+			return &ValidationError{Name: "to", err: fmt.Errorf(`ent: validator failed for field "Transaction.to": %w`, err)}
 		}
 	}
 	if v, ok := tuo.mutation.Amount(); ok {
 		if err := transaction.AmountValidator(v); err != nil {
-			return &ValidationError{Name: "amount", err: fmt.Errorf("ent: validator failed for field \"amount\": %w", err)}
+			return &ValidationError{Name: "amount", err: fmt.Errorf(`ent: validator failed for field "Transaction.amount": %w`, err)}
 		}
 	}
 	return nil
@@ -877,7 +878,7 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	}
 	id, ok := tuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Transaction.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Transaction.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := tuo.fields; len(fields) > 0 {

@@ -195,6 +195,14 @@ func (tc *TransactionCreate) SetID(u uuid.UUID) *TransactionCreate {
 	return tc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableID(u *uuid.UUID) *TransactionCreate {
+	if u != nil {
+		tc.SetID(*u)
+	}
+	return tc
+}
+
 // Mutation returns the TransactionMutation object of the builder.
 func (tc *TransactionCreate) Mutation() *TransactionMutation {
 	return tc.mutation
@@ -319,63 +327,63 @@ func (tc *TransactionCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (tc *TransactionCreate) check() error {
 	if _, ok := tc.mutation.Nonce(); !ok {
-		return &ValidationError{Name: "nonce", err: errors.New(`ent: missing required field "nonce"`)}
+		return &ValidationError{Name: "nonce", err: errors.New(`ent: missing required field "Transaction.nonce"`)}
 	}
 	if _, ok := tc.mutation.TransactionType(); !ok {
-		return &ValidationError{Name: "transaction_type", err: errors.New(`ent: missing required field "transaction_type"`)}
+		return &ValidationError{Name: "transaction_type", err: errors.New(`ent: missing required field "Transaction.transaction_type"`)}
 	}
 	if _, ok := tc.mutation.CoinType(); !ok {
-		return &ValidationError{Name: "coin_type", err: errors.New(`ent: missing required field "coin_type"`)}
+		return &ValidationError{Name: "coin_type", err: errors.New(`ent: missing required field "Transaction.coin_type"`)}
 	}
 	if _, ok := tc.mutation.TransactionID(); !ok {
-		return &ValidationError{Name: "transaction_id", err: errors.New(`ent: missing required field "transaction_id"`)}
+		return &ValidationError{Name: "transaction_id", err: errors.New(`ent: missing required field "Transaction.transaction_id"`)}
 	}
 	if v, ok := tc.mutation.TransactionID(); ok {
 		if err := transaction.TransactionIDValidator(v); err != nil {
-			return &ValidationError{Name: "transaction_id", err: fmt.Errorf(`ent: validator failed for field "transaction_id": %w`, err)}
+			return &ValidationError{Name: "transaction_id", err: fmt.Errorf(`ent: validator failed for field "Transaction.transaction_id": %w`, err)}
 		}
 	}
 	if _, ok := tc.mutation.Cid(); !ok {
-		return &ValidationError{Name: "cid", err: errors.New(`ent: missing required field "cid"`)}
+		return &ValidationError{Name: "cid", err: errors.New(`ent: missing required field "Transaction.cid"`)}
 	}
 	if _, ok := tc.mutation.ExitCode(); !ok {
-		return &ValidationError{Name: "exit_code", err: errors.New(`ent: missing required field "exit_code"`)}
+		return &ValidationError{Name: "exit_code", err: errors.New(`ent: missing required field "Transaction.exit_code"`)}
 	}
 	if _, ok := tc.mutation.From(); !ok {
-		return &ValidationError{Name: "from", err: errors.New(`ent: missing required field "from"`)}
+		return &ValidationError{Name: "from", err: errors.New(`ent: missing required field "Transaction.from"`)}
 	}
 	if v, ok := tc.mutation.From(); ok {
 		if err := transaction.FromValidator(v); err != nil {
-			return &ValidationError{Name: "from", err: fmt.Errorf(`ent: validator failed for field "from": %w`, err)}
+			return &ValidationError{Name: "from", err: fmt.Errorf(`ent: validator failed for field "Transaction.from": %w`, err)}
 		}
 	}
 	if _, ok := tc.mutation.To(); !ok {
-		return &ValidationError{Name: "to", err: errors.New(`ent: missing required field "to"`)}
+		return &ValidationError{Name: "to", err: errors.New(`ent: missing required field "Transaction.to"`)}
 	}
 	if v, ok := tc.mutation.To(); ok {
 		if err := transaction.ToValidator(v); err != nil {
-			return &ValidationError{Name: "to", err: fmt.Errorf(`ent: validator failed for field "to": %w`, err)}
+			return &ValidationError{Name: "to", err: fmt.Errorf(`ent: validator failed for field "Transaction.to": %w`, err)}
 		}
 	}
 	if _, ok := tc.mutation.Amount(); !ok {
-		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "amount"`)}
+		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "Transaction.amount"`)}
 	}
 	if v, ok := tc.mutation.Amount(); ok {
 		if err := transaction.AmountValidator(v); err != nil {
-			return &ValidationError{Name: "amount", err: fmt.Errorf(`ent: validator failed for field "amount": %w`, err)}
+			return &ValidationError{Name: "amount", err: fmt.Errorf(`ent: validator failed for field "Transaction.amount": %w`, err)}
 		}
 	}
 	if _, ok := tc.mutation.State(); !ok {
-		return &ValidationError{Name: "state", err: errors.New(`ent: missing required field "state"`)}
+		return &ValidationError{Name: "state", err: errors.New(`ent: missing required field "Transaction.state"`)}
 	}
 	if _, ok := tc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Transaction.created_at"`)}
 	}
 	if _, ok := tc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Transaction.updated_at"`)}
 	}
 	if _, ok := tc.mutation.DeletedAt(); !ok {
-		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "deleted_at"`)}
+		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "Transaction.deleted_at"`)}
 	}
 	return nil
 }
@@ -389,7 +397,11 @@ func (tc *TransactionCreate) sqlSave(ctx context.Context) (*Transaction, error) 
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -408,7 +420,7 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 	_spec.OnConflict = tc.conflict
 	if id, ok := tc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := tc.mutation.Nonce(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -580,6 +592,12 @@ func (u *TransactionUpsert) UpdateNonce() *TransactionUpsert {
 	return u
 }
 
+// AddNonce adds v to the "nonce" field.
+func (u *TransactionUpsert) AddNonce(v uint64) *TransactionUpsert {
+	u.Add(transaction.FieldNonce, v)
+	return u
+}
+
 // SetTransactionType sets the "transaction_type" field.
 func (u *TransactionUpsert) SetTransactionType(v int8) *TransactionUpsert {
 	u.Set(transaction.FieldTransactionType, v)
@@ -592,6 +610,12 @@ func (u *TransactionUpsert) UpdateTransactionType() *TransactionUpsert {
 	return u
 }
 
+// AddTransactionType adds v to the "transaction_type" field.
+func (u *TransactionUpsert) AddTransactionType(v int8) *TransactionUpsert {
+	u.Add(transaction.FieldTransactionType, v)
+	return u
+}
+
 // SetCoinType sets the "coin_type" field.
 func (u *TransactionUpsert) SetCoinType(v int32) *TransactionUpsert {
 	u.Set(transaction.FieldCoinType, v)
@@ -601,6 +625,12 @@ func (u *TransactionUpsert) SetCoinType(v int32) *TransactionUpsert {
 // UpdateCoinType sets the "coin_type" field to the value that was provided on create.
 func (u *TransactionUpsert) UpdateCoinType() *TransactionUpsert {
 	u.SetExcluded(transaction.FieldCoinType)
+	return u
+}
+
+// AddCoinType adds v to the "coin_type" field.
+func (u *TransactionUpsert) AddCoinType(v int32) *TransactionUpsert {
+	u.Add(transaction.FieldCoinType, v)
 	return u
 }
 
@@ -640,6 +670,12 @@ func (u *TransactionUpsert) UpdateExitCode() *TransactionUpsert {
 	return u
 }
 
+// AddExitCode adds v to the "exit_code" field.
+func (u *TransactionUpsert) AddExitCode(v int64) *TransactionUpsert {
+	u.Add(transaction.FieldExitCode, v)
+	return u
+}
+
 // SetFrom sets the "from" field.
 func (u *TransactionUpsert) SetFrom(v string) *TransactionUpsert {
 	u.Set(transaction.FieldFrom, v)
@@ -676,6 +712,12 @@ func (u *TransactionUpsert) UpdateAmount() *TransactionUpsert {
 	return u
 }
 
+// AddAmount adds v to the "amount" field.
+func (u *TransactionUpsert) AddAmount(v uint64) *TransactionUpsert {
+	u.Add(transaction.FieldAmount, v)
+	return u
+}
+
 // SetState sets the "state" field.
 func (u *TransactionUpsert) SetState(v uint8) *TransactionUpsert {
 	u.Set(transaction.FieldState, v)
@@ -685,6 +727,12 @@ func (u *TransactionUpsert) SetState(v uint8) *TransactionUpsert {
 // UpdateState sets the "state" field to the value that was provided on create.
 func (u *TransactionUpsert) UpdateState() *TransactionUpsert {
 	u.SetExcluded(transaction.FieldState)
+	return u
+}
+
+// AddState adds v to the "state" field.
+func (u *TransactionUpsert) AddState(v uint8) *TransactionUpsert {
+	u.Add(transaction.FieldState, v)
 	return u
 }
 
@@ -700,6 +748,12 @@ func (u *TransactionUpsert) UpdateCreatedAt() *TransactionUpsert {
 	return u
 }
 
+// AddCreatedAt adds v to the "created_at" field.
+func (u *TransactionUpsert) AddCreatedAt(v uint32) *TransactionUpsert {
+	u.Add(transaction.FieldCreatedAt, v)
+	return u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (u *TransactionUpsert) SetUpdatedAt(v uint32) *TransactionUpsert {
 	u.Set(transaction.FieldUpdatedAt, v)
@@ -709,6 +763,12 @@ func (u *TransactionUpsert) SetUpdatedAt(v uint32) *TransactionUpsert {
 // UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
 func (u *TransactionUpsert) UpdateUpdatedAt() *TransactionUpsert {
 	u.SetExcluded(transaction.FieldUpdatedAt)
+	return u
+}
+
+// AddUpdatedAt adds v to the "updated_at" field.
+func (u *TransactionUpsert) AddUpdatedAt(v uint32) *TransactionUpsert {
+	u.Add(transaction.FieldUpdatedAt, v)
 	return u
 }
 
@@ -724,7 +784,13 @@ func (u *TransactionUpsert) UpdateDeletedAt() *TransactionUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create except the ID field.
+// AddDeletedAt adds v to the "deleted_at" field.
+func (u *TransactionUpsert) AddDeletedAt(v uint32) *TransactionUpsert {
+	u.Add(transaction.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.Transaction.Create().
@@ -781,6 +847,13 @@ func (u *TransactionUpsertOne) SetNonce(v uint64) *TransactionUpsertOne {
 	})
 }
 
+// AddNonce adds v to the "nonce" field.
+func (u *TransactionUpsertOne) AddNonce(v uint64) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddNonce(v)
+	})
+}
+
 // UpdateNonce sets the "nonce" field to the value that was provided on create.
 func (u *TransactionUpsertOne) UpdateNonce() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -795,6 +868,13 @@ func (u *TransactionUpsertOne) SetTransactionType(v int8) *TransactionUpsertOne 
 	})
 }
 
+// AddTransactionType adds v to the "transaction_type" field.
+func (u *TransactionUpsertOne) AddTransactionType(v int8) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddTransactionType(v)
+	})
+}
+
 // UpdateTransactionType sets the "transaction_type" field to the value that was provided on create.
 func (u *TransactionUpsertOne) UpdateTransactionType() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -806,6 +886,13 @@ func (u *TransactionUpsertOne) UpdateTransactionType() *TransactionUpsertOne {
 func (u *TransactionUpsertOne) SetCoinType(v int32) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.SetCoinType(v)
+	})
+}
+
+// AddCoinType adds v to the "coin_type" field.
+func (u *TransactionUpsertOne) AddCoinType(v int32) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddCoinType(v)
 	})
 }
 
@@ -851,6 +938,13 @@ func (u *TransactionUpsertOne) SetExitCode(v int64) *TransactionUpsertOne {
 	})
 }
 
+// AddExitCode adds v to the "exit_code" field.
+func (u *TransactionUpsertOne) AddExitCode(v int64) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddExitCode(v)
+	})
+}
+
 // UpdateExitCode sets the "exit_code" field to the value that was provided on create.
 func (u *TransactionUpsertOne) UpdateExitCode() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -893,6 +987,13 @@ func (u *TransactionUpsertOne) SetAmount(v uint64) *TransactionUpsertOne {
 	})
 }
 
+// AddAmount adds v to the "amount" field.
+func (u *TransactionUpsertOne) AddAmount(v uint64) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddAmount(v)
+	})
+}
+
 // UpdateAmount sets the "amount" field to the value that was provided on create.
 func (u *TransactionUpsertOne) UpdateAmount() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -904,6 +1005,13 @@ func (u *TransactionUpsertOne) UpdateAmount() *TransactionUpsertOne {
 func (u *TransactionUpsertOne) SetState(v uint8) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.SetState(v)
+	})
+}
+
+// AddState adds v to the "state" field.
+func (u *TransactionUpsertOne) AddState(v uint8) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddState(v)
 	})
 }
 
@@ -921,6 +1029,13 @@ func (u *TransactionUpsertOne) SetCreatedAt(v uint32) *TransactionUpsertOne {
 	})
 }
 
+// AddCreatedAt adds v to the "created_at" field.
+func (u *TransactionUpsertOne) AddCreatedAt(v uint32) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddCreatedAt(v)
+	})
+}
+
 // UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
 func (u *TransactionUpsertOne) UpdateCreatedAt() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -935,6 +1050,13 @@ func (u *TransactionUpsertOne) SetUpdatedAt(v uint32) *TransactionUpsertOne {
 	})
 }
 
+// AddUpdatedAt adds v to the "updated_at" field.
+func (u *TransactionUpsertOne) AddUpdatedAt(v uint32) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddUpdatedAt(v)
+	})
+}
+
 // UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
 func (u *TransactionUpsertOne) UpdateUpdatedAt() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -946,6 +1068,13 @@ func (u *TransactionUpsertOne) UpdateUpdatedAt() *TransactionUpsertOne {
 func (u *TransactionUpsertOne) SetDeletedAt(v uint32) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.SetDeletedAt(v)
+	})
+}
+
+// AddDeletedAt adds v to the "deleted_at" field.
+func (u *TransactionUpsertOne) AddDeletedAt(v uint32) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddDeletedAt(v)
 	})
 }
 
@@ -1119,7 +1248,7 @@ type TransactionUpsertBulk struct {
 	create *TransactionCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.Transaction.Create().
@@ -1179,6 +1308,13 @@ func (u *TransactionUpsertBulk) SetNonce(v uint64) *TransactionUpsertBulk {
 	})
 }
 
+// AddNonce adds v to the "nonce" field.
+func (u *TransactionUpsertBulk) AddNonce(v uint64) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddNonce(v)
+	})
+}
+
 // UpdateNonce sets the "nonce" field to the value that was provided on create.
 func (u *TransactionUpsertBulk) UpdateNonce() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1193,6 +1329,13 @@ func (u *TransactionUpsertBulk) SetTransactionType(v int8) *TransactionUpsertBul
 	})
 }
 
+// AddTransactionType adds v to the "transaction_type" field.
+func (u *TransactionUpsertBulk) AddTransactionType(v int8) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddTransactionType(v)
+	})
+}
+
 // UpdateTransactionType sets the "transaction_type" field to the value that was provided on create.
 func (u *TransactionUpsertBulk) UpdateTransactionType() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1204,6 +1347,13 @@ func (u *TransactionUpsertBulk) UpdateTransactionType() *TransactionUpsertBulk {
 func (u *TransactionUpsertBulk) SetCoinType(v int32) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.SetCoinType(v)
+	})
+}
+
+// AddCoinType adds v to the "coin_type" field.
+func (u *TransactionUpsertBulk) AddCoinType(v int32) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddCoinType(v)
 	})
 }
 
@@ -1249,6 +1399,13 @@ func (u *TransactionUpsertBulk) SetExitCode(v int64) *TransactionUpsertBulk {
 	})
 }
 
+// AddExitCode adds v to the "exit_code" field.
+func (u *TransactionUpsertBulk) AddExitCode(v int64) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddExitCode(v)
+	})
+}
+
 // UpdateExitCode sets the "exit_code" field to the value that was provided on create.
 func (u *TransactionUpsertBulk) UpdateExitCode() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1291,6 +1448,13 @@ func (u *TransactionUpsertBulk) SetAmount(v uint64) *TransactionUpsertBulk {
 	})
 }
 
+// AddAmount adds v to the "amount" field.
+func (u *TransactionUpsertBulk) AddAmount(v uint64) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddAmount(v)
+	})
+}
+
 // UpdateAmount sets the "amount" field to the value that was provided on create.
 func (u *TransactionUpsertBulk) UpdateAmount() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1302,6 +1466,13 @@ func (u *TransactionUpsertBulk) UpdateAmount() *TransactionUpsertBulk {
 func (u *TransactionUpsertBulk) SetState(v uint8) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.SetState(v)
+	})
+}
+
+// AddState adds v to the "state" field.
+func (u *TransactionUpsertBulk) AddState(v uint8) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddState(v)
 	})
 }
 
@@ -1319,6 +1490,13 @@ func (u *TransactionUpsertBulk) SetCreatedAt(v uint32) *TransactionUpsertBulk {
 	})
 }
 
+// AddCreatedAt adds v to the "created_at" field.
+func (u *TransactionUpsertBulk) AddCreatedAt(v uint32) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddCreatedAt(v)
+	})
+}
+
 // UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
 func (u *TransactionUpsertBulk) UpdateCreatedAt() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1333,6 +1511,13 @@ func (u *TransactionUpsertBulk) SetUpdatedAt(v uint32) *TransactionUpsertBulk {
 	})
 }
 
+// AddUpdatedAt adds v to the "updated_at" field.
+func (u *TransactionUpsertBulk) AddUpdatedAt(v uint32) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddUpdatedAt(v)
+	})
+}
+
 // UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
 func (u *TransactionUpsertBulk) UpdateUpdatedAt() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1344,6 +1529,13 @@ func (u *TransactionUpsertBulk) UpdateUpdatedAt() *TransactionUpsertBulk {
 func (u *TransactionUpsertBulk) SetDeletedAt(v uint32) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.SetDeletedAt(v)
+	})
+}
+
+// AddDeletedAt adds v to the "deleted_at" field.
+func (u *TransactionUpsertBulk) AddDeletedAt(v uint32) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddDeletedAt(v)
 	})
 }
 
