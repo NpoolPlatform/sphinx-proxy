@@ -17,7 +17,8 @@ var (
 // CoinType ..
 func CoinType(coinType sphinxplugin.CoinType) error {
 	switch coinType {
-	case sphinxplugin.CoinType_CoinTypeBTC, sphinxplugin.CoinType_CoinTypeFIL:
+	case sphinxplugin.CoinType_CoinTypefilecoin,
+		sphinxplugin.CoinType_CoinTypebtc:
 	default:
 		return ErrCoinTypeNotSupport
 	}

@@ -6,7 +6,7 @@ require (
 	entgo.io/ent v0.10.0
 	github.com/NpoolPlatform/api-manager v0.0.0-20220205130236-69d286e72dba
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220120091626-4e8035637592
-	github.com/NpoolPlatform/message v0.0.0-20220207160408-a790395bc42a
+	github.com/NpoolPlatform/message v0.0.0-20220223054211-429bba1e9dce
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996
 	github.com/filecoin-project/go-state-types v0.1.1
 	github.com/filecoin-project/lotus v1.13.1
@@ -16,7 +16,7 @@ require (
 	github.com/shopspring/decimal v1.3.1
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/tools v0.1.9 // indirect
-	google.golang.org/grpc v1.43.0
+	google.golang.org/grpc v1.44.0
 )
 
 replace google.golang.org/grpc => github.com/grpc/grpc-go v1.41.0

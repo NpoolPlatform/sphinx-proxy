@@ -27,6 +27,13 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+/*
+!important
+now record sign and plugin conn in service memory, cause not start multi pod,
+next we can record the connect in db or other service(eg: redis), then
+we can start multi pod
+*/
+
 type lmPluginType map[sphinxplugin.CoinType][]*mPlugin
 
 var (
