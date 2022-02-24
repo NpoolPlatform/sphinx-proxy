@@ -201,8 +201,11 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 				CoinType:        ssResponse.GetCoinType(),
 				TransactionType: sphinxproxy.TransactionType_Broadcast,
 				TransactionID:   ssResponse.GetTransactionID(),
-				Message:         ssResponse.GetInfo().GetMessage(),
-				Signature:       ssResponse.GetInfo().GetSignature(),
+				// fil
+				Message:   ssResponse.GetInfo().GetMessage(),
+				Signature: ssResponse.GetInfo().GetSignature(),
+				// btc
+				MsgTx: ssResponse.GetMsgTx(),
 			}
 		}
 	}
@@ -331,6 +334,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 				TransactionID:   info.GetTransactionID(),
 				Message:         info.GetMessage(),
 				Signature:       info.GetSignature(),
+				MsgTx:           info.GetMsgTx(),
 			}
 		case info := <-p.syncMsg:
 			request = &sphinxproxy.ProxyPluginRequest{
@@ -388,11 +392,14 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			}
 			logger.Sugar().Infof("plugin register new coin: %v ok", psResponse.GetCoinType())
 		case sphinxproxy.TransactionType_Balance:
-			v, exact := unit.AttoFIL2FIL(psResponse.GetBalance())
-			if !exact {
-				logger.Sugar().Warnf("AttoFIL2FIL balance from->to(%v->%v) not exact", psResponse.GetBalance(), v)
+			v := psResponse.GetBalance()
+			if psResponse.GetCoinType() == sphinxplugin.CoinType_CoinTypefilecoin {
+				var exact bool
+				v, exact = unit.AttoFIL2FIL(psResponse.GetBalance())
+				if !exact {
+					logger.Sugar().Warnf("AttoFIL2FIL balance from->to(%v->%v) not exact", psResponse.GetBalance(), v)
+				}
 			}
-
 			ch, ok := balanceDoneChannel.Load(psResponse.GetTransactionID())
 			if !ok {
 				logger.Sugar().Warnf("TransactionID: %v Addr: %v get balance maybe timeout", psResponse.GetTransactionID(), psResponse)
@@ -408,12 +415,12 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			if err := crud.UpdateTransaction(context.Background(), crud.UpdateTransactionParams{
 				TransactionID: psResponse.GetTransactionID(),
 				State:         sphinxproxy.TransactionState_TransactionStateSign,
-				Nonce:         psResponse.GetNonce(),
+				Nonce:         psResponse.GetMessage().GetNonce(),
 			}); err != nil {
-				logger.Sugar().Infof("TransactionID: %v get nonce: %v error: %v", psResponse.GetTransactionID(), psResponse.GetNonce(), err)
+				logger.Sugar().Infof("TransactionID: %v get nonce: %v error: %v", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce(), err)
 				continue
 			}
-			logger.Sugar().Infof("TransactionID: %v get nonce: %v ok", psResponse.GetTransactionID(), psResponse.GetNonce())
+			logger.Sugar().Infof("TransactionID: %v get nonce: %v ok", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce())
 		case sphinxproxy.TransactionType_Broadcast:
 			if err := crud.UpdateTransaction(context.Background(), crud.UpdateTransactionParams{
 				TransactionID: psResponse.GetTransactionID(),

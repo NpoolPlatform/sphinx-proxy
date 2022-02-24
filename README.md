@@ -12,6 +12,7 @@
     - [步骤](#步骤)
     - [最佳实践](#最佳实践)
     - [关于mysql](#关于mysql)
+    - [优化](#优化)
 
 -----------
 ### 功能
@@ -28,19 +29,19 @@
 
 Transaction:
 
-| Field                 | Type              | Unique | Optional | Nillable | Default | UpdateDefault | Immutable | StructTag                              | Validators |
-| :-------------------- | :---------------- | :----- | :------- | :------- | :------ | :------------ | :-------- | :------------------------------------- | :--------- |
-| id                    | string            | true   | false    | false    | true    | false         | false     | json:"id,omitempty"                    | 0          |
-| nonce                 | uint64            | false  | false    | false    | true    | false         | false     | json:"nonce,omitempty"                 | 0          |
-| coin_type             | int8              | false  | false    | false    | true    | false         | false     | json:"coin_type,omitempty"             | 0          |
+| Field          | Type              | Unique | Optional | Nillable | Default | UpdateDefault | Immutable | StructTag                       | Validators |
+| :------------- | :---------------- | :----- | :------- | :------- | :------ | :------------ | :-------- | :------------------------------ | :--------- |
+| id             | string            | true   | false    | false    | true    | false         | false     | json:"id,omitempty"             | 0          |
+| nonce          | uint64            | false  | false    | false    | true    | false         | false     | json:"nonce,omitempty"          | 0          |
+| coin_type      | int8              | false  | false    | false    | true    | false         | false     | json:"coin_type,omitempty"      | 0          |
 | transaction_id | string            | false  | false    | false    | true    | false         | false     | json:"transaction_id,omitempty" | 1          |
-| from                  | string            | false  | false    | false    | true    | false         | false     | json:"from,omitempty"                  | 1          |
-| to                    | string            | false  | false    | false    | true    | false         | false     | json:"to,omitempty"                    | 1          |
-| value                 | float64           | false  | false    | false    | true    | false         | false     | json:"value,omitempty"                 | 0          |
-| state                 | transaction.State | false  | false    | false    | false   | false         | false     | json:"state,omitempty"                 | 0          |
-| create_at             | uint32            | false  | false    | false    | true    | false         | false     | json:"create_at,omitempty"             | 0          |
-| update_at             | uint32            | false  | false    | false    | true    | true          | false     | json:"update_at,omitempty"             | 0          |
-| delete_at             | uint32            | false  | false    | false    | true    | false         | false     | json:"delete_at,omitempty"             | 0          |
+| from           | string            | false  | false    | false    | true    | false         | false     | json:"from,omitempty"           | 1          |
+| to             | string            | false  | false    | false    | true    | false         | false     | json:"to,omitempty"             | 1          |
+| value          | float64           | false  | false    | false    | true    | false         | false     | json:"value,omitempty"          | 0          |
+| state          | transaction.State | false  | false    | false    | false   | false         | false     | json:"state,omitempty"          | 0          |
+| create_at      | uint32            | false  | false    | false    | true    | false         | false     | json:"create_at,omitempty"      | 0          |
+| update_at      | uint32            | false  | false    | false    | true    | true          | false     | json:"update_at,omitempty"      | 0          |
+| delete_at      | uint32            | false  | false    | false    | true    | false         | false     | json:"delete_at,omitempty"      | 0          |
 
 ### 命令
 * make init ```初始化仓库，创建go.mod```
@@ -63,3 +64,7 @@ Transaction:
 ### 关于mysql
 * 创建app后，从app.Mysql()获取本地mysql client
 * [文档参考](https://entgo.io/docs/sql-integration)
+
+### 优化
+
+对离线钱包的操作抽象接口，从服务中剥离出来
