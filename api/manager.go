@@ -393,7 +393,8 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			logger.Sugar().Infof("plugin register new coin: %v ok", psResponse.GetCoinType())
 		case sphinxproxy.TransactionType_Balance:
 			v := psResponse.GetBalance()
-			if psResponse.GetCoinType() == sphinxplugin.CoinType_CoinTypefilecoin {
+			if psResponse.GetCoinType() == sphinxplugin.CoinType_CoinTypefilecoin ||
+				psResponse.GetCoinType() == sphinxplugin.CoinType_CoinTypetfilecoin {
 				var exact bool
 				v, exact = unit.AttoFIL2FIL(psResponse.GetBalance())
 				if !exact {

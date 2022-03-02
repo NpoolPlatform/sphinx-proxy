@@ -3,7 +3,6 @@ package check
 import (
 	"errors"
 
-	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 )
 
@@ -13,17 +12,6 @@ var (
 	// ErrTransactionTypeNotSupport ..
 	ErrTransactionTypeNotSupport = errors.New("transaction type not support")
 )
-
-// CoinType ..
-func CoinType(coinType sphinxplugin.CoinType) error {
-	switch coinType {
-	case sphinxplugin.CoinType_CoinTypefilecoin,
-		sphinxplugin.CoinType_CoinTypebitcoin:
-	default:
-		return ErrCoinTypeNotSupport
-	}
-	return nil
-}
 
 // TransactionType ..
 func TransactionType(transType sphinxproxy.TransactionType) error {
