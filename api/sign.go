@@ -121,12 +121,26 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 
 		switch ssResponse.GetTransactionType() {
 		case sphinxproxy.TransactionType_WalletNew:
-			if ch, ok := walletDoneChannel.Load(ssResponse.GetTransactionID()); ok {
-				ch.(chan walletDoneInfo) <- walletDoneInfo{
-					success: true,
-					address: ssResponse.GetInfo().GetAddress(),
-				}
+			ch, ok := walletDoneChannel.Load(ssResponse.GetTransactionID())
+			if !ok {
+				logger.Sugar().Warnf("TransactionID: %v create wallet maybe timeout", ssResponse.GetTransactionID())
+				continue
 			}
+
+			if ssResponse.GetRPCExitMessage() != "" {
+				logger.Sugar().Infof("TransactionID: %v create wallet error: %v", ssResponse.GetTransactionID(), ssResponse.GetRPCExitMessage())
+				ch.(chan walletDoneInfo) <- walletDoneInfo{
+					success: false,
+					message: ssResponse.GetRPCExitMessage(),
+				}
+				continue
+			}
+
+			ch.(chan walletDoneInfo) <- walletDoneInfo{
+				success: true,
+				address: ssResponse.GetInfo().GetAddress(),
+			}
+			logger.Sugar().Infof("TransactionID: %v create wallet ok", ssResponse.GetTransactionID())
 		case sphinxproxy.TransactionType_Signature:
 			pluginProxy, err := getProxyPlugin(ssResponse.GetCoinType())
 			if err != nil {

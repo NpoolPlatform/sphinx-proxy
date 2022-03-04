@@ -178,6 +178,21 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			}
 			logger.Sugar().Infof("plugin register new coin: %v ok", psResponse.GetCoinType())
 		case sphinxproxy.TransactionType_Balance:
+			ch, ok := balanceDoneChannel.Load(psResponse.GetTransactionID())
+			if !ok {
+				logger.Sugar().Warnf("TransactionID: %v get balance maybe timeout", psResponse.GetTransactionID())
+				continue
+			}
+
+			if psResponse.GetRPCExitMessage() != "" {
+				logger.Sugar().Infof("TransactionID: %v get balance error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
+				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
+					success: false,
+					message: psResponse.GetRPCExitMessage(),
+				}
+				continue
+			}
+
 			v := psResponse.GetBalance()
 			if psResponse.GetCoinType() == sphinxplugin.CoinType_CoinTypefilecoin ||
 				psResponse.GetCoinType() == sphinxplugin.CoinType_CoinTypetfilecoin {
@@ -187,17 +202,13 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					logger.Sugar().Warnf("AttoFIL2FIL balance from->to(%v->%v) not exact", psResponse.GetBalance(), v)
 				}
 			}
-			ch, ok := balanceDoneChannel.Load(psResponse.GetTransactionID())
-			if !ok {
-				logger.Sugar().Warnf("TransactionID: %v Addr: %v get balance maybe timeout", psResponse.GetTransactionID(), psResponse)
-				continue
-			}
+
 			ch.(chan balanceDoneInfo) <- balanceDoneInfo{
 				success:    true,
 				balance:    v,
 				balanceStr: psResponse.GetBalanceStr(),
 			}
-			logger.Sugar().Infof("TransactionID: %v Addr: %v get balance ok", psResponse.GetTransactionID(), psResponse)
+			logger.Sugar().Infof("TransactionID: %v get balance ok", psResponse.GetTransactionID())
 		case sphinxproxy.TransactionType_PreSign:
 			if err := crud.UpdateTransaction(context.Background(), crud.UpdateTransactionParams{
 				TransactionID: psResponse.GetTransactionID(),
