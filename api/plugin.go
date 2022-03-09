@@ -52,6 +52,9 @@ func (lp lmPluginType) append(coinType sphinxplugin.CoinType, lmp *mPlugin) {
 	plk.Lock()
 	defer plk.Unlock()
 	lmp.coinType = coinType
+
+	logger.Sugar().Infof("some plugin %v", coinType)
+
 	if _, ok := lp[coinType]; !ok {
 		lp[coinType] = append(lp[coinType], lmp)
 	} else {
