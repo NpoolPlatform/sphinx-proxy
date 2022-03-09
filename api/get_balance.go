@@ -24,7 +24,7 @@ type balanceDoneInfo struct {
 var balanceDoneChannel = sync.Map{}
 
 func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceRequest) (out *sphinxproxy.GetBalanceResponse, err error) {
-	logger.Infof("get balance info: %#v", in)
+	logger.Sugar().Infof("get balance info: %#v", in)
 
 	if in.GetName() == "" {
 		logger.Sugar().Errorf("GetBalance Name: %v empty", in.GetName())
@@ -37,7 +37,7 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 		return out, status.Error(codes.InvalidArgument, "Name Invalid")
 	}
 
-	logger.Infof("get balance info: %v", coinType)
+	logger.Sugar().Infof("get balance info: %v", coinType)
 	if in.GetAddress() == "" {
 		logger.Sugar().Errorf("GetBalance Address: %v invalid", in.GetAddress())
 		return out, status.Error(codes.InvalidArgument, "Address Invalid")
