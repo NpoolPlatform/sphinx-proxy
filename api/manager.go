@@ -121,13 +121,16 @@ func Transaction() {
 						Message: &sphinxplugin.UnsignedMessage{
 							To:    tran.To,
 							From:  tran.From,
-							Nonce: tran.Nonce,
 							Value: price.DBPriceToVisualPrice(tran.Amount),
 							// TODO from chain get
 							GasLimit:   200000000,
 							GasFeeCap:  10000000,
 							GasPremium: 1000000,
 							Method:     uint64(builtin.MethodSend),
+							// fil
+							Nonce: tran.Nonce,
+							// TODO optimize btc
+							Unspent: tran.Utxo,
 						},
 					}
 				case uint8(sphinxproxy.TransactionState_TransactionStateSync):

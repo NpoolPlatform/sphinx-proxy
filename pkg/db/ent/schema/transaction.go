@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/google/uuid"
 )
 
@@ -22,6 +23,8 @@ func (Transaction) Fields() []ent.Field {
 			Unique(),
 		field.Uint64("nonce").
 			Default(0),
+		field.JSON("utxo", []*sphinxplugin.Unspent{}).
+			Comment("only for btc"),
 		field.Int8("transaction_type").
 			Default(0),
 		field.Int32("coin_type").
@@ -42,22 +45,25 @@ func (Transaction) Fields() []ent.Field {
 		field.Uint64("amount").
 			Positive().
 			Default(0),
-		field.Uint8("state"),
+		field.Uint8("state").Default(0),
 		field.Uint32("created_at").
 			DefaultFunc(func() uint32 {
 				return uint32(time.Now().Unix())
-			}),
+			}).
+			Default(0),
 		field.Uint32("updated_at").
 			DefaultFunc(func() uint32 {
 				return uint32(time.Now().Unix())
 			}).
 			UpdateDefault(func() uint32 {
 				return uint32(time.Now().Unix())
-			}),
+			}).
+			Default(0),
 		field.Uint32("deleted_at").
 			DefaultFunc(func() uint32 {
 				return 0
-			}),
+			}).
+			Default(0),
 	}
 }
 

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/predicate"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	"github.com/google/uuid"
@@ -35,6 +36,7 @@ type TransactionMutation struct {
 	id                  *uuid.UUID
 	nonce               *uint64
 	addnonce            *int64
+	utxo                *[]*sphinxplugin.Unspent
 	transaction_type    *int8
 	addtransaction_type *int8
 	coin_type           *int32
@@ -219,6 +221,42 @@ func (m *TransactionMutation) AddedNonce() (r int64, exists bool) {
 func (m *TransactionMutation) ResetNonce() {
 	m.nonce = nil
 	m.addnonce = nil
+}
+
+// SetUtxo sets the "utxo" field.
+func (m *TransactionMutation) SetUtxo(s []*sphinxplugin.Unspent) {
+	m.utxo = &s
+}
+
+// Utxo returns the value of the "utxo" field in the mutation.
+func (m *TransactionMutation) Utxo() (r []*sphinxplugin.Unspent, exists bool) {
+	v := m.utxo
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUtxo returns the old "utxo" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldUtxo(ctx context.Context) (v []*sphinxplugin.Unspent, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUtxo is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUtxo requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUtxo: %w", err)
+	}
+	return oldValue.Utxo, nil
+}
+
+// ResetUtxo resets all changes to the "utxo" field.
+func (m *TransactionMutation) ResetUtxo() {
+	m.utxo = nil
 }
 
 // SetTransactionType sets the "transaction_type" field.
@@ -832,9 +870,12 @@ func (m *TransactionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TransactionMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 14)
 	if m.nonce != nil {
 		fields = append(fields, transaction.FieldNonce)
+	}
+	if m.utxo != nil {
+		fields = append(fields, transaction.FieldUtxo)
 	}
 	if m.transaction_type != nil {
 		fields = append(fields, transaction.FieldTransactionType)
@@ -882,6 +923,8 @@ func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case transaction.FieldNonce:
 		return m.Nonce()
+	case transaction.FieldUtxo:
+		return m.Utxo()
 	case transaction.FieldTransactionType:
 		return m.TransactionType()
 	case transaction.FieldCoinType:
@@ -917,6 +960,8 @@ func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Va
 	switch name {
 	case transaction.FieldNonce:
 		return m.OldNonce(ctx)
+	case transaction.FieldUtxo:
+		return m.OldUtxo(ctx)
 	case transaction.FieldTransactionType:
 		return m.OldTransactionType(ctx)
 	case transaction.FieldCoinType:
@@ -956,6 +1001,13 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetNonce(v)
+		return nil
+	case transaction.FieldUtxo:
+		v, ok := value.([]*sphinxplugin.Unspent)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUtxo(v)
 		return nil
 	case transaction.FieldTransactionType:
 		v, ok := value.(int8)
@@ -1203,6 +1255,9 @@ func (m *TransactionMutation) ResetField(name string) error {
 	switch name {
 	case transaction.FieldNonce:
 		m.ResetNonce()
+		return nil
+	case transaction.FieldUtxo:
+		m.ResetUtxo()
 		return nil
 	case transaction.FieldTransactionType:
 		m.ResetTransactionType()

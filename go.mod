@@ -3,7 +3,7 @@ module github.com/NpoolPlatform/sphinx-proxy
 go 1.16
 
 require (
-	entgo.io/ent v0.10.0
+	entgo.io/ent v0.10.1
 	github.com/NpoolPlatform/api-manager v0.0.0-20220205130236-69d286e72dba
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220120091626-4e8035637592
 	github.com/NpoolPlatform/message v0.0.0-20220304061637-9156b21e4944

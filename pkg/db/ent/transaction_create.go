@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	"github.com/google/uuid"
 )
@@ -34,6 +35,12 @@ func (tc *TransactionCreate) SetNillableNonce(u *uint64) *TransactionCreate {
 	if u != nil {
 		tc.SetNonce(*u)
 	}
+	return tc
+}
+
+// SetUtxo sets the "utxo" field.
+func (tc *TransactionCreate) SetUtxo(s []*sphinxplugin.Unspent) *TransactionCreate {
+	tc.mutation.SetUtxo(s)
 	return tc
 }
 
@@ -144,6 +151,14 @@ func (tc *TransactionCreate) SetNillableAmount(u *uint64) *TransactionCreate {
 // SetState sets the "state" field.
 func (tc *TransactionCreate) SetState(u uint8) *TransactionCreate {
 	tc.mutation.SetState(u)
+	return tc
+}
+
+// SetNillableState sets the "state" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableState(u *uint8) *TransactionCreate {
+	if u != nil {
+		tc.SetState(*u)
+	}
 	return tc
 }
 
@@ -306,16 +321,20 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultAmount
 		tc.mutation.SetAmount(v)
 	}
+	if _, ok := tc.mutation.State(); !ok {
+		v := transaction.DefaultState
+		tc.mutation.SetState(v)
+	}
 	if _, ok := tc.mutation.CreatedAt(); !ok {
-		v := transaction.DefaultCreatedAt()
+		v := transaction.DefaultCreatedAt
 		tc.mutation.SetCreatedAt(v)
 	}
 	if _, ok := tc.mutation.UpdatedAt(); !ok {
-		v := transaction.DefaultUpdatedAt()
+		v := transaction.DefaultUpdatedAt
 		tc.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := tc.mutation.DeletedAt(); !ok {
-		v := transaction.DefaultDeletedAt()
+		v := transaction.DefaultDeletedAt
 		tc.mutation.SetDeletedAt(v)
 	}
 	if _, ok := tc.mutation.ID(); !ok {
@@ -328,6 +347,9 @@ func (tc *TransactionCreate) defaults() {
 func (tc *TransactionCreate) check() error {
 	if _, ok := tc.mutation.Nonce(); !ok {
 		return &ValidationError{Name: "nonce", err: errors.New(`ent: missing required field "Transaction.nonce"`)}
+	}
+	if _, ok := tc.mutation.Utxo(); !ok {
+		return &ValidationError{Name: "utxo", err: errors.New(`ent: missing required field "Transaction.utxo"`)}
 	}
 	if _, ok := tc.mutation.TransactionType(); !ok {
 		return &ValidationError{Name: "transaction_type", err: errors.New(`ent: missing required field "Transaction.transaction_type"`)}
@@ -429,6 +451,14 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Column: transaction.FieldNonce,
 		})
 		_node.Nonce = value
+	}
+	if value, ok := tc.mutation.Utxo(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: transaction.FieldUtxo,
+		})
+		_node.Utxo = value
 	}
 	if value, ok := tc.mutation.TransactionType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -595,6 +625,18 @@ func (u *TransactionUpsert) UpdateNonce() *TransactionUpsert {
 // AddNonce adds v to the "nonce" field.
 func (u *TransactionUpsert) AddNonce(v uint64) *TransactionUpsert {
 	u.Add(transaction.FieldNonce, v)
+	return u
+}
+
+// SetUtxo sets the "utxo" field.
+func (u *TransactionUpsert) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUpsert {
+	u.Set(transaction.FieldUtxo, v)
+	return u
+}
+
+// UpdateUtxo sets the "utxo" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateUtxo() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldUtxo)
 	return u
 }
 
@@ -858,6 +900,20 @@ func (u *TransactionUpsertOne) AddNonce(v uint64) *TransactionUpsertOne {
 func (u *TransactionUpsertOne) UpdateNonce() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateNonce()
+	})
+}
+
+// SetUtxo sets the "utxo" field.
+func (u *TransactionUpsertOne) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetUtxo(v)
+	})
+}
+
+// UpdateUtxo sets the "utxo" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateUtxo() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateUtxo()
 	})
 }
 
@@ -1319,6 +1375,20 @@ func (u *TransactionUpsertBulk) AddNonce(v uint64) *TransactionUpsertBulk {
 func (u *TransactionUpsertBulk) UpdateNonce() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateNonce()
+	})
+}
+
+// SetUtxo sets the "utxo" field.
+func (u *TransactionUpsertBulk) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetUtxo(v)
+	})
+}
+
+// UpdateUtxo sets the "utxo" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateUtxo() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateUtxo()
 	})
 }
 

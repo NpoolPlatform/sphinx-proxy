@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/predicate"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 )
@@ -45,6 +46,12 @@ func (tu *TransactionUpdate) SetNillableNonce(u *uint64) *TransactionUpdate {
 // AddNonce adds u to the "nonce" field.
 func (tu *TransactionUpdate) AddNonce(u int64) *TransactionUpdate {
 	tu.mutation.AddNonce(u)
+	return tu
+}
+
+// SetUtxo sets the "utxo" field.
+func (tu *TransactionUpdate) SetUtxo(s []*sphinxplugin.Unspent) *TransactionUpdate {
+	tu.mutation.SetUtxo(s)
 	return tu
 }
 
@@ -184,6 +191,14 @@ func (tu *TransactionUpdate) AddAmount(u int64) *TransactionUpdate {
 func (tu *TransactionUpdate) SetState(u uint8) *TransactionUpdate {
 	tu.mutation.ResetState()
 	tu.mutation.SetState(u)
+	return tu
+}
+
+// SetNillableState sets the "state" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableState(u *uint8) *TransactionUpdate {
+	if u != nil {
+		tu.SetState(*u)
+	}
 	return tu
 }
 
@@ -379,6 +394,13 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: transaction.FieldNonce,
 		})
 	}
+	if value, ok := tu.mutation.Utxo(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: transaction.FieldUtxo,
+		})
+	}
 	if value, ok := tu.mutation.TransactionType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
@@ -559,6 +581,12 @@ func (tuo *TransactionUpdateOne) AddNonce(u int64) *TransactionUpdateOne {
 	return tuo
 }
 
+// SetUtxo sets the "utxo" field.
+func (tuo *TransactionUpdateOne) SetUtxo(s []*sphinxplugin.Unspent) *TransactionUpdateOne {
+	tuo.mutation.SetUtxo(s)
+	return tuo
+}
+
 // SetTransactionType sets the "transaction_type" field.
 func (tuo *TransactionUpdateOne) SetTransactionType(i int8) *TransactionUpdateOne {
 	tuo.mutation.ResetTransactionType()
@@ -695,6 +723,14 @@ func (tuo *TransactionUpdateOne) AddAmount(u int64) *TransactionUpdateOne {
 func (tuo *TransactionUpdateOne) SetState(u uint8) *TransactionUpdateOne {
 	tuo.mutation.ResetState()
 	tuo.mutation.SetState(u)
+	return tuo
+}
+
+// SetNillableState sets the "state" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableState(u *uint8) *TransactionUpdateOne {
+	if u != nil {
+		tuo.SetState(*u)
+	}
 	return tuo
 }
 
@@ -912,6 +948,13 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Type:   field.TypeUint64,
 			Value:  value,
 			Column: transaction.FieldNonce,
+		})
+	}
+	if value, ok := tuo.mutation.Utxo(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: transaction.FieldUtxo,
 		})
 	}
 	if value, ok := tuo.mutation.TransactionType(); ok {

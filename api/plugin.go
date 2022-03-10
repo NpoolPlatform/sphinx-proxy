@@ -210,17 +210,18 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			}
 			logger.Sugar().Infof("TransactionID: %v get balance ok", psResponse.GetTransactionID())
 		case sphinxproxy.TransactionType_PreSign:
-			if err := crud.UpdateTransaction(context.Background(), crud.UpdateTransactionParams{
+			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
 				TransactionID: psResponse.GetTransactionID(),
 				State:         sphinxproxy.TransactionState_TransactionStateSign,
 				Nonce:         psResponse.GetMessage().GetNonce(),
+				UTXO:          psResponse.GetMessage().GetUnspent(),
 			}); err != nil {
 				logger.Sugar().Infof("TransactionID: %v get nonce: %v error: %v", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce(), err)
 				continue
 			}
 			logger.Sugar().Infof("TransactionID: %v get nonce: %v ok", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce())
 		case sphinxproxy.TransactionType_Broadcast:
-			if err := crud.UpdateTransaction(context.Background(), crud.UpdateTransactionParams{
+			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
 				TransactionID: psResponse.GetTransactionID(),
 				State:         sphinxproxy.TransactionState_TransactionStateSync,
 				Cid:           psResponse.GetCID(),
@@ -234,7 +235,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			if psResponse.GetExitCode() == int64(exitcode.Ok) {
 				_state = sphinxproxy.TransactionState_TransactionStateDone
 			}
-			if err := crud.UpdateTransaction(context.Background(), crud.UpdateTransactionParams{
+			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
 				TransactionID: psResponse.GetTransactionID(),
 				State:         _state,
 				ExitCode:      psResponse.GetExitCode(),

@@ -13,6 +13,8 @@ const (
 	FieldID = "id"
 	// FieldNonce holds the string denoting the nonce field in the database.
 	FieldNonce = "nonce"
+	// FieldUtxo holds the string denoting the utxo field in the database.
+	FieldUtxo = "utxo"
 	// FieldTransactionType holds the string denoting the transaction_type field in the database.
 	FieldTransactionType = "transaction_type"
 	// FieldCoinType holds the string denoting the coin_type field in the database.
@@ -45,6 +47,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldNonce,
+	FieldUtxo,
 	FieldTransactionType,
 	FieldCoinType,
 	FieldTransactionID,
@@ -94,14 +97,16 @@ var (
 	DefaultAmount uint64
 	// AmountValidator is a validator for the "amount" field. It is called by the builders before save.
 	AmountValidator func(uint64) error
+	// DefaultState holds the default value on creation for the "state" field.
+	DefaultState uint8
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() uint32
+	DefaultCreatedAt uint32
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
-	DefaultUpdatedAt func() uint32
+	DefaultUpdatedAt uint32
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() uint32
 	// DefaultDeletedAt holds the default value on creation for the "deleted_at" field.
-	DefaultDeletedAt func() uint32
+	DefaultDeletedAt uint32
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
