@@ -23,6 +23,8 @@ type walletDoneInfo struct {
 var walletDoneChannel = sync.Map{}
 
 func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletRequest) (out *sphinxproxy.CreateWalletResponse, err error) {
+	logger.Sugar().Infof("create wallet info: %#v", in)
+
 	if in.GetName() == "" {
 		logger.Sugar().Errorf("CreateWallet Name: %v empty", in.GetName())
 		return out, status.Error(codes.InvalidArgument, "Name empty")
