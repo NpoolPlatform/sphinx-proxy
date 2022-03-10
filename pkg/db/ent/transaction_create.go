@@ -293,6 +293,10 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultNonce
 		tc.mutation.SetNonce(v)
 	}
+	if _, ok := tc.mutation.Utxo(); !ok {
+		v := transaction.DefaultUtxo
+		tc.mutation.SetUtxo(v)
+	}
 	if _, ok := tc.mutation.TransactionType(); !ok {
 		v := transaction.DefaultTransactionType
 		tc.mutation.SetTransactionType(v)

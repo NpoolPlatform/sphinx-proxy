@@ -3,6 +3,7 @@
 package transaction
 
 import (
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/google/uuid"
 )
 
@@ -75,6 +76,8 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultNonce holds the default value on creation for the "nonce" field.
 	DefaultNonce uint64
+	// DefaultUtxo holds the default value on creation for the "utxo" field.
+	DefaultUtxo []*sphinxplugin.Unspent
 	// DefaultTransactionType holds the default value on creation for the "transaction_type" field.
 	DefaultTransactionType int8
 	// DefaultCoinType holds the default value on creation for the "coin_type" field.

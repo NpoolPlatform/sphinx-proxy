@@ -15,7 +15,7 @@ func GetTransaction(ctx context.Context, transactionID string) (*ent.Transaction
 	if err != nil {
 		return nil, err
 	}
-	return client.Debug().
+	return client.
 		Transaction.
 		Query().
 		Where(

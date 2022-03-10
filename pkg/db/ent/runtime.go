@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/schema"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	"github.com/google/uuid"
@@ -18,6 +19,10 @@ func init() {
 	transactionDescNonce := transactionFields[1].Descriptor()
 	// transaction.DefaultNonce holds the default value on creation for the nonce field.
 	transaction.DefaultNonce = transactionDescNonce.Default.(uint64)
+	// transactionDescUtxo is the schema descriptor for utxo field.
+	transactionDescUtxo := transactionFields[2].Descriptor()
+	// transaction.DefaultUtxo holds the default value on creation for the utxo field.
+	transaction.DefaultUtxo = transactionDescUtxo.Default.([]*sphinxplugin.Unspent)
 	// transactionDescTransactionType is the schema descriptor for transaction_type field.
 	transactionDescTransactionType := transactionFields[3].Descriptor()
 	// transaction.DefaultTransactionType holds the default value on creation for the transaction_type field.

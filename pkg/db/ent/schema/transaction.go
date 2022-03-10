@@ -24,6 +24,7 @@ func (Transaction) Fields() []ent.Field {
 		field.Uint64("nonce").
 			Default(0),
 		field.JSON("utxo", []*sphinxplugin.Unspent{}).
+			Default([]*sphinxplugin.Unspent{}).
 			Comment("only for btc"),
 		field.Int8("transaction_type").
 			Default(0),
