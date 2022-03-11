@@ -152,6 +152,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 	}
 }
 
+//nolint
 func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for !p.closeFlag {
@@ -234,9 +235,14 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			}
 			logger.Sugar().Infof("Broadcast TransactionID: %v message ok", psResponse.GetTransactionID())
 		case sphinxproxy.TransactionType_SyncMsgState:
-			_state := sphinxproxy.TransactionState_TransactionStateFail
-			if psResponse.GetExitCode() == int64(exitcode.Ok) {
-				_state = sphinxproxy.TransactionState_TransactionStateDone
+			if psResponse.GetRPCExitMessage() != "" {
+				logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
+				continue
+			}
+
+			_state := sphinxproxy.TransactionState_TransactionStateDone
+			if psResponse.GetExitCode() != int64(exitcode.Ok) {
+				_state = sphinxproxy.TransactionState_TransactionStateFail
 			}
 			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
 				TransactionID: psResponse.GetTransactionID(),
