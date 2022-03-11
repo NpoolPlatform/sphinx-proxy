@@ -225,6 +225,10 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			}
 			logger.Sugar().Infof("TransactionID: %v get nonce: %v ok", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce())
 		case sphinxproxy.TransactionType_Broadcast:
+			if psResponse.GetRPCExitMessage() != "" {
+				logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
+				continue
+			}
 			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
 				TransactionID: psResponse.GetTransactionID(),
 				State:         sphinxproxy.TransactionState_TransactionStateSync,
