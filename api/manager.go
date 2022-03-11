@@ -61,7 +61,7 @@ func getProxySign() (*mSign, error) {
 func getProxyPlugin(coinType sphinxplugin.CoinType) (*mPlugin, error) {
 	plk.RLock()
 	defer plk.RUnlock()
-	logger.Sugar().Infof("get proxy plugin length: %v", len(lmPlugin[coinType]))
+	logger.Sugar().Infof("get coin %v proxy plugin length: %v", coinType, len(lmPlugin[coinType]))
 	if len(lmPlugin[coinType]) == 0 {
 		return nil, ErrNoPluginServiceFound
 	}
@@ -97,7 +97,7 @@ func Transaction() {
 					coinType := sphinxplugin.CoinType(tran.CoinType)
 					pluginProxy, err := getProxyPlugin(coinType)
 					if err != nil {
-						logger.Sugar().Error("proxy->plugin no invalid connection")
+						logger.Sugar().Errorf("proxy->plugin invalid coin %v connection", coinType)
 						continue
 					}
 					pluginProxy.preSign <- &sphinxproxy.ProxyPluginRequest{
@@ -110,7 +110,7 @@ func Transaction() {
 					// sign -> broadcast
 					signProxy, err := getProxySign()
 					if err != nil {
-						logger.Sugar().Error("proxy->sign no invalid connection")
+						logger.Sugar().Errorf("proxy->sign invalid coin %v connection", tran.CoinType)
 						continue
 					}
 					coinType := sphinxplugin.CoinType(tran.CoinType)
@@ -137,7 +137,7 @@ func Transaction() {
 					coinType := sphinxplugin.CoinType(tran.CoinType)
 					pluginProxy, err := getProxyPlugin(coinType)
 					if err != nil {
-						logger.Sugar().Error("proxy->plugin no invalid connection")
+						logger.Sugar().Errorf("proxy->plugin invalid coin %v connection", coinType)
 						continue
 					}
 					pluginProxy.syncMsg <- &sphinxproxy.ProxyPluginRequest{
