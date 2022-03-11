@@ -330,15 +330,15 @@ func (tc *TransactionCreate) defaults() {
 		tc.mutation.SetState(v)
 	}
 	if _, ok := tc.mutation.CreatedAt(); !ok {
-		v := transaction.DefaultCreatedAt
+		v := transaction.DefaultCreatedAt()
 		tc.mutation.SetCreatedAt(v)
 	}
 	if _, ok := tc.mutation.UpdatedAt(); !ok {
-		v := transaction.DefaultUpdatedAt
+		v := transaction.DefaultUpdatedAt()
 		tc.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := tc.mutation.DeletedAt(); !ok {
-		v := transaction.DefaultDeletedAt
+		v := transaction.DefaultDeletedAt()
 		tc.mutation.SetDeletedAt(v)
 	}
 	if _, ok := tc.mutation.ID(); !ok {

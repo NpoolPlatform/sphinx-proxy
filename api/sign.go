@@ -144,7 +144,18 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 		case sphinxproxy.TransactionType_Signature:
 			pluginProxy, err := getProxyPlugin(ssResponse.GetCoinType())
 			if err != nil {
-				logger.Sugar().Error("proxy->plugin no invalid connection")
+				logger.Sugar().Errorf("proxy->plugin no valid connection for coin: %v transaction: %v",
+					ssResponse.GetCoinType(),
+					ssResponse.GetTransactionID(),
+				)
+				continue
+			}
+			if ssResponse.GetRPCExitMessage() != "" {
+				logger.Sugar().Errorf("proxy->sign signature for coin: %v transaction: %v error: %v",
+					ssResponse.GetCoinType(),
+					ssResponse.GetTransactionID(),
+					ssResponse.GetRPCExitMessage(),
+				)
 				continue
 			}
 			pluginProxy.mpoolPush <- &sphinxproxy.ProxyPluginRequest{

@@ -22,9 +22,9 @@ var (
 		{Name: "to", Type: field.TypeString, Default: ""},
 		{Name: "amount", Type: field.TypeUint64, Default: 0},
 		{Name: "state", Type: field.TypeUint8, Default: 0},
-		{Name: "created_at", Type: field.TypeUint32, Default: 0},
-		{Name: "updated_at", Type: field.TypeUint32, Default: 0},
-		{Name: "deleted_at", Type: field.TypeUint32, Default: 0},
+		{Name: "created_at", Type: field.TypeUint32},
+		{Name: "updated_at", Type: field.TypeUint32},
+		{Name: "deleted_at", Type: field.TypeUint32},
 	}
 	// TransactionsTable holds the schema information for the "transactions" table.
 	TransactionsTable = &schema.Table{

@@ -103,13 +103,13 @@ var (
 	// DefaultState holds the default value on creation for the "state" field.
 	DefaultState uint8
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt uint32
+	DefaultCreatedAt func() uint32
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
-	DefaultUpdatedAt uint32
+	DefaultUpdatedAt func() uint32
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() uint32
 	// DefaultDeletedAt holds the default value on creation for the "deleted_at" field.
-	DefaultDeletedAt uint32
+	DefaultDeletedAt func() uint32
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

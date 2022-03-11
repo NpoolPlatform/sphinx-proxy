@@ -68,17 +68,17 @@ func init() {
 	// transactionDescCreatedAt is the schema descriptor for created_at field.
 	transactionDescCreatedAt := transactionFields[12].Descriptor()
 	// transaction.DefaultCreatedAt holds the default value on creation for the created_at field.
-	transaction.DefaultCreatedAt = transactionDescCreatedAt.Default.(uint32)
+	transaction.DefaultCreatedAt = transactionDescCreatedAt.Default.(func() uint32)
 	// transactionDescUpdatedAt is the schema descriptor for updated_at field.
 	transactionDescUpdatedAt := transactionFields[13].Descriptor()
 	// transaction.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	transaction.DefaultUpdatedAt = transactionDescUpdatedAt.Default.(uint32)
+	transaction.DefaultUpdatedAt = transactionDescUpdatedAt.Default.(func() uint32)
 	// transaction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	transaction.UpdateDefaultUpdatedAt = transactionDescUpdatedAt.UpdateDefault.(func() uint32)
 	// transactionDescDeletedAt is the schema descriptor for deleted_at field.
 	transactionDescDeletedAt := transactionFields[14].Descriptor()
 	// transaction.DefaultDeletedAt holds the default value on creation for the deleted_at field.
-	transaction.DefaultDeletedAt = transactionDescDeletedAt.Default.(uint32)
+	transaction.DefaultDeletedAt = transactionDescDeletedAt.Default.(func() uint32)
 	// transactionDescID is the schema descriptor for id field.
 	transactionDescID := transactionFields[0].Descriptor()
 	// transaction.DefaultID holds the default value on creation for the id field.

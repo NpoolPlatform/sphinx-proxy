@@ -50,21 +50,18 @@ func (Transaction) Fields() []ent.Field {
 		field.Uint32("created_at").
 			DefaultFunc(func() uint32 {
 				return uint32(time.Now().Unix())
-			}).
-			Default(0),
+			}),
 		field.Uint32("updated_at").
 			DefaultFunc(func() uint32 {
 				return uint32(time.Now().Unix())
 			}).
 			UpdateDefault(func() uint32 {
 				return uint32(time.Now().Unix())
-			}).
-			Default(0),
+			}),
 		field.Uint32("deleted_at").
 			DefaultFunc(func() uint32 {
 				return 0
-			}).
-			Default(0),
+			}),
 	}
 }
 
