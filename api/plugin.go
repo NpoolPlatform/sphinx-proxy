@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"sync"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
@@ -225,13 +226,18 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			}
 			logger.Sugar().Infof("TransactionID: %v get nonce: %v ok", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce())
 		case sphinxproxy.TransactionType_Broadcast:
+			state := sphinxproxy.TransactionState_TransactionStateSync
 			if psResponse.GetRPCExitMessage() != "" {
 				logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
-				continue
+				if !isErrGasLow(psResponse.GetRPCExitMessage()) {
+					continue
+				}
+				state = sphinxproxy.TransactionState_TransactionStateFail
 			}
+
 			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
 				TransactionID: psResponse.GetTransactionID(),
-				State:         sphinxproxy.TransactionState_TransactionStateSync,
+				State:         state,
 				Cid:           psResponse.GetCID(),
 			}); err != nil {
 				logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
@@ -276,4 +282,16 @@ func (p *mPlugin) close(wg *sync.WaitGroup) {
 	}
 	lmPlugin[p.coinType] = nlmPlugin
 	plk.Unlock()
+}
+
+func isErrGasLow(msg string) bool {
+	if msg == "" {
+		return false
+	}
+	// messagepool.ErrGasFeeCapTooLow
+	// messagepool.go:76
+	// messagepool.go:884
+	return regexp.MustCompile(
+		`minimum expected nonce is [0-9]{1,}: message nonce too low`,
+	).MatchString(msg)
 }
