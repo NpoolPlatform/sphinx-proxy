@@ -42,20 +42,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sphinx-proxy-http
-  namespace: kube-system
-
-spec:
-  ports:
-  - name: http
-    port: 50000
-  selector:
-    app: sphinx-proxy
-
----
-apiVersion: v1
-kind: Service
-metadata:
   name: sphinx-proxy
   namespace: kube-system
   annotations:
@@ -67,3 +53,8 @@ spec:
     port: 50001
   selector:
     app: sphinx-proxy
+  - name: http
+    port: 50000
+  selector:
+    app: sphinx-proxy
+
