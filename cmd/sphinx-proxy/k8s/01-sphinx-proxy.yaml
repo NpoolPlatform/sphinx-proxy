@@ -46,15 +46,13 @@ metadata:
   namespace: kube-system
   annotations:
     traefik.ingress.kubernetes.io/service.serversscheme: h2c
-
 spec:
   ports:
-  - name: grpc
-    port: 50001
-  selector:
-    app: sphinx-proxy
   - name: http
     port: 50000
+    targetPort: 50000
+  - name: grpc
+    port: 50001
+    targetPort: 50001
   selector:
     app: sphinx-proxy
-
