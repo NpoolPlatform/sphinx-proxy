@@ -18,7 +18,7 @@ require (
 	google.golang.org/grpc v1.44.0
 )
 
-require golang.org/x/tools v0.1.9 // indirect
+require golang.org/x/tools v0.1.10 // indirect
 
 replace google.golang.org/grpc => github.com/grpc/grpc-go v1.41.0
 
