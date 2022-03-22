@@ -11,7 +11,6 @@ import (
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
-	"github.com/NpoolPlatform/sphinx-proxy/pkg/unit"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"github.com/filecoin-project/go-state-types/exitcode"
 )
@@ -198,19 +197,9 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				continue
 			}
 
-			v := psResponse.GetBalance()
-			if psResponse.GetCoinType() == sphinxplugin.CoinType_CoinTypefilecoin ||
-				psResponse.GetCoinType() == sphinxplugin.CoinType_CoinTypetfilecoin {
-				var exact bool
-				v, exact = unit.AttoFIL2FIL(psResponse.GetBalance())
-				if !exact {
-					logger.Sugar().Warnf("AttoFIL2FIL balance from->to(%v->%v) not exact", psResponse.GetBalance(), v)
-				}
-			}
-
 			ch.(chan balanceDoneInfo) <- balanceDoneInfo{
 				success:    true,
-				balance:    v,
+				balance:    psResponse.GetBalance(),
 				balanceStr: psResponse.GetBalanceStr(),
 			}
 			logger.Sugar().Infof("TransactionID: %v get balance ok", psResponse.GetTransactionID())

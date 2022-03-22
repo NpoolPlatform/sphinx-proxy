@@ -16,13 +16,11 @@ pipeline {
     stage('Prepare') {
       steps {
         // Get linter and other build tools.
-        sh 'go get -u golang.org/x/lint/golint'
-        sh 'go get github.com/tebeka/go2xunit'
-        sh 'go get github.com/t-yuki/gocover-cobertura'
-
-        // Get dependencies
-        sh 'go get golang.org/x/image/tiff/lzw'
-        sh 'go get github.com/boombuler/barcode'
+        sh '''
+          go install golang.org/x/lint/golint@latest
+          go install github.com/tebeka/go2xunit@latest
+          go install github.com/t-yuki/gocover-cobertura@latest
+        '''
         sh 'make deps'
       }
     }
