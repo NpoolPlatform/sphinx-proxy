@@ -124,6 +124,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 				Message:         info.GetMessage(),
 				Signature:       info.GetSignature(),
 				MsgTx:           info.GetMsgTx(),
+				SignedRawTxHex:  info.GetSignedRawTxHex(),
 			}
 		case info := <-p.syncMsg:
 			request = &sphinxproxy.ProxyPluginRequest{
