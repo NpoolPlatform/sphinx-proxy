@@ -10,6 +10,7 @@ import (
 	"github.com/NpoolPlatform/message/npool/coininfo"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
+	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"github.com/filecoin-project/go-state-types/exitcode"
@@ -210,6 +211,12 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				State:         sphinxproxy.TransactionState_TransactionStateSign,
 				Nonce:         psResponse.GetMessage().GetNonce(),
 				UTXO:          psResponse.GetMessage().GetUnspent(),
+				Pre: &eth.PreSignInfo{
+					ChainID:  psResponse.GetMessage().GetChainID(),
+					Nonce:    psResponse.GetMessage().GetNonce(),
+					GasPrice: psResponse.GetMessage().GetGasPrice(),
+					GasLimit: psResponse.GetMessage().GetGasLimit(),
+				},
 			}); err != nil {
 				logger.Sugar().Infof("TransactionID: %v get nonce: %v error: %v", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce(), err)
 				continue

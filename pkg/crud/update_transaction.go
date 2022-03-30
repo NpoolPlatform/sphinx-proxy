@@ -5,6 +5,7 @@ import (
 
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
+	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 )
@@ -16,6 +17,7 @@ type UpdateTransactionParams struct {
 	Nonce         uint64
 	// TODO optimize
 	UTXO     []*sphinxplugin.Unspent
+	Pre      *eth.PreSignInfo
 	Cid      string
 	ExitCode int64
 }
@@ -35,6 +37,7 @@ func UpdateTransaction(ctx context.Context, t *UpdateTransactionParams) error {
 	case sphinxproxy.TransactionState_TransactionStateSign:
 		stm.SetNonce(t.Nonce)
 		stm.SetUtxo(t.UTXO)
+		stm.SetPre(t.Pre)
 		stm.Where(transaction.StateEQ(uint8(sphinxproxy.TransactionState_TransactionStateWait)))
 	case sphinxproxy.TransactionState_TransactionStateSync:
 		stm.SetCid(t.Cid)
