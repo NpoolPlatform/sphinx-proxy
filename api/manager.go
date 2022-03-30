@@ -130,7 +130,7 @@ func Transaction() {
 						sphinxplugin.CoinType_CoinTypeusdterc20,
 						sphinxplugin.CoinType_CoinTypetethereum,
 						sphinxplugin.CoinType_CoinTypetusdterc20:
-						gasLimit = int64(tran.Pre.Nonce)
+						gasLimit = tran.Pre.GasLimit
 						nonce = tran.Pre.Nonce
 					}
 
