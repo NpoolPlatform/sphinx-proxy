@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
+	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	"github.com/google/uuid"
 )
@@ -41,6 +42,12 @@ func (tc *TransactionCreate) SetNillableNonce(u *uint64) *TransactionCreate {
 // SetUtxo sets the "utxo" field.
 func (tc *TransactionCreate) SetUtxo(s []*sphinxplugin.Unspent) *TransactionCreate {
 	tc.mutation.SetUtxo(s)
+	return tc
+}
+
+// SetPre sets the "pre" field.
+func (tc *TransactionCreate) SetPre(esi *eth.PreSignInfo) *TransactionCreate {
+	tc.mutation.SetPre(esi)
 	return tc
 }
 
@@ -297,6 +304,10 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultUtxo
 		tc.mutation.SetUtxo(v)
 	}
+	if _, ok := tc.mutation.Pre(); !ok {
+		v := transaction.DefaultPre
+		tc.mutation.SetPre(v)
+	}
 	if _, ok := tc.mutation.TransactionType(); !ok {
 		v := transaction.DefaultTransactionType
 		tc.mutation.SetTransactionType(v)
@@ -354,6 +365,9 @@ func (tc *TransactionCreate) check() error {
 	}
 	if _, ok := tc.mutation.Utxo(); !ok {
 		return &ValidationError{Name: "utxo", err: errors.New(`ent: missing required field "Transaction.utxo"`)}
+	}
+	if _, ok := tc.mutation.Pre(); !ok {
+		return &ValidationError{Name: "pre", err: errors.New(`ent: missing required field "Transaction.pre"`)}
 	}
 	if _, ok := tc.mutation.TransactionType(); !ok {
 		return &ValidationError{Name: "transaction_type", err: errors.New(`ent: missing required field "Transaction.transaction_type"`)}
@@ -463,6 +477,14 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Column: transaction.FieldUtxo,
 		})
 		_node.Utxo = value
+	}
+	if value, ok := tc.mutation.Pre(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: transaction.FieldPre,
+		})
+		_node.Pre = value
 	}
 	if value, ok := tc.mutation.TransactionType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -641,6 +663,18 @@ func (u *TransactionUpsert) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUpser
 // UpdateUtxo sets the "utxo" field to the value that was provided on create.
 func (u *TransactionUpsert) UpdateUtxo() *TransactionUpsert {
 	u.SetExcluded(transaction.FieldUtxo)
+	return u
+}
+
+// SetPre sets the "pre" field.
+func (u *TransactionUpsert) SetPre(v *eth.PreSignInfo) *TransactionUpsert {
+	u.Set(transaction.FieldPre, v)
+	return u
+}
+
+// UpdatePre sets the "pre" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdatePre() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldPre)
 	return u
 }
 
@@ -918,6 +952,20 @@ func (u *TransactionUpsertOne) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUp
 func (u *TransactionUpsertOne) UpdateUtxo() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateUtxo()
+	})
+}
+
+// SetPre sets the "pre" field.
+func (u *TransactionUpsertOne) SetPre(v *eth.PreSignInfo) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetPre(v)
+	})
+}
+
+// UpdatePre sets the "pre" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdatePre() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdatePre()
 	})
 }
 
@@ -1393,6 +1441,20 @@ func (u *TransactionUpsertBulk) SetUtxo(v []*sphinxplugin.Unspent) *TransactionU
 func (u *TransactionUpsertBulk) UpdateUtxo() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateUtxo()
+	})
+}
+
+// SetPre sets the "pre" field.
+func (u *TransactionUpsertBulk) SetPre(v *eth.PreSignInfo) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetPre(v)
+	})
+}
+
+// UpdatePre sets the "pre" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdatePre() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdatePre()
 	})
 }
 

@@ -4,6 +4,7 @@ package transaction
 
 import (
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
+	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/google/uuid"
 )
 
@@ -16,6 +17,8 @@ const (
 	FieldNonce = "nonce"
 	// FieldUtxo holds the string denoting the utxo field in the database.
 	FieldUtxo = "utxo"
+	// FieldPre holds the string denoting the pre field in the database.
+	FieldPre = "pre"
 	// FieldTransactionType holds the string denoting the transaction_type field in the database.
 	FieldTransactionType = "transaction_type"
 	// FieldCoinType holds the string denoting the coin_type field in the database.
@@ -49,6 +52,7 @@ var Columns = []string{
 	FieldID,
 	FieldNonce,
 	FieldUtxo,
+	FieldPre,
 	FieldTransactionType,
 	FieldCoinType,
 	FieldTransactionID,
@@ -78,6 +82,8 @@ var (
 	DefaultNonce uint64
 	// DefaultUtxo holds the default value on creation for the "utxo" field.
 	DefaultUtxo []*sphinxplugin.Unspent
+	// DefaultPre holds the default value on creation for the "pre" field.
+	DefaultPre *eth.PreSignInfo
 	// DefaultTransactionType holds the default value on creation for the "transaction_type" field.
 	DefaultTransactionType int8
 	// DefaultCoinType holds the default value on creation for the "coin_type" field.

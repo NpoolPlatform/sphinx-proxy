@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
+	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/predicate"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 )
@@ -52,6 +53,12 @@ func (tu *TransactionUpdate) AddNonce(u int64) *TransactionUpdate {
 // SetUtxo sets the "utxo" field.
 func (tu *TransactionUpdate) SetUtxo(s []*sphinxplugin.Unspent) *TransactionUpdate {
 	tu.mutation.SetUtxo(s)
+	return tu
+}
+
+// SetPre sets the "pre" field.
+func (tu *TransactionUpdate) SetPre(esi *eth.PreSignInfo) *TransactionUpdate {
+	tu.mutation.SetPre(esi)
 	return tu
 }
 
@@ -401,6 +408,13 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: transaction.FieldUtxo,
 		})
 	}
+	if value, ok := tu.mutation.Pre(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: transaction.FieldPre,
+		})
+	}
 	if value, ok := tu.mutation.TransactionType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
@@ -584,6 +598,12 @@ func (tuo *TransactionUpdateOne) AddNonce(u int64) *TransactionUpdateOne {
 // SetUtxo sets the "utxo" field.
 func (tuo *TransactionUpdateOne) SetUtxo(s []*sphinxplugin.Unspent) *TransactionUpdateOne {
 	tuo.mutation.SetUtxo(s)
+	return tuo
+}
+
+// SetPre sets the "pre" field.
+func (tuo *TransactionUpdateOne) SetPre(esi *eth.PreSignInfo) *TransactionUpdateOne {
+	tuo.mutation.SetPre(esi)
 	return tuo
 }
 
@@ -955,6 +975,13 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Type:   field.TypeJSON,
 			Value:  value,
 			Column: transaction.FieldUtxo,
+		})
+	}
+	if value, ok := tuo.mutation.Pre(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: transaction.FieldPre,
 		})
 	}
 	if value, ok := tuo.mutation.TransactionType(); ok {

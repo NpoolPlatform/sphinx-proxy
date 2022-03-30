@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
+	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	"github.com/google/uuid"
 )
@@ -23,6 +24,9 @@ type Transaction struct {
 	// Utxo holds the value of the "utxo" field.
 	// only for btc
 	Utxo []*sphinxplugin.Unspent `json:"utxo,omitempty"`
+	// Pre holds the value of the "pre" field.
+	// only for eth
+	Pre *eth.PreSignInfo `json:"pre,omitempty"`
 	// TransactionType holds the value of the "transaction_type" field.
 	TransactionType int8 `json:"transaction_type,omitempty"`
 	// CoinType holds the value of the "coin_type" field.
@@ -54,7 +58,7 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case transaction.FieldUtxo:
+		case transaction.FieldUtxo, transaction.FieldPre:
 			values[i] = new([]byte)
 		case transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldCoinType, transaction.FieldExitCode, transaction.FieldAmount, transaction.FieldState, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
@@ -95,6 +99,14 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &t.Utxo); err != nil {
 					return fmt.Errorf("unmarshal field utxo: %w", err)
+				}
+			}
+		case transaction.FieldPre:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field pre", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &t.Pre); err != nil {
+					return fmt.Errorf("unmarshal field pre: %w", err)
 				}
 			}
 		case transaction.FieldTransactionType:
@@ -201,6 +213,8 @@ func (t *Transaction) String() string {
 	builder.WriteString(fmt.Sprintf("%v", t.Nonce))
 	builder.WriteString(", utxo=")
 	builder.WriteString(fmt.Sprintf("%v", t.Utxo))
+	builder.WriteString(", pre=")
+	builder.WriteString(fmt.Sprintf("%v", t.Pre))
 	builder.WriteString(", transaction_type=")
 	builder.WriteString(fmt.Sprintf("%v", t.TransactionType))
 	builder.WriteString(", coin_type=")

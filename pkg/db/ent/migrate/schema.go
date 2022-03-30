@@ -13,6 +13,7 @@ var (
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "nonce", Type: field.TypeUint64, Default: 0},
 		{Name: "utxo", Type: field.TypeJSON},
+		{Name: "pre", Type: field.TypeJSON},
 		{Name: "transaction_type", Type: field.TypeInt8, Default: 0},
 		{Name: "coin_type", Type: field.TypeInt32, Default: 0},
 		{Name: "transaction_id", Type: field.TypeString, Unique: true},
@@ -35,7 +36,7 @@ var (
 			{
 				Name:    "transaction_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[12]},
+				Columns: []*schema.Column{TransactionsColumns[13]},
 			},
 		},
 	}

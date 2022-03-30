@@ -7,6 +7,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
+	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/google/uuid"
 )
 
@@ -26,6 +27,9 @@ func (Transaction) Fields() []ent.Field {
 		field.JSON("utxo", []*sphinxplugin.Unspent{}).
 			Default([]*sphinxplugin.Unspent{}).
 			Comment("only for btc"),
+		field.JSON("pre", &eth.PreSignInfo{}).
+			Default(&eth.PreSignInfo{}).
+			Comment("only for eth"),
 		field.Int8("transaction_type").
 			Default(0),
 		field.Int32("coin_type").

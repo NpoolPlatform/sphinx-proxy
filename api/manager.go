@@ -113,7 +113,27 @@ func Transaction() {
 						logger.Sugar().Errorf("proxy->sign invalid coin %v connection", tran.CoinType)
 						continue
 					}
+
 					coinType := sphinxplugin.CoinType(tran.CoinType)
+
+					gasLimit := int64(0)
+					nonce := uint64(0)
+
+					switch coinType {
+					case
+						sphinxplugin.CoinType_CoinTypefilecoin,
+						sphinxplugin.CoinType_CoinTypetfilecoin:
+						gasLimit = 200000000
+						nonce = tran.Nonce
+					case
+						sphinxplugin.CoinType_CoinTypeethereum,
+						sphinxplugin.CoinType_CoinTypeusdterc20,
+						sphinxplugin.CoinType_CoinTypetethereum,
+						sphinxplugin.CoinType_CoinTypetusdterc20:
+						gasLimit = int64(tran.Pre.Nonce)
+						nonce = tran.Pre.Nonce
+					}
+
 					signProxy.sign <- &sphinxproxy.ProxySignRequest{
 						TransactionType: sphinxproxy.TransactionType_Signature,
 						CoinType:        coinType,
@@ -123,14 +143,17 @@ func Transaction() {
 							From:  tran.From,
 							Value: price.DBPriceToVisualPrice(tran.Amount),
 							// TODO from chain get
-							GasLimit:   200000000,
+							GasLimit:   gasLimit,
 							GasFeeCap:  10000000,
 							GasPremium: 1000000,
 							Method:     uint64(builtin.MethodSend),
 							// fil
-							Nonce: tran.Nonce,
+							Nonce: nonce,
 							// TODO optimize btc
 							Unspent: tran.Utxo,
+							// eth/erc20
+							GasPrice: tran.Pre.GasPrice,
+							ChainID:  tran.Pre.ChainID,
 						},
 					}
 				case uint8(sphinxproxy.TransactionState_TransactionStateSync):
