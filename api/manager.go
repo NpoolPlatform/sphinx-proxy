@@ -152,8 +152,9 @@ func Transaction() {
 							// TODO optimize btc
 							Unspent: tran.Utxo,
 							// eth/erc20
-							GasPrice: tran.Pre.GasPrice,
-							ChainID:  tran.Pre.ChainID,
+							GasPrice:   tran.Pre.GasPrice,
+							ChainID:    tran.Pre.ChainID,
+							ContractID: tran.Pre.ContractID,
 						},
 					}
 				case uint8(sphinxproxy.TransactionState_TransactionStateSync):
