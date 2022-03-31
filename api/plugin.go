@@ -171,96 +171,98 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			continue
 		}
 
-		switch psResponse.GetTransactionType() {
-		case sphinxproxy.TransactionType_RegisterCoin:
-			lmPlugin.append(psResponse.GetCoinType(), p)
-			if err := registerCoin(&coininfo.CreateCoinInfoRequest{
-				Name: utils.TruncateCoinTypePrefix(psResponse.GetCoinType()),
-				ENV:  psResponse.GetENV(),
-				Unit: psResponse.GetUnit(),
-			}); err != nil {
-				logger.Sugar().Infof("plugin register new coin: %v error: %v", psResponse.GetCoinType(), err)
-				continue
-			}
-			logger.Sugar().Infof("plugin register new coin: %v ok", psResponse.GetCoinType())
-		case sphinxproxy.TransactionType_Balance:
-			ch, ok := balanceDoneChannel.Load(psResponse.GetTransactionID())
-			if !ok {
-				logger.Sugar().Warnf("TransactionID: %v get balance maybe timeout", psResponse.GetTransactionID())
-				continue
-			}
+		go func(psResponse *sphinxproxy.ProxyPluginResponse) {
+			switch psResponse.GetTransactionType() {
+			case sphinxproxy.TransactionType_RegisterCoin:
+				lmPlugin.append(psResponse.GetCoinType(), p)
+				if err := registerCoin(&coininfo.CreateCoinInfoRequest{
+					Name: utils.TruncateCoinTypePrefix(psResponse.GetCoinType()),
+					ENV:  psResponse.GetENV(),
+					Unit: psResponse.GetUnit(),
+				}); err != nil {
+					logger.Sugar().Infof("plugin register new coin: %v error: %v", psResponse.GetCoinType(), err)
+					return
+				}
+				logger.Sugar().Infof("plugin register new coin: %v ok", psResponse.GetCoinType())
+			case sphinxproxy.TransactionType_Balance:
+				ch, ok := balanceDoneChannel.Load(psResponse.GetTransactionID())
+				if !ok {
+					logger.Sugar().Warnf("TransactionID: %v get balance maybe timeout", psResponse.GetTransactionID())
+					return
+				}
 
-			if psResponse.GetRPCExitMessage() != "" {
-				logger.Sugar().Infof("TransactionID: %v get balance error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
+				if psResponse.GetRPCExitMessage() != "" {
+					logger.Sugar().Infof("TransactionID: %v get balance error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
+					ch.(chan balanceDoneInfo) <- balanceDoneInfo{
+						success: false,
+						message: psResponse.GetRPCExitMessage(),
+					}
+					return
+				}
+
 				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
-					success: false,
-					message: psResponse.GetRPCExitMessage(),
+					success:    true,
+					balance:    psResponse.GetBalance(),
+					balanceStr: psResponse.GetBalanceStr(),
 				}
-				continue
-			}
-
-			ch.(chan balanceDoneInfo) <- balanceDoneInfo{
-				success:    true,
-				balance:    psResponse.GetBalance(),
-				balanceStr: psResponse.GetBalanceStr(),
-			}
-			logger.Sugar().Infof("TransactionID: %v get balance ok", psResponse.GetTransactionID())
-		case sphinxproxy.TransactionType_PreSign:
-			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
-				TransactionID: psResponse.GetTransactionID(),
-				State:         sphinxproxy.TransactionState_TransactionStateSign,
-				Nonce:         psResponse.GetMessage().GetNonce(),
-				UTXO:          psResponse.GetMessage().GetUnspent(),
-				Pre: &eth.PreSignInfo{
-					ChainID:  psResponse.GetMessage().GetChainID(),
-					Nonce:    psResponse.GetMessage().GetNonce(),
-					GasPrice: psResponse.GetMessage().GetGasPrice(),
-					GasLimit: psResponse.GetMessage().GetGasLimit(),
-				},
-			}); err != nil {
-				logger.Sugar().Infof("TransactionID: %v get nonce: %v error: %v", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce(), err)
-				continue
-			}
-			logger.Sugar().Infof("TransactionID: %v get nonce: %v ok", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce())
-		case sphinxproxy.TransactionType_Broadcast:
-			state := sphinxproxy.TransactionState_TransactionStateSync
-			if psResponse.GetRPCExitMessage() != "" {
-				logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
-				if !isErrGasLow(psResponse.GetRPCExitMessage()) {
-					continue
+				logger.Sugar().Infof("TransactionID: %v get balance ok", psResponse.GetTransactionID())
+			case sphinxproxy.TransactionType_PreSign:
+				if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
+					TransactionID: psResponse.GetTransactionID(),
+					State:         sphinxproxy.TransactionState_TransactionStateSign,
+					Nonce:         psResponse.GetMessage().GetNonce(),
+					UTXO:          psResponse.GetMessage().GetUnspent(),
+					Pre: &eth.PreSignInfo{
+						ChainID:  psResponse.GetMessage().GetChainID(),
+						Nonce:    psResponse.GetMessage().GetNonce(),
+						GasPrice: psResponse.GetMessage().GetGasPrice(),
+						GasLimit: psResponse.GetMessage().GetGasLimit(),
+					},
+				}); err != nil {
+					logger.Sugar().Infof("TransactionID: %v get nonce: %v error: %v", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce(), err)
+					return
 				}
-				state = sphinxproxy.TransactionState_TransactionStateFail
-			}
+				logger.Sugar().Infof("TransactionID: %v get nonce: %v ok", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce())
+			case sphinxproxy.TransactionType_Broadcast:
+				state := sphinxproxy.TransactionState_TransactionStateSync
+				if psResponse.GetRPCExitMessage() != "" {
+					logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
+					if !isErrGasLow(psResponse.GetRPCExitMessage()) {
+						return
+					}
+					state = sphinxproxy.TransactionState_TransactionStateFail
+				}
 
-			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
-				TransactionID: psResponse.GetTransactionID(),
-				State:         state,
-				Cid:           psResponse.GetCID(),
-			}); err != nil {
-				logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
-				continue
-			}
-			logger.Sugar().Infof("Broadcast TransactionID: %v message ok", psResponse.GetTransactionID())
-		case sphinxproxy.TransactionType_SyncMsgState:
-			if psResponse.GetRPCExitMessage() != "" {
-				logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
-				continue
-			}
+				if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
+					TransactionID: psResponse.GetTransactionID(),
+					State:         state,
+					Cid:           psResponse.GetCID(),
+				}); err != nil {
+					logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
+					return
+				}
+				logger.Sugar().Infof("Broadcast TransactionID: %v message ok", psResponse.GetTransactionID())
+			case sphinxproxy.TransactionType_SyncMsgState:
+				if psResponse.GetRPCExitMessage() != "" {
+					logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
+					return
+				}
 
-			_state := sphinxproxy.TransactionState_TransactionStateDone
-			if psResponse.GetExitCode() != int64(exitcode.Ok) {
-				_state = sphinxproxy.TransactionState_TransactionStateFail
+				_state := sphinxproxy.TransactionState_TransactionStateDone
+				if psResponse.GetExitCode() != int64(exitcode.Ok) {
+					_state = sphinxproxy.TransactionState_TransactionStateFail
+				}
+				if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
+					TransactionID: psResponse.GetTransactionID(),
+					State:         _state,
+					ExitCode:      psResponse.GetExitCode(),
+				}); err != nil {
+					logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
+					return
+				}
+				logger.Sugar().Infof("SyncMsgState TransactionID: %v ExitCode: %v message ok", psResponse.GetTransactionID(), psResponse.GetExitCode())
 			}
-			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
-				TransactionID: psResponse.GetTransactionID(),
-				State:         _state,
-				ExitCode:      psResponse.GetExitCode(),
-			}); err != nil {
-				logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
-				continue
-			}
-			logger.Sugar().Infof("SyncMsgState TransactionID: %v ExitCode: %v message ok", psResponse.GetTransactionID(), psResponse.GetExitCode())
-		}
+		}(psResponse)
 	}
 }
 
