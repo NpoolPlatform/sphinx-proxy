@@ -213,10 +213,11 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					Nonce:         psResponse.GetMessage().GetNonce(),
 					UTXO:          psResponse.GetMessage().GetUnspent(),
 					Pre: &eth.PreSignInfo{
-						ChainID:  psResponse.GetMessage().GetChainID(),
-						Nonce:    psResponse.GetMessage().GetNonce(),
-						GasPrice: psResponse.GetMessage().GetGasPrice(),
-						GasLimit: psResponse.GetMessage().GetGasLimit(),
+						ChainID:    psResponse.GetMessage().GetChainID(),
+						ContractID: psResponse.GetMessage().GetContractID(),
+						Nonce:      psResponse.GetMessage().GetNonce(),
+						GasPrice:   psResponse.GetMessage().GetGasPrice(),
+						GasLimit:   psResponse.GetMessage().GetGasLimit(),
 					},
 				}); err != nil {
 					logger.Sugar().Infof("TransactionID: %v get nonce: %v error: %v", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce(), err)
