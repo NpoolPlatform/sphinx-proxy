@@ -9,20 +9,21 @@ import (
 )
 
 type mSign struct {
-	signServer   sphinxproxy.SphinxProxy_ProxySignServer
-	closeFlag    bool
-	closeChannel chan struct{}
-	walletNew    chan *sphinxproxy.ProxySignRequest
-	sign         chan *sphinxproxy.ProxySignRequest
+	signServer sphinxproxy.SphinxProxy_ProxySignServer
+	exitChan   chan struct{}
+	once       sync.Once
+	closeChan  chan struct{}
+	walletNew  chan *sphinxproxy.ProxySignRequest
+	sign       chan *sphinxproxy.ProxySignRequest
 }
 
 func newSignStream(stream sphinxproxy.SphinxProxy_ProxySignServer) {
 	lc := &mSign{
-		signServer:   stream,
-		closeFlag:    false,
-		closeChannel: make(chan struct{}),
-		walletNew:    make(chan *sphinxproxy.ProxySignRequest, channelBufSize),
-		sign:         make(chan *sphinxproxy.ProxySignRequest, channelBufSize),
+		signServer: stream,
+		exitChan:   make(chan struct{}),
+		closeChan:  make(chan struct{}),
+		walletNew:  make(chan *sphinxproxy.ProxySignRequest, channelBufSize),
+		sign:       make(chan *sphinxproxy.ProxySignRequest, channelBufSize),
 	}
 	slk.Lock()
 	lmSign = append(lmSign, lc)
@@ -32,16 +33,19 @@ func newSignStream(stream sphinxproxy.SphinxProxy_ProxySignServer) {
 	wg.Add(3)
 	go lc.signStreamSend(wg)
 	go lc.signStreamRecv(wg)
-	go lc.close(wg)
+	go lc.watch(wg)
 	wg.Wait()
 	logger.Sugar().Info("some sign client down, close it")
 }
 
 func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 	defer wg.Done()
-send:
-	for !s.closeFlag {
+	defer logger.Sugar().Warn("sphinx sign stream send exit")
+
+	for {
 		select {
+		case <-s.exitChan:
+			return
 		case info := <-s.walletNew:
 			logger.Sugar().Infof("proxy->sign TransactionID: %v start", info.GetTransactionID())
 			if err := s.signServer.Send(&sphinxproxy.ProxySignRequest{
@@ -63,8 +67,8 @@ send:
 					}
 				}
 				if checkCode(err) {
-					s.closeChannel <- struct{}{}
-					break send
+					s.closeChan <- struct{}{}
+					return
 				}
 				continue
 			}
@@ -86,8 +90,8 @@ send:
 					err,
 				)
 				if checkCode(err) {
-					s.closeChannel <- struct{}{}
-					break send
+					s.closeChan <- struct{}{}
+					return
 				}
 				continue
 			}
@@ -98,7 +102,9 @@ send:
 
 func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 	defer wg.Done()
-	for !s.closeFlag {
+	defer logger.Sugar().Warn("sphinx sign stream recv exit")
+
+	for {
 		ssResponse, err := s.signServer.Recv()
 		if err != nil {
 			logger.Sugar().Errorf(
@@ -106,8 +112,8 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 				err,
 			)
 			if checkCode(err) {
-				s.closeChannel <- struct{}{}
-				break
+				s.closeChan <- struct{}{}
+				return
 			}
 			continue
 		}
@@ -174,12 +180,13 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 	}
 }
 
-func (s *mSign) close(wg *sync.WaitGroup) {
+func (s *mSign) watch(wg *sync.WaitGroup) {
 	defer wg.Done()
-	<-s.closeChannel
+	defer logger.Sugar().Warn("sphinx sign stream watch exit")
+
+	<-s.closeChan
 	slk.Lock()
-	// cancel recv transaction
-	s.closeFlag = true
+
 	nlmSign := make([]*mSign, 0, len(lmSign))
 	for _, sign := range lmSign {
 		if sign.signServer == s.signServer {
@@ -190,4 +197,9 @@ func (s *mSign) close(wg *sync.WaitGroup) {
 	}
 	lmSign = nlmSign
 	slk.Unlock()
+
+	// current conn exit
+	s.once.Do(func() {
+		close(s.exitChan)
+	})
 }
