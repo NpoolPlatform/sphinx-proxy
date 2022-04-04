@@ -173,7 +173,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			)
 			if checkCode(err) {
 				p.closeChan <- struct{}{}
-				break
+				return
 			}
 			continue
 		}
@@ -187,14 +187,14 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				Unit: psResponse.GetUnit(),
 			}); err != nil {
 				logger.Sugar().Infof("plugin register new coin: %v error: %v", psResponse.GetCoinType(), err)
-				return
+				continue
 			}
 			logger.Sugar().Infof("plugin register new coin: %v ok", psResponse.GetCoinType())
 		case sphinxproxy.TransactionType_Balance:
 			ch, ok := balanceDoneChannel.Load(psResponse.GetTransactionID())
 			if !ok {
 				logger.Sugar().Warnf("TransactionID: %v get balance maybe timeout", psResponse.GetTransactionID())
-				return
+				continue
 			}
 
 			if psResponse.GetRPCExitMessage() != "" {
@@ -203,7 +203,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					success: false,
 					message: psResponse.GetRPCExitMessage(),
 				}
-				return
+				continue
 			}
 
 			ch.(chan balanceDoneInfo) <- balanceDoneInfo{
@@ -227,7 +227,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				},
 			}); err != nil {
 				logger.Sugar().Infof("TransactionID: %v get nonce: %v error: %v", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce(), err)
-				return
+				continue
 			}
 			logger.Sugar().Infof("TransactionID: %v get nonce: %v ok", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce())
 		case sphinxproxy.TransactionType_Broadcast:
@@ -235,7 +235,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			if psResponse.GetRPCExitMessage() != "" {
 				logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
 				if !isErrGasLow(psResponse.GetRPCExitMessage()) {
-					return
+					continue
 				}
 				state = sphinxproxy.TransactionState_TransactionStateFail
 			}
@@ -246,13 +246,13 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				Cid:           psResponse.GetCID(),
 			}); err != nil {
 				logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
-				return
+				continue
 			}
 			logger.Sugar().Infof("Broadcast TransactionID: %v message ok", psResponse.GetTransactionID())
 		case sphinxproxy.TransactionType_SyncMsgState:
 			if psResponse.GetRPCExitMessage() != "" {
 				logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
-				return
+				continue
 			}
 
 			_state := sphinxproxy.TransactionState_TransactionStateDone
@@ -265,7 +265,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				ExitCode:      psResponse.GetExitCode(),
 			}); err != nil {
 				logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
-				return
+				continue
 			}
 			logger.Sugar().Infof("SyncMsgState TransactionID: %v ExitCode: %v message ok", psResponse.GetTransactionID(), psResponse.GetExitCode())
 		}
