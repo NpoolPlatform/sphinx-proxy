@@ -168,7 +168,7 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 				CoinType:        ssResponse.GetCoinType(),
 				TransactionType: sphinxproxy.TransactionType_Broadcast,
 				TransactionID:   ssResponse.GetTransactionID(),
-				// fil
+				// fil/sol
 				Message:   ssResponse.GetInfo().GetMessage(),
 				Signature: ssResponse.GetInfo().GetSignature(),
 				// btc

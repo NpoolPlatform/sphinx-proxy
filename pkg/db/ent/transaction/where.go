@@ -119,6 +119,13 @@ func TransactionID(v string) predicate.Transaction {
 	})
 }
 
+// RecentBhash applies equality check predicate on the "recent_bhash" field. It's identical to RecentBhashEQ.
+func RecentBhash(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRecentBhash), v))
+	})
+}
+
 // Cid applies equality check predicate on the "cid" field. It's identical to CidEQ.
 func Cid(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -518,6 +525,117 @@ func TransactionIDEqualFold(v string) predicate.Transaction {
 func TransactionIDContainsFold(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldTransactionID), v))
+	})
+}
+
+// RecentBhashEQ applies the EQ predicate on the "recent_bhash" field.
+func RecentBhashEQ(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashNEQ applies the NEQ predicate on the "recent_bhash" field.
+func RecentBhashNEQ(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashIn applies the In predicate on the "recent_bhash" field.
+func RecentBhashIn(vs ...string) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldRecentBhash), v...))
+	})
+}
+
+// RecentBhashNotIn applies the NotIn predicate on the "recent_bhash" field.
+func RecentBhashNotIn(vs ...string) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldRecentBhash), v...))
+	})
+}
+
+// RecentBhashGT applies the GT predicate on the "recent_bhash" field.
+func RecentBhashGT(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashGTE applies the GTE predicate on the "recent_bhash" field.
+func RecentBhashGTE(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashLT applies the LT predicate on the "recent_bhash" field.
+func RecentBhashLT(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashLTE applies the LTE predicate on the "recent_bhash" field.
+func RecentBhashLTE(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashContains applies the Contains predicate on the "recent_bhash" field.
+func RecentBhashContains(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashHasPrefix applies the HasPrefix predicate on the "recent_bhash" field.
+func RecentBhashHasPrefix(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashHasSuffix applies the HasSuffix predicate on the "recent_bhash" field.
+func RecentBhashHasSuffix(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashEqualFold applies the EqualFold predicate on the "recent_bhash" field.
+func RecentBhashEqualFold(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashContainsFold applies the ContainsFold predicate on the "recent_bhash" field.
+func RecentBhashContainsFold(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldRecentBhash), v))
 	})
 }
 

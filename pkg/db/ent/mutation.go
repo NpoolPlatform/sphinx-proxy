@@ -44,6 +44,7 @@ type TransactionMutation struct {
 	coin_type           *int32
 	addcoin_type        *int32
 	transaction_id      *string
+	recent_bhash        *string
 	cid                 *string
 	exit_code           *int64
 	addexit_code        *int64
@@ -443,6 +444,42 @@ func (m *TransactionMutation) OldTransactionID(ctx context.Context) (v string, e
 // ResetTransactionID resets all changes to the "transaction_id" field.
 func (m *TransactionMutation) ResetTransactionID() {
 	m.transaction_id = nil
+}
+
+// SetRecentBhash sets the "recent_bhash" field.
+func (m *TransactionMutation) SetRecentBhash(s string) {
+	m.recent_bhash = &s
+}
+
+// RecentBhash returns the value of the "recent_bhash" field in the mutation.
+func (m *TransactionMutation) RecentBhash() (r string, exists bool) {
+	v := m.recent_bhash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRecentBhash returns the old "recent_bhash" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldRecentBhash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRecentBhash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRecentBhash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRecentBhash: %w", err)
+	}
+	return oldValue.RecentBhash, nil
+}
+
+// ResetRecentBhash resets all changes to the "recent_bhash" field.
+func (m *TransactionMutation) ResetRecentBhash() {
+	m.recent_bhash = nil
 }
 
 // SetCid sets the "cid" field.
@@ -908,7 +945,7 @@ func (m *TransactionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TransactionMutation) Fields() []string {
-	fields := make([]string, 0, 15)
+	fields := make([]string, 0, 16)
 	if m.nonce != nil {
 		fields = append(fields, transaction.FieldNonce)
 	}
@@ -926,6 +963,9 @@ func (m *TransactionMutation) Fields() []string {
 	}
 	if m.transaction_id != nil {
 		fields = append(fields, transaction.FieldTransactionID)
+	}
+	if m.recent_bhash != nil {
+		fields = append(fields, transaction.FieldRecentBhash)
 	}
 	if m.cid != nil {
 		fields = append(fields, transaction.FieldCid)
@@ -974,6 +1014,8 @@ func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 		return m.CoinType()
 	case transaction.FieldTransactionID:
 		return m.TransactionID()
+	case transaction.FieldRecentBhash:
+		return m.RecentBhash()
 	case transaction.FieldCid:
 		return m.Cid()
 	case transaction.FieldExitCode:
@@ -1013,6 +1055,8 @@ func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldCoinType(ctx)
 	case transaction.FieldTransactionID:
 		return m.OldTransactionID(ctx)
+	case transaction.FieldRecentBhash:
+		return m.OldRecentBhash(ctx)
 	case transaction.FieldCid:
 		return m.OldCid(ctx)
 	case transaction.FieldExitCode:
@@ -1081,6 +1125,13 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTransactionID(v)
+		return nil
+	case transaction.FieldRecentBhash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRecentBhash(v)
 		return nil
 	case transaction.FieldCid:
 		v, ok := value.(string)
@@ -1322,6 +1373,9 @@ func (m *TransactionMutation) ResetField(name string) error {
 		return nil
 	case transaction.FieldTransactionID:
 		m.ResetTransactionID()
+		return nil
+	case transaction.FieldRecentBhash:
+		m.ResetRecentBhash()
 		return nil
 	case transaction.FieldCid:
 		m.ResetCid()

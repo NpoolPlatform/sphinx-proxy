@@ -37,6 +37,9 @@ func (Transaction) Fields() []ent.Field {
 		field.String("transaction_id").
 			Unique().
 			NotEmpty(),
+		field.String("recent_bhash").
+			Default("").
+			Comment("only for sol,abbreviation for 'recent_bloack_hash'"),
 		field.String("cid").
 			Default(""),
 		field.Int64("exit_code").

@@ -14,6 +14,7 @@ import (
 type UpdateTransactionParams struct {
 	TransactionID string
 	State         sphinxproxy.TransactionState
+	RecentBhash   string
 	Nonce         uint64
 	// TODO optimize
 	UTXO     []*sphinxplugin.Unspent
@@ -38,6 +39,7 @@ func UpdateTransaction(ctx context.Context, t *UpdateTransactionParams) error {
 		stm.SetNonce(t.Nonce)
 		stm.SetUtxo(t.UTXO)
 		stm.SetPre(t.Pre)
+		stm.SetRecentBhash(t.RecentBhash)
 		stm.Where(transaction.StateEQ(uint8(sphinxproxy.TransactionState_TransactionStateWait)))
 	case sphinxproxy.TransactionState_TransactionStateSync:
 		stm.SetCid(t.Cid)

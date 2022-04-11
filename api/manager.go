@@ -118,6 +118,7 @@ func Transaction() {
 
 					gasLimit := int64(0)
 					nonce := uint64(0)
+					recentBHash := string("")
 
 					switch coinType {
 					case
@@ -132,6 +133,10 @@ func Transaction() {
 						sphinxplugin.CoinType_CoinTypetusdterc20:
 						gasLimit = tran.Pre.GasLimit
 						nonce = tran.Pre.Nonce
+					case
+						sphinxplugin.CoinType_CoinTypesolana,
+						sphinxplugin.CoinType_CoinTypetsolana:
+						recentBHash = tran.RecentBhash
 					}
 
 					signProxy.sign <- &sphinxproxy.ProxySignRequest{
@@ -155,6 +160,8 @@ func Transaction() {
 							GasPrice:   tran.Pre.GasPrice,
 							ChainID:    tran.Pre.ChainID,
 							ContractID: tran.Pre.ContractID,
+							// sol
+							RecentBhash: recentBHash,
 						},
 					}
 				case uint8(sphinxproxy.TransactionState_TransactionStateSync):

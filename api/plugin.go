@@ -217,6 +217,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				TransactionID: psResponse.GetTransactionID(),
 				State:         sphinxproxy.TransactionState_TransactionStateSign,
 				Nonce:         psResponse.GetMessage().GetNonce(),
+				RecentBhash:   psResponse.GetMessage().GetRecentBhash(),
 				UTXO:          psResponse.GetMessage().GetUnspent(),
 				Pre: &eth.PreSignInfo{
 					ChainID:    psResponse.GetMessage().GetChainID(),

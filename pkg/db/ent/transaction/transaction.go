@@ -25,6 +25,8 @@ const (
 	FieldCoinType = "coin_type"
 	// FieldTransactionID holds the string denoting the transaction_id field in the database.
 	FieldTransactionID = "transaction_id"
+	// FieldRecentBhash holds the string denoting the recent_bhash field in the database.
+	FieldRecentBhash = "recent_bhash"
 	// FieldCid holds the string denoting the cid field in the database.
 	FieldCid = "cid"
 	// FieldExitCode holds the string denoting the exit_code field in the database.
@@ -56,6 +58,7 @@ var Columns = []string{
 	FieldTransactionType,
 	FieldCoinType,
 	FieldTransactionID,
+	FieldRecentBhash,
 	FieldCid,
 	FieldExitCode,
 	FieldFrom,
@@ -90,6 +93,8 @@ var (
 	DefaultCoinType int32
 	// TransactionIDValidator is a validator for the "transaction_id" field. It is called by the builders before save.
 	TransactionIDValidator func(string) error
+	// DefaultRecentBhash holds the default value on creation for the "recent_bhash" field.
+	DefaultRecentBhash string
 	// DefaultCid holds the default value on creation for the "cid" field.
 	DefaultCid string
 	// DefaultExitCode holds the default value on creation for the "exit_code" field.

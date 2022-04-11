@@ -110,6 +110,20 @@ func (tu *TransactionUpdate) SetTransactionID(s string) *TransactionUpdate {
 	return tu
 }
 
+// SetRecentBhash sets the "recent_bhash" field.
+func (tu *TransactionUpdate) SetRecentBhash(s string) *TransactionUpdate {
+	tu.mutation.SetRecentBhash(s)
+	return tu
+}
+
+// SetNillableRecentBhash sets the "recent_bhash" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableRecentBhash(s *string) *TransactionUpdate {
+	if s != nil {
+		tu.SetRecentBhash(*s)
+	}
+	return tu
+}
+
 // SetCid sets the "cid" field.
 func (tu *TransactionUpdate) SetCid(s string) *TransactionUpdate {
 	tu.mutation.SetCid(s)
@@ -450,6 +464,13 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: transaction.FieldTransactionID,
 		})
 	}
+	if value, ok := tu.mutation.RecentBhash(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldRecentBhash,
+		})
+	}
 	if value, ok := tu.mutation.Cid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -652,6 +673,20 @@ func (tuo *TransactionUpdateOne) AddCoinType(i int32) *TransactionUpdateOne {
 // SetTransactionID sets the "transaction_id" field.
 func (tuo *TransactionUpdateOne) SetTransactionID(s string) *TransactionUpdateOne {
 	tuo.mutation.SetTransactionID(s)
+	return tuo
+}
+
+// SetRecentBhash sets the "recent_bhash" field.
+func (tuo *TransactionUpdateOne) SetRecentBhash(s string) *TransactionUpdateOne {
+	tuo.mutation.SetRecentBhash(s)
+	return tuo
+}
+
+// SetNillableRecentBhash sets the "recent_bhash" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableRecentBhash(s *string) *TransactionUpdateOne {
+	if s != nil {
+		tuo.SetRecentBhash(*s)
+	}
 	return tuo
 }
 
@@ -1017,6 +1052,13 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Type:   field.TypeString,
 			Value:  value,
 			Column: transaction.FieldTransactionID,
+		})
+	}
+	if value, ok := tuo.mutation.RecentBhash(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldRecentBhash,
 		})
 	}
 	if value, ok := tuo.mutation.Cid(); ok {
