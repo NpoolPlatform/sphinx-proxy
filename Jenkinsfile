@@ -104,7 +104,7 @@ pipeline {
       }
     }
 
-    stage('Generate docker image for development') {
+    stage('Generate docker image for feature test') {
       when {
         expression { BUILD_TARGET == 'true' }
         expression { BRANCH_NAME != 'master' }
