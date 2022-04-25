@@ -35,6 +35,10 @@ if [ "xdevelopment" == "x$2" ]; then
   version=latest
 fi
 
+if [ "xfeature" == "x$2" ]; then
+  version=feature
+fi
+
 echo "Generate docker image for $PLATFORM -- $version"
 if [ ! -f $OUTPUT/$PLATFORM/$service_name ]; then
     echo "Run 'make $service_name' before you generate its image"
