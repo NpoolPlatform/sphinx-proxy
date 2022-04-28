@@ -17,10 +17,6 @@ require (
 	google.golang.org/grpc v1.46.2
 )
 
-replace github.com/NpoolPlatform/message => ../message
-
-replace github.com/NpoolPlatform/sphinx-plugin => ../sphinx-plugin
-
 require (
 	ariga.io/atlas v0.3.7-0.20220303204946-787354f533c3 // indirect
 	github.com/Shonminh/apollo-client v0.4.0 // indirect
