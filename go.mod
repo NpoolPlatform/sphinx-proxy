@@ -9,13 +9,17 @@ require (
 	github.com/NpoolPlatform/message v0.0.0-20220428075350-a617f58af629
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996
 	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220428082007-3df9299e7fd9
-	github.com/filecoin-project/go-state-types v0.1.1
+	github.com/filecoin-project/go-state-types v0.1.3
 	github.com/filecoin-project/specs-actors v0.9.14
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.8.0
 	github.com/urfave/cli/v2 v2.5.0
-	google.golang.org/grpc v1.46.0
+	google.golang.org/grpc v1.46.2
 )
+
+replace github.com/NpoolPlatform/message => ../message
+
+replace github.com/NpoolPlatform/sphinx-plugin => ../sphinx-plugin
 
 require (
 	ariga.io/atlas v0.3.7-0.20220303204946-787354f533c3 // indirect
