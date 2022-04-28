@@ -242,6 +242,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 						GasPrice:   psResponse.GetMessage().GetGasPrice(),
 						GasLimit:   psResponse.GetMessage().GetGasLimit(),
 					},
+					TxData: psResponse.GetMessage().GetTxData(),
 				}); err != nil {
 					logger.Sugar().Infof("TransactionID: %v get nonce: %v error: %v", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce(), err)
 					continue

@@ -27,6 +27,8 @@ const (
 	FieldTransactionID = "transaction_id"
 	// FieldRecentBhash holds the string denoting the recent_bhash field in the database.
 	FieldRecentBhash = "recent_bhash"
+	// FieldTxData holds the string denoting the tx_data field in the database.
+	FieldTxData = "tx_data"
 	// FieldCid holds the string denoting the cid field in the database.
 	FieldCid = "cid"
 	// FieldExitCode holds the string denoting the exit_code field in the database.
@@ -59,6 +61,7 @@ var Columns = []string{
 	FieldCoinType,
 	FieldTransactionID,
 	FieldRecentBhash,
+	FieldTxData,
 	FieldCid,
 	FieldExitCode,
 	FieldFrom,
@@ -95,6 +98,8 @@ var (
 	TransactionIDValidator func(string) error
 	// DefaultRecentBhash holds the default value on creation for the "recent_bhash" field.
 	DefaultRecentBhash string
+	// DefaultTxData holds the default value on creation for the "tx_data" field.
+	DefaultTxData []byte
 	// DefaultCid holds the default value on creation for the "cid" field.
 	DefaultCid string
 	// DefaultExitCode holds the default value on creation for the "exit_code" field.

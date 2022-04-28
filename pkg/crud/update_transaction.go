@@ -20,6 +20,7 @@ type UpdateTransactionParams struct {
 	UTXO     []*sphinxplugin.Unspent
 	Pre      *eth.PreSignInfo
 	Cid      string
+	TxData   []byte
 	ExitCode int64
 }
 
@@ -40,6 +41,7 @@ func UpdateTransaction(ctx context.Context, t *UpdateTransactionParams) error {
 		stm.SetUtxo(t.UTXO)
 		stm.SetPre(t.Pre)
 		stm.SetRecentBhash(t.RecentBhash)
+		stm.SetTxData(t.TxData)
 		stm.Where(transaction.StateEQ(uint8(sphinxproxy.TransactionState_TransactionStateWait)))
 	case sphinxproxy.TransactionState_TransactionStateSync:
 		stm.SetCid(t.Cid)

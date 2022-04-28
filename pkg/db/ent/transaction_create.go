@@ -96,6 +96,12 @@ func (tc *TransactionCreate) SetNillableRecentBhash(s *string) *TransactionCreat
 	return tc
 }
 
+// SetTxData sets the "tx_data" field.
+func (tc *TransactionCreate) SetTxData(b []byte) *TransactionCreate {
+	tc.mutation.SetTxData(b)
+	return tc
+}
+
 // SetCid sets the "cid" field.
 func (tc *TransactionCreate) SetCid(s string) *TransactionCreate {
 	tc.mutation.SetCid(s)
@@ -331,6 +337,10 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultRecentBhash
 		tc.mutation.SetRecentBhash(v)
 	}
+	if _, ok := tc.mutation.TxData(); !ok {
+		v := transaction.DefaultTxData
+		tc.mutation.SetTxData(v)
+	}
 	if _, ok := tc.mutation.Cid(); !ok {
 		v := transaction.DefaultCid
 		tc.mutation.SetCid(v)
@@ -400,6 +410,9 @@ func (tc *TransactionCreate) check() error {
 	}
 	if _, ok := tc.mutation.RecentBhash(); !ok {
 		return &ValidationError{Name: "recent_bhash", err: errors.New(`ent: missing required field "Transaction.recent_bhash"`)}
+	}
+	if _, ok := tc.mutation.TxData(); !ok {
+		return &ValidationError{Name: "tx_data", err: errors.New(`ent: missing required field "Transaction.tx_data"`)}
 	}
 	if _, ok := tc.mutation.Cid(); !ok {
 		return &ValidationError{Name: "cid", err: errors.New(`ent: missing required field "Transaction.cid"`)}
@@ -534,6 +547,14 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Column: transaction.FieldRecentBhash,
 		})
 		_node.RecentBhash = value
+	}
+	if value, ok := tc.mutation.TxData(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: transaction.FieldTxData,
+		})
+		_node.TxData = value
 	}
 	if value, ok := tc.mutation.Cid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
