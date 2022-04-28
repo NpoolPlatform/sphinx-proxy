@@ -221,7 +221,6 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					}
 					continue
 				}
-
 				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
 					success:    true,
 					balance:    psResponse.GetBalance(),
