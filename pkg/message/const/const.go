@@ -22,5 +22,5 @@ const (
 
 // FormatServiceName ..
 func FormatServiceName() string {
-	return strings.Title(ServiceName)
+	return strings.Title(ServiceName) //nolint
 }

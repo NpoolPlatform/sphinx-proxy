@@ -18,6 +18,7 @@ var (
 		{Name: "coin_type", Type: field.TypeInt32, Default: 0},
 		{Name: "transaction_id", Type: field.TypeString, Unique: true},
 		{Name: "recent_bhash", Type: field.TypeString, Default: ""},
+		{Name: "tx_data", Type: field.TypeBytes},
 		{Name: "cid", Type: field.TypeString, Default: ""},
 		{Name: "exit_code", Type: field.TypeInt64, Default: -1},
 		{Name: "from", Type: field.TypeString, Default: ""},
@@ -37,7 +38,7 @@ var (
 			{
 				Name:    "transaction_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[14]},
+				Columns: []*schema.Column{TransactionsColumns[15]},
 			},
 		},
 	}

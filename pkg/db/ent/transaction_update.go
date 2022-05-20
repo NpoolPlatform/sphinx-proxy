@@ -124,6 +124,12 @@ func (tu *TransactionUpdate) SetNillableRecentBhash(s *string) *TransactionUpdat
 	return tu
 }
 
+// SetTxData sets the "tx_data" field.
+func (tu *TransactionUpdate) SetTxData(b []byte) *TransactionUpdate {
+	tu.mutation.SetTxData(b)
+	return tu
+}
+
 // SetCid sets the "cid" field.
 func (tu *TransactionUpdate) SetCid(s string) *TransactionUpdate {
 	tu.mutation.SetCid(s)
@@ -471,6 +477,13 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: transaction.FieldRecentBhash,
 		})
 	}
+	if value, ok := tu.mutation.TxData(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: transaction.FieldTxData,
+		})
+	}
 	if value, ok := tu.mutation.Cid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -687,6 +700,12 @@ func (tuo *TransactionUpdateOne) SetNillableRecentBhash(s *string) *TransactionU
 	if s != nil {
 		tuo.SetRecentBhash(*s)
 	}
+	return tuo
+}
+
+// SetTxData sets the "tx_data" field.
+func (tuo *TransactionUpdateOne) SetTxData(b []byte) *TransactionUpdateOne {
+	tuo.mutation.SetTxData(b)
 	return tuo
 }
 
@@ -1059,6 +1078,13 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Type:   field.TypeString,
 			Value:  value,
 			Column: transaction.FieldRecentBhash,
+		})
+	}
+	if value, ok := tuo.mutation.TxData(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: transaction.FieldTxData,
 		})
 	}
 	if value, ok := tuo.mutation.Cid(); ok {

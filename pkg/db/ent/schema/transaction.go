@@ -40,6 +40,9 @@ func (Transaction) Fields() []ent.Field {
 		field.String("recent_bhash").
 			Default("").
 			Comment("only for sol,abbreviation for 'recent_bloack_hash'"),
+		field.Bytes("tx_data").
+			Default([]byte{}).
+			Comment("tx_data of complex data structure for tx"),
 		field.String("cid").
 			Default(""),
 		field.Int64("exit_code").

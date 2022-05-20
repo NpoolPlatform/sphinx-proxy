@@ -106,7 +106,6 @@ func Transaction(exitChan chan struct{}) {
 					logger.Sugar().Errorf("call GetTransactions get transaction error: %v", err)
 					return
 				}
-
 				for _, tran := range trans {
 					switch tran.State {
 					case uint8(sphinxproxy.TransactionState_TransactionStateWait):
@@ -117,12 +116,23 @@ func Transaction(exitChan chan struct{}) {
 							logger.Sugar().Errorf("proxy->plugin invalid coin %v connection", coinType)
 							continue
 						}
-						pluginProxy.preSign <- &sphinxproxy.ProxyPluginRequest{
+						ppRequest := &sphinxproxy.ProxyPluginRequest{
 							CoinType:        coinType,
 							TransactionType: sphinxproxy.TransactionType_PreSign,
 							TransactionID:   tran.TransactionID,
 							Address:         tran.From,
 						}
+
+						switch coinType {
+						case
+							sphinxplugin.CoinType_CoinTypeusdttrc20,
+							sphinxplugin.CoinType_CoinTypetusdttrc20:
+							ppRequest.Message = &sphinxplugin.UnsignedMessage{}
+							ppRequest.Message.From = tran.From
+							ppRequest.Message.To = tran.To
+							ppRequest.Message.Value = price.DBPriceToVisualPrice(tran.Amount)
+						}
+						pluginProxy.preSign <- ppRequest
 					case uint8(sphinxproxy.TransactionState_TransactionStateSign):
 						// sign -> broadcast
 						signProxy, err := getProxySign()
@@ -136,6 +146,7 @@ func Transaction(exitChan chan struct{}) {
 						gasLimit := int64(0)
 						nonce := uint64(0)
 						recentBHash := string("")
+						txData := []byte{}
 
 						switch coinType {
 						case
@@ -154,6 +165,10 @@ func Transaction(exitChan chan struct{}) {
 							sphinxplugin.CoinType_CoinTypesolana,
 							sphinxplugin.CoinType_CoinTypetsolana:
 							recentBHash = tran.RecentBhash
+						case
+							sphinxplugin.CoinType_CoinTypeusdttrc20,
+							sphinxplugin.CoinType_CoinTypetusdttrc20:
+							txData = tran.TxData
 						}
 
 						signProxy.sign <- &sphinxproxy.ProxySignRequest{
@@ -179,6 +194,8 @@ func Transaction(exitChan chan struct{}) {
 								ContractID: tran.Pre.ContractID,
 								// sol
 								RecentBhash: recentBHash,
+								// trc20
+								TxData: txData,
 							},
 						}
 					case uint8(sphinxproxy.TransactionState_TransactionStateSync):

@@ -126,6 +126,13 @@ func RecentBhash(v string) predicate.Transaction {
 	})
 }
 
+// TxData applies equality check predicate on the "tx_data" field. It's identical to TxDataEQ.
+func TxData(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTxData), v))
+	})
+}
+
 // Cid applies equality check predicate on the "cid" field. It's identical to CidEQ.
 func Cid(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -636,6 +643,82 @@ func RecentBhashEqualFold(v string) predicate.Transaction {
 func RecentBhashContainsFold(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldRecentBhash), v))
+	})
+}
+
+// TxDataEQ applies the EQ predicate on the "tx_data" field.
+func TxDataEQ(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTxData), v))
+	})
+}
+
+// TxDataNEQ applies the NEQ predicate on the "tx_data" field.
+func TxDataNEQ(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTxData), v))
+	})
+}
+
+// TxDataIn applies the In predicate on the "tx_data" field.
+func TxDataIn(vs ...[]byte) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTxData), v...))
+	})
+}
+
+// TxDataNotIn applies the NotIn predicate on the "tx_data" field.
+func TxDataNotIn(vs ...[]byte) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTxData), v...))
+	})
+}
+
+// TxDataGT applies the GT predicate on the "tx_data" field.
+func TxDataGT(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTxData), v))
+	})
+}
+
+// TxDataGTE applies the GTE predicate on the "tx_data" field.
+func TxDataGTE(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTxData), v))
+	})
+}
+
+// TxDataLT applies the LT predicate on the "tx_data" field.
+func TxDataLT(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTxData), v))
+	})
+}
+
+// TxDataLTE applies the LTE predicate on the "tx_data" field.
+func TxDataLTE(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTxData), v))
 	})
 }
 

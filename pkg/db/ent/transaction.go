@@ -34,7 +34,11 @@ type Transaction struct {
 	// TransactionID holds the value of the "transaction_id" field.
 	TransactionID string `json:"transaction_id,omitempty"`
 	// RecentBhash holds the value of the "recent_bhash" field.
+	// only for sol,abbreviation for 'recent_bloack_hash'
 	RecentBhash string `json:"recent_bhash,omitempty"`
+	// TxData holds the value of the "tx_data" field.
+	// tx_data of complex data structure for tx
+	TxData []byte `json:"tx_data,omitempty"`
 	// Cid holds the value of the "cid" field.
 	Cid string `json:"cid,omitempty"`
 	// ExitCode holds the value of the "exit_code" field.
@@ -60,7 +64,7 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case transaction.FieldUtxo, transaction.FieldPre:
+		case transaction.FieldUtxo, transaction.FieldPre, transaction.FieldTxData:
 			values[i] = new([]byte)
 		case transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldCoinType, transaction.FieldExitCode, transaction.FieldAmount, transaction.FieldState, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
@@ -134,6 +138,12 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 				return fmt.Errorf("unexpected type %T for field recent_bhash", values[i])
 			} else if value.Valid {
 				t.RecentBhash = value.String
+			}
+		case transaction.FieldTxData:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field tx_data", values[i])
+			} else if value != nil {
+				t.TxData = *value
 			}
 		case transaction.FieldCid:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -231,6 +241,8 @@ func (t *Transaction) String() string {
 	builder.WriteString(t.TransactionID)
 	builder.WriteString(", recent_bhash=")
 	builder.WriteString(t.RecentBhash)
+	builder.WriteString(", tx_data=")
+	builder.WriteString(fmt.Sprintf("%v", t.TxData))
 	builder.WriteString(", cid=")
 	builder.WriteString(t.Cid)
 	builder.WriteString(", exit_code=")

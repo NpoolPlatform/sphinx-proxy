@@ -213,15 +213,6 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					continue
 				}
 
-				if psResponse.GetRPCExitMessage() != "" {
-					logger.Sugar().Infof("TransactionID: %v get balance error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
-					ch.(chan balanceDoneInfo) <- balanceDoneInfo{
-						success: false,
-						message: psResponse.GetRPCExitMessage(),
-					}
-					continue
-				}
-
 				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
 					success:    true,
 					balance:    psResponse.GetBalance(),
@@ -242,6 +233,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 						GasPrice:   psResponse.GetMessage().GetGasPrice(),
 						GasLimit:   psResponse.GetMessage().GetGasLimit(),
 					},
+					TxData: psResponse.GetMessage().GetTxData(),
 				}); err != nil {
 					logger.Sugar().Infof("TransactionID: %v get nonce: %v error: %v", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce(), err)
 					continue
@@ -250,8 +242,9 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			case sphinxproxy.TransactionType_Broadcast:
 				state := sphinxproxy.TransactionState_TransactionStateSync
 				if psResponse.GetRPCExitMessage() != "" {
-					logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
-					if !isErrGasLow(psResponse.GetRPCExitMessage()) {
+					logger.Sugar().Errorf("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
+					if !isErrFILGasLow(psResponse.GetRPCExitMessage()) &&
+						!isErrTRC20Expired(psResponse.GetRPCExitMessage()) {
 						continue
 					}
 					state = sphinxproxy.TransactionState_TransactionStateFail
@@ -317,7 +310,7 @@ func (p *mPlugin) watch(wg *sync.WaitGroup) {
 	}
 }
 
-func isErrGasLow(msg string) bool {
+func isErrFILGasLow(msg string) bool {
 	if msg == "" {
 		return false
 	}
@@ -326,5 +319,14 @@ func isErrGasLow(msg string) bool {
 	// messagepool.go:884
 	return regexp.MustCompile(
 		`gas fee cap too low`,
+	).MatchString(msg)
+}
+
+func isErrTRC20Expired(msg string) bool {
+	if msg == "" {
+		return false
+	}
+	return regexp.MustCompile(
+		`Transaction expired`,
 	).MatchString(msg)
 }
