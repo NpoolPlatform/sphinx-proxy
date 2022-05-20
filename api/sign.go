@@ -49,8 +49,10 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 	for {
 		select {
 		case <-s.exitChan:
+			logger.Sugar().Info("sign send chan exit")
 			return
 		case <-s.connCloseChan:
+			logger.Sugar().Info("sign send chan close")
 			return
 		case info := <-s.walletNew:
 			logger.Sugar().Infof("proxy->sign TransactionID: %v start", info.GetTransactionID())
@@ -113,8 +115,10 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 	for {
 		select {
 		case <-s.exitChan:
+			logger.Sugar().Info("sign recv chan exit")
 			return
 		case <-s.connCloseChan:
+			logger.Sugar().Info("sign recv chan close")
 			return
 		default:
 			ssResponse, err := s.signServer.Recv()
@@ -199,8 +203,10 @@ func (s *mSign) watch(wg *sync.WaitGroup) {
 
 	select {
 	case <-s.exitChan:
+		logger.Sugar().Info("sign watch chan exit")
 		return
 	case <-s.closeChan:
+		logger.Sugar().Info("sign watch chan close")
 		slk.Lock()
 		nlmSign := make([]*mSign, 0, len(lmSign))
 		for _, sign := range lmSign {

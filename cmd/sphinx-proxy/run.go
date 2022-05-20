@@ -31,6 +31,7 @@ var runCmd = &cli.Command{
 		signal.Notify(podStopSig, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 		go func() {
 			<-podStopSig
+			logger.Sugar().Info("received SIGTERM to clean conn resource")
 			close(exitChan)
 		}()
 		go api.Transaction(exitChan)

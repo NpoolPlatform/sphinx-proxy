@@ -74,6 +74,7 @@ func Transaction(exitChan chan struct{}) {
 		select {
 		case <-exitChan:
 			plk.Lock()
+			logger.Sugar().Info("release plugin conn resource")
 			for _, plugin := range lmPlugin {
 				for _, pc := range plugin {
 					close(pc.exitChan)
@@ -81,6 +82,7 @@ func Transaction(exitChan chan struct{}) {
 			}
 			plk.Unlock()
 			slk.Lock()
+			logger.Sugar().Info("release sign conn resource")
 			for _, sign := range lmSign {
 				close(sign.exitChan)
 			}

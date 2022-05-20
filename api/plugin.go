@@ -85,8 +85,10 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 	for {
 		select {
 		case <-p.exitChan:
+			logger.Sugar().Info("plugin send chan exit")
 			return
 		case <-p.connCloseChan:
+			logger.Sugar().Info("plugin send chan close")
 			return
 		case info := <-p.balance:
 			if err := p.pluginServer.Send(&sphinxproxy.ProxyPluginRequest{
@@ -173,8 +175,10 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 	for {
 		select {
 		case <-p.exitChan:
+			logger.Sugar().Info("plugin recv chan exit")
 			return
 		case <-p.connCloseChan:
+			logger.Sugar().Info("plugin recv chan close")
 			return
 		default:
 			psResponse, err := p.pluginServer.Recv()
@@ -292,8 +296,10 @@ func (p *mPlugin) watch(wg *sync.WaitGroup) {
 
 	select {
 	case <-p.exitChan:
+		logger.Sugar().Info("plugin watch chan exit")
 		return
 	case <-p.closeChan:
+		logger.Sugar().Info("plugin watch chan close")
 		plk.Lock()
 		nlmPlugin := make([]*mPlugin, 0, len(lmPlugin[p.coinType]))
 		for _, plugin := range lmPlugin[p.coinType] {
