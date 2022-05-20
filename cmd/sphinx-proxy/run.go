@@ -2,6 +2,8 @@ package main
 
 import (
 	"os"
+	"os/signal"
+	"syscall"
 
 	apimgrcli "github.com/NpoolPlatform/api-manager/pkg/client"
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
@@ -14,7 +16,7 @@ import (
 
 var runCmd = &cli.Command{
 	Name:    "run",
-	Aliases: []string{"s"},
+	Aliases: []string{"r"},
 	Usage:   "Run Sphinx Proxy daemon",
 	After: func(c *cli.Context) error {
 		if err := grpc2.HShutdown(); err != nil {
@@ -24,7 +26,14 @@ var runCmd = &cli.Command{
 		return logger.Sync()
 	},
 	Action: func(c *cli.Context) error {
-		go api.Transaction()
+		podStopSig := make(chan os.Signal, 1)
+		exitChan := make(chan struct{})
+		signal.Notify(podStopSig, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+		go func() {
+			<-podStopSig
+			close(exitChan)
+		}()
+		go api.Transaction(exitChan)
 		go func() {
 			if err := grpc2.RunGRPC(rpcRegister); err != nil {
 				logger.Sugar().Warnf("start grpc server error: %v", err)
