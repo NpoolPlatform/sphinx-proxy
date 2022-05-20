@@ -251,7 +251,8 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				state := sphinxproxy.TransactionState_TransactionStateSync
 				if psResponse.GetRPCExitMessage() != "" {
 					logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
-					if !isErrGasLow(psResponse.GetRPCExitMessage()) {
+					if !isErrFILGasLow(psResponse.GetRPCExitMessage()) ||
+						isErrTRC20TxExpired(psResponse.GetRPCExitMessage()) {
 						continue
 					}
 					state = sphinxproxy.TransactionState_TransactionStateFail
@@ -317,7 +318,7 @@ func (p *mPlugin) watch(wg *sync.WaitGroup) {
 	}
 }
 
-func isErrGasLow(msg string) bool {
+func isErrFILGasLow(msg string) bool {
 	if msg == "" {
 		return false
 	}
@@ -326,5 +327,14 @@ func isErrGasLow(msg string) bool {
 	// messagepool.go:884
 	return regexp.MustCompile(
 		`gas fee cap too low`,
+	).MatchString(msg)
+}
+
+func isErrTRC20TxExpired(msg string) bool {
+	if msg == "" {
+		return false
+	}
+	return regexp.MustCompile(
+		`Transaction expired`,
 	).MatchString(msg)
 }
