@@ -326,9 +326,6 @@ func isErrExpired(msg string) bool {
 	if msg == "" {
 		return false
 	}
-	// messagepool.ErrGasFeeCapTooLow
-	// messagepool.go:76
-	// messagepool.go:884
 	return regexp.MustCompile(
 		`Transaction expired`,
 	).MatchString(msg)
