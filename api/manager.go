@@ -68,122 +68,138 @@ func getProxyPlugin(coinType sphinxplugin.CoinType) (*mPlugin, error) {
 	return lmPlugin[coinType][rnd.Intn(len(lmPlugin[coinType]))], nil
 }
 
-// Transaction from db fetch transactions
-// multi wallet can parall
-func Transaction() {
-	for range time.NewTicker(constant.TaskDuration).C {
-		func() {
-			ctx, cancel := context.WithTimeout(context.Background(), constant.TaskTimeout)
-			defer cancel()
+// nolint
+func Transaction(exitChan chan struct{}) {
+	for {
+		select {
+		case <-time.NewTicker(constant.TaskDuration).C:
+			func() {
+				ctx, cancel := context.WithTimeout(context.Background(), constant.TaskTimeout)
+				defer cancel()
 
-			var (
-				err   error
-				trans []*ent.Transaction
-			)
+				var (
+					err   error
+					trans []*ent.Transaction
+				)
 
-			// priority deal sign
-			// TODO if one wallet error will block all
-			// here should wait all done
-			trans, err = crud.GetTransactions(ctx)
-			if err != nil {
-				logger.Sugar().Errorf("call GetTransactions get transaction error: %v", err)
-				return
-			}
+				// priority deal sign
+				// TODO if one wallet error will block all
+				// here should wait all done
+				trans, err = crud.GetTransactions(ctx)
+				if err != nil {
+					logger.Sugar().Errorf("call GetTransactions get transaction error: %v", err)
+					return
+				}
 
-			for _, tran := range trans {
-				switch tran.State {
-				case uint8(sphinxproxy.TransactionState_TransactionStateWait):
-					// from wallet get nonce/utxo
-					coinType := sphinxplugin.CoinType(tran.CoinType)
-					pluginProxy, err := getProxyPlugin(coinType)
-					if err != nil {
-						logger.Sugar().Errorf("proxy->plugin invalid coin %v connection", coinType)
-						continue
-					}
-					pluginProxy.preSign <- &sphinxproxy.ProxyPluginRequest{
-						CoinType:        coinType,
-						TransactionType: sphinxproxy.TransactionType_PreSign,
-						TransactionID:   tran.TransactionID,
-						Address:         tran.From,
-					}
-				case uint8(sphinxproxy.TransactionState_TransactionStateSign):
-					// sign -> broadcast
-					signProxy, err := getProxySign()
-					if err != nil {
-						logger.Sugar().Errorf("proxy->sign invalid coin %v connection", tran.CoinType)
-						continue
-					}
+				for _, tran := range trans {
+					switch tran.State {
+					case uint8(sphinxproxy.TransactionState_TransactionStateWait):
+						// from wallet get nonce/utxo
+						coinType := sphinxplugin.CoinType(tran.CoinType)
+						pluginProxy, err := getProxyPlugin(coinType)
+						if err != nil {
+							logger.Sugar().Errorf("proxy->plugin invalid coin %v connection", coinType)
+							continue
+						}
+						pluginProxy.preSign <- &sphinxproxy.ProxyPluginRequest{
+							CoinType:        coinType,
+							TransactionType: sphinxproxy.TransactionType_PreSign,
+							TransactionID:   tran.TransactionID,
+							Address:         tran.From,
+						}
+					case uint8(sphinxproxy.TransactionState_TransactionStateSign):
+						// sign -> broadcast
+						signProxy, err := getProxySign()
+						if err != nil {
+							logger.Sugar().Errorf("proxy->sign invalid coin %v connection", tran.CoinType)
+							continue
+						}
 
-					coinType := sphinxplugin.CoinType(tran.CoinType)
+						coinType := sphinxplugin.CoinType(tran.CoinType)
 
-					gasLimit := int64(0)
-					nonce := uint64(0)
-					recentBHash := string("")
+						gasLimit := int64(0)
+						nonce := uint64(0)
+						recentBHash := string("")
 
-					switch coinType {
-					case
-						sphinxplugin.CoinType_CoinTypefilecoin,
-						sphinxplugin.CoinType_CoinTypetfilecoin:
-						gasLimit = 200000000
-						nonce = tran.Nonce
-					case
-						sphinxplugin.CoinType_CoinTypeethereum,
-						sphinxplugin.CoinType_CoinTypeusdterc20,
-						sphinxplugin.CoinType_CoinTypetethereum,
-						sphinxplugin.CoinType_CoinTypetusdterc20:
-						gasLimit = tran.Pre.GasLimit
-						nonce = tran.Pre.Nonce
-					case
-						sphinxplugin.CoinType_CoinTypesolana,
-						sphinxplugin.CoinType_CoinTypetsolana:
-						recentBHash = tran.RecentBhash
-					}
+						switch coinType {
+						case
+							sphinxplugin.CoinType_CoinTypefilecoin,
+							sphinxplugin.CoinType_CoinTypetfilecoin:
+							gasLimit = 200000000
+							nonce = tran.Nonce
+						case
+							sphinxplugin.CoinType_CoinTypeethereum,
+							sphinxplugin.CoinType_CoinTypeusdterc20,
+							sphinxplugin.CoinType_CoinTypetethereum,
+							sphinxplugin.CoinType_CoinTypetusdterc20:
+							gasLimit = tran.Pre.GasLimit
+							nonce = tran.Pre.Nonce
+						case
+							sphinxplugin.CoinType_CoinTypesolana,
+							sphinxplugin.CoinType_CoinTypetsolana:
+							recentBHash = tran.RecentBhash
+						}
 
-					signProxy.sign <- &sphinxproxy.ProxySignRequest{
-						TransactionType: sphinxproxy.TransactionType_Signature,
-						CoinType:        coinType,
-						TransactionID:   tran.TransactionID,
-						Message: &sphinxplugin.UnsignedMessage{
-							To:    tran.To,
-							From:  tran.From,
-							Value: price.DBPriceToVisualPrice(tran.Amount),
-							// TODO from chain get
-							GasLimit:   gasLimit,
-							GasFeeCap:  10000000,
-							GasPremium: 1000000,
-							Method:     uint64(builtin.MethodSend),
-							// fil
-							Nonce: nonce,
-							// TODO optimize btc
-							Unspent: tran.Utxo,
-							// eth/erc20
-							GasPrice:   tran.Pre.GasPrice,
-							ChainID:    tran.Pre.ChainID,
-							ContractID: tran.Pre.ContractID,
-							// sol
-							RecentBhash: recentBHash,
-						},
-					}
-				case uint8(sphinxproxy.TransactionState_TransactionStateSync):
-					coinType := sphinxplugin.CoinType(tran.CoinType)
-					pluginProxy, err := getProxyPlugin(coinType)
-					if err != nil {
-						logger.Sugar().Errorf("proxy->plugin invalid coin %v connection", coinType)
-						continue
-					}
-					pluginProxy.syncMsg <- &sphinxproxy.ProxyPluginRequest{
-						CoinType:        coinType,
-						TransactionType: sphinxproxy.TransactionType_SyncMsgState,
-						TransactionID:   tran.TransactionID,
-						CID:             tran.Cid,
-						Message: &sphinxplugin.UnsignedMessage{
-							From: tran.From,
-							To:   tran.To,
-						},
+						signProxy.sign <- &sphinxproxy.ProxySignRequest{
+							TransactionType: sphinxproxy.TransactionType_Signature,
+							CoinType:        coinType,
+							TransactionID:   tran.TransactionID,
+							Message: &sphinxplugin.UnsignedMessage{
+								To:    tran.To,
+								From:  tran.From,
+								Value: price.DBPriceToVisualPrice(tran.Amount),
+								// TODO from chain get
+								GasLimit:   gasLimit,
+								GasFeeCap:  10000000,
+								GasPremium: 1000000,
+								Method:     uint64(builtin.MethodSend),
+								// fil
+								Nonce: nonce,
+								// TODO optimize btc
+								Unspent: tran.Utxo,
+								// eth/erc20
+								GasPrice:   tran.Pre.GasPrice,
+								ChainID:    tran.Pre.ChainID,
+								ContractID: tran.Pre.ContractID,
+								// sol
+								RecentBhash: recentBHash,
+							},
+						}
+					case uint8(sphinxproxy.TransactionState_TransactionStateSync):
+						coinType := sphinxplugin.CoinType(tran.CoinType)
+						pluginProxy, err := getProxyPlugin(coinType)
+						if err != nil {
+							logger.Sugar().Errorf("proxy->plugin invalid coin %v connection", coinType)
+							continue
+						}
+						pluginProxy.syncMsg <- &sphinxproxy.ProxyPluginRequest{
+							CoinType:        coinType,
+							TransactionType: sphinxproxy.TransactionType_SyncMsgState,
+							TransactionID:   tran.TransactionID,
+							CID:             tran.Cid,
+							Message: &sphinxplugin.UnsignedMessage{
+								From: tran.From,
+								To:   tran.To,
+							},
+						}
 					}
 				}
+			}()
+		case <-exitChan:
+			plk.Lock()
+			for _, plugin := range lmPlugin {
+				for _, pc := range plugin {
+					close(pc.exitChan)
+				}
 			}
-		}()
+			plk.Unlock()
+			slk.Lock()
+			for _, sign := range lmSign {
+				close(sign.exitChan)
+			}
+			slk.Unlock()
+			return
+		}
 	}
 }
 

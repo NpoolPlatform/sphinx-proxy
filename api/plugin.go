@@ -19,26 +19,30 @@ import (
 type mPlugin struct {
 	pluginServer sphinxproxy.SphinxProxy_ProxyPluginServer
 	coinType     sphinxplugin.CoinType
-	exitChan     chan struct{}
-	once         sync.Once
-	closeChan    chan struct{}
-	balance      chan *sphinxproxy.ProxyPluginRequest
-	preSign      chan *sphinxproxy.ProxyPluginRequest
-	mpoolPush    chan *sphinxproxy.ProxyPluginRequest
-	syncMsg      chan *sphinxproxy.ProxyPluginRequest
-	registerCoin chan *sphinxproxy.ProxyPluginResponse
+	// pod exit
+	exitChan chan struct{}
+	// conn error
+	connCloseChan chan struct{}
+	closeChan     chan struct{}
+	once          sync.Once
+	balance       chan *sphinxproxy.ProxyPluginRequest
+	preSign       chan *sphinxproxy.ProxyPluginRequest
+	mpoolPush     chan *sphinxproxy.ProxyPluginRequest
+	syncMsg       chan *sphinxproxy.ProxyPluginRequest
+	registerCoin  chan *sphinxproxy.ProxyPluginResponse
 }
 
 func newPluginStream(stream sphinxproxy.SphinxProxy_ProxyPluginServer) {
 	lp := &mPlugin{
-		pluginServer: stream,
-		exitChan:     make(chan struct{}),
-		closeChan:    make(chan struct{}),
-		balance:      make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
-		preSign:      make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
-		mpoolPush:    make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
-		syncMsg:      make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
-		registerCoin: make(chan *sphinxproxy.ProxyPluginResponse),
+		pluginServer:  stream,
+		exitChan:      make(chan struct{}),
+		connCloseChan: make(chan struct{}),
+		closeChan:     make(chan struct{}),
+		balance:       make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
+		preSign:       make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
+		mpoolPush:     make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
+		syncMsg:       make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
+		registerCoin:  make(chan *sphinxproxy.ProxyPluginResponse),
 	}
 	wg := &sync.WaitGroup{}
 	wg.Add(3)
@@ -81,6 +85,8 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 	for {
 		select {
 		case <-p.exitChan:
+			return
+		case <-p.connCloseChan:
 			return
 		case info := <-p.balance:
 			if err := p.pluginServer.Send(&sphinxproxy.ProxyPluginRequest{
@@ -165,110 +171,117 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer logger.Sugar().Warn("sphinx plugin stream recv exit")
 	for {
-		psResponse, err := p.pluginServer.Recv()
-		if err != nil {
-			logger.Sugar().Errorf(
-				"proxy->plugin error: %v",
-				err,
-			)
-			if checkCode(err) {
-				p.closeChan <- struct{}{}
-				return
-			}
-			continue
-		}
-
-		switch psResponse.GetTransactionType() {
-		case sphinxproxy.TransactionType_RegisterCoin:
-			lmPlugin.append(psResponse.GetCoinType(), p)
-			if err := registerCoin(&coininfo.CreateCoinInfoRequest{
-				Name: utils.TruncateCoinTypePrefix(psResponse.GetCoinType()),
-				ENV:  psResponse.GetENV(),
-				Unit: psResponse.GetUnit(),
-			}); err != nil {
-				logger.Sugar().Infof("plugin register new coin: %v error: %v", psResponse.GetCoinType(), err)
-				continue
-			}
-			logger.Sugar().Infof("plugin register new coin: %v ok", psResponse.GetCoinType())
-		case sphinxproxy.TransactionType_Balance:
-			ch, ok := balanceDoneChannel.Load(psResponse.GetTransactionID())
-			if !ok {
-				logger.Sugar().Warnf("TransactionID: %v get balance maybe timeout", psResponse.GetTransactionID())
-				continue
-			}
-
-			if psResponse.GetRPCExitMessage() != "" {
-				logger.Sugar().Infof("TransactionID: %v get balance error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
-				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
-					success: false,
-					message: psResponse.GetRPCExitMessage(),
+		select {
+		case <-p.exitChan:
+			return
+		case <-p.connCloseChan:
+			return
+		default:
+			psResponse, err := p.pluginServer.Recv()
+			if err != nil {
+				logger.Sugar().Errorf(
+					"proxy->plugin error: %v",
+					err,
+				)
+				if checkCode(err) {
+					p.closeChan <- struct{}{}
+					return
 				}
 				continue
 			}
 
-			ch.(chan balanceDoneInfo) <- balanceDoneInfo{
-				success:    true,
-				balance:    psResponse.GetBalance(),
-				balanceStr: psResponse.GetBalanceStr(),
-			}
-			logger.Sugar().Infof("TransactionID: %v get balance ok", psResponse.GetTransactionID())
-		case sphinxproxy.TransactionType_PreSign:
-			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
-				TransactionID: psResponse.GetTransactionID(),
-				State:         sphinxproxy.TransactionState_TransactionStateSign,
-				Nonce:         psResponse.GetMessage().GetNonce(),
-				RecentBhash:   psResponse.GetMessage().GetRecentBhash(),
-				UTXO:          psResponse.GetMessage().GetUnspent(),
-				Pre: &eth.PreSignInfo{
-					ChainID:    psResponse.GetMessage().GetChainID(),
-					ContractID: psResponse.GetMessage().GetContractID(),
-					Nonce:      psResponse.GetMessage().GetNonce(),
-					GasPrice:   psResponse.GetMessage().GetGasPrice(),
-					GasLimit:   psResponse.GetMessage().GetGasLimit(),
-				},
-			}); err != nil {
-				logger.Sugar().Infof("TransactionID: %v get nonce: %v error: %v", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce(), err)
-				continue
-			}
-			logger.Sugar().Infof("TransactionID: %v get nonce: %v ok", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce())
-		case sphinxproxy.TransactionType_Broadcast:
-			state := sphinxproxy.TransactionState_TransactionStateSync
-			if psResponse.GetRPCExitMessage() != "" {
-				logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
-				if !isErrGasLow(psResponse.GetRPCExitMessage()) {
+			switch psResponse.GetTransactionType() {
+			case sphinxproxy.TransactionType_RegisterCoin:
+				lmPlugin.append(psResponse.GetCoinType(), p)
+				if err := registerCoin(&coininfo.CreateCoinInfoRequest{
+					Name: utils.TruncateCoinTypePrefix(psResponse.GetCoinType()),
+					ENV:  psResponse.GetENV(),
+					Unit: psResponse.GetUnit(),
+				}); err != nil {
+					logger.Sugar().Infof("plugin register new coin: %v error: %v", psResponse.GetCoinType(), err)
 					continue
 				}
-				state = sphinxproxy.TransactionState_TransactionStateFail
-			}
+				logger.Sugar().Infof("plugin register new coin: %v ok", psResponse.GetCoinType())
+			case sphinxproxy.TransactionType_Balance:
+				ch, ok := balanceDoneChannel.Load(psResponse.GetTransactionID())
+				if !ok {
+					logger.Sugar().Warnf("TransactionID: %v get balance maybe timeout", psResponse.GetTransactionID())
+					continue
+				}
 
-			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
-				TransactionID: psResponse.GetTransactionID(),
-				State:         state,
-				Cid:           psResponse.GetCID(),
-			}); err != nil {
-				logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
-				continue
-			}
-			logger.Sugar().Infof("Broadcast TransactionID: %v message ok", psResponse.GetTransactionID())
-		case sphinxproxy.TransactionType_SyncMsgState:
-			if psResponse.GetRPCExitMessage() != "" {
-				logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
-				continue
-			}
+				if psResponse.GetRPCExitMessage() != "" {
+					logger.Sugar().Infof("TransactionID: %v get balance error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
+					ch.(chan balanceDoneInfo) <- balanceDoneInfo{
+						success: false,
+						message: psResponse.GetRPCExitMessage(),
+					}
+					continue
+				}
 
-			_state := sphinxproxy.TransactionState_TransactionStateDone
-			if psResponse.GetExitCode() != int64(exitcode.Ok) {
-				_state = sphinxproxy.TransactionState_TransactionStateFail
+				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
+					success:    true,
+					balance:    psResponse.GetBalance(),
+					balanceStr: psResponse.GetBalanceStr(),
+				}
+				logger.Sugar().Infof("TransactionID: %v get balance ok", psResponse.GetTransactionID())
+			case sphinxproxy.TransactionType_PreSign:
+				if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
+					TransactionID: psResponse.GetTransactionID(),
+					State:         sphinxproxy.TransactionState_TransactionStateSign,
+					Nonce:         psResponse.GetMessage().GetNonce(),
+					RecentBhash:   psResponse.GetMessage().GetRecentBhash(),
+					UTXO:          psResponse.GetMessage().GetUnspent(),
+					Pre: &eth.PreSignInfo{
+						ChainID:    psResponse.GetMessage().GetChainID(),
+						ContractID: psResponse.GetMessage().GetContractID(),
+						Nonce:      psResponse.GetMessage().GetNonce(),
+						GasPrice:   psResponse.GetMessage().GetGasPrice(),
+						GasLimit:   psResponse.GetMessage().GetGasLimit(),
+					},
+				}); err != nil {
+					logger.Sugar().Infof("TransactionID: %v get nonce: %v error: %v", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce(), err)
+					continue
+				}
+				logger.Sugar().Infof("TransactionID: %v get nonce: %v ok", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce())
+			case sphinxproxy.TransactionType_Broadcast:
+				state := sphinxproxy.TransactionState_TransactionStateSync
+				if psResponse.GetRPCExitMessage() != "" {
+					logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
+					if !isErrGasLow(psResponse.GetRPCExitMessage()) {
+						continue
+					}
+					state = sphinxproxy.TransactionState_TransactionStateFail
+				}
+
+				if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
+					TransactionID: psResponse.GetTransactionID(),
+					State:         state,
+					Cid:           psResponse.GetCID(),
+				}); err != nil {
+					logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
+					continue
+				}
+				logger.Sugar().Infof("Broadcast TransactionID: %v message ok", psResponse.GetTransactionID())
+			case sphinxproxy.TransactionType_SyncMsgState:
+				if psResponse.GetRPCExitMessage() != "" {
+					logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
+					continue
+				}
+
+				_state := sphinxproxy.TransactionState_TransactionStateDone
+				if psResponse.GetExitCode() != int64(exitcode.Ok) {
+					_state = sphinxproxy.TransactionState_TransactionStateFail
+				}
+				if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
+					TransactionID: psResponse.GetTransactionID(),
+					State:         _state,
+					ExitCode:      psResponse.GetExitCode(),
+				}); err != nil {
+					logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
+					continue
+				}
+				logger.Sugar().Infof("SyncMsgState TransactionID: %v ExitCode: %v message ok", psResponse.GetTransactionID(), psResponse.GetExitCode())
 			}
-			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
-				TransactionID: psResponse.GetTransactionID(),
-				State:         _state,
-				ExitCode:      psResponse.GetExitCode(),
-			}); err != nil {
-				logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
-				continue
-			}
-			logger.Sugar().Infof("SyncMsgState TransactionID: %v ExitCode: %v message ok", psResponse.GetTransactionID(), psResponse.GetExitCode())
 		}
 	}
 }
@@ -277,23 +290,25 @@ func (p *mPlugin) watch(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer logger.Sugar().Warn("sphinx plugin stream watch exit")
 
-	<-p.closeChan
-	plk.Lock()
-	nlmPlugin := make([]*mPlugin, 0, len(lmPlugin[p.coinType]))
-	for _, plugin := range lmPlugin[p.coinType] {
-		if plugin.pluginServer == p.pluginServer {
-			logger.Sugar().Info("some plugin client closed, proxy remove it")
-			continue
+	select {
+	case <-p.exitChan:
+		return
+	case <-p.closeChan:
+		plk.Lock()
+		nlmPlugin := make([]*mPlugin, 0, len(lmPlugin[p.coinType]))
+		for _, plugin := range lmPlugin[p.coinType] {
+			if plugin.pluginServer == p.pluginServer {
+				logger.Sugar().Info("some plugin client closed, proxy remove it")
+				continue
+			}
+			nlmPlugin = append(nlmPlugin, plugin)
 		}
-		nlmPlugin = append(nlmPlugin, plugin)
+		lmPlugin[p.coinType] = nlmPlugin
+		plk.Unlock()
+		p.once.Do(func() {
+			close(p.connCloseChan)
+		})
 	}
-	lmPlugin[p.coinType] = nlmPlugin
-	plk.Unlock()
-
-	// current conn exit
-	p.once.Do(func() {
-		close(p.exitChan)
-	})
 }
 
 func isErrGasLow(msg string) bool {
@@ -304,6 +319,6 @@ func isErrGasLow(msg string) bool {
 	// messagepool.go:76
 	// messagepool.go:884
 	return regexp.MustCompile(
-		`minimum expected nonce is [0-9]{1,}: message nonce too low`,
+		`gas fee cap too low`,
 	).MatchString(msg)
 }
