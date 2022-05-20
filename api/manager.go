@@ -72,6 +72,20 @@ func getProxyPlugin(coinType sphinxplugin.CoinType) (*mPlugin, error) {
 func Transaction(exitChan chan struct{}) {
 	for {
 		select {
+		case <-exitChan:
+			plk.Lock()
+			for _, plugin := range lmPlugin {
+				for _, pc := range plugin {
+					close(pc.exitChan)
+				}
+			}
+			plk.Unlock()
+			slk.Lock()
+			for _, sign := range lmSign {
+				close(sign.exitChan)
+			}
+			slk.Unlock()
+			return
 		case <-time.NewTicker(constant.TaskDuration).C:
 			func() {
 				ctx, cancel := context.WithTimeout(context.Background(), constant.TaskTimeout)
@@ -185,20 +199,6 @@ func Transaction(exitChan chan struct{}) {
 					}
 				}
 			}()
-		case <-exitChan:
-			plk.Lock()
-			for _, plugin := range lmPlugin {
-				for _, pc := range plugin {
-					close(pc.exitChan)
-				}
-			}
-			plk.Unlock()
-			slk.Lock()
-			for _, sign := range lmSign {
-				close(sign.exitChan)
-			}
-			slk.Unlock()
-			return
 		}
 	}
 }
