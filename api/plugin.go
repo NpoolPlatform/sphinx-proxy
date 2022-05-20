@@ -242,9 +242,9 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			case sphinxproxy.TransactionType_Broadcast:
 				state := sphinxproxy.TransactionState_TransactionStateSync
 				if psResponse.GetRPCExitMessage() != "" {
-					logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
-					if !isErrGasLow(psResponse.GetRPCExitMessage()) &&
-						!isErrExpired(psResponse.GetRPCExitMessage()) {
+					logger.Sugar().Errorf("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
+					if !isErrFILGasLow(psResponse.GetRPCExitMessage()) &&
+						!isErrTRC20Expired(psResponse.GetRPCExitMessage()) {
 						continue
 					}
 					state = sphinxproxy.TransactionState_TransactionStateFail
@@ -310,7 +310,7 @@ func (p *mPlugin) watch(wg *sync.WaitGroup) {
 	}
 }
 
-func isErrGasLow(msg string) bool {
+func isErrFILGasLow(msg string) bool {
 	if msg == "" {
 		return false
 	}
@@ -322,7 +322,7 @@ func isErrGasLow(msg string) bool {
 	).MatchString(msg)
 }
 
-func isErrExpired(msg string) bool {
+func isErrTRC20Expired(msg string) bool {
 	if msg == "" {
 		return false
 	}
