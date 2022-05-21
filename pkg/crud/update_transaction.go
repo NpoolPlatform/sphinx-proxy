@@ -35,6 +35,10 @@ func UpdateTransaction(ctx context.Context, t *UpdateTransactionParams) error {
 		Update().
 		Where(transaction.TransactionIDEQ(t.TransactionID))
 
+	// TODO: 'txdata' feild of trc20 can`t be null.
+	if t.TxData == nil {
+		t.TxData = []byte{}
+	}
 	switch t.State {
 	case sphinxproxy.TransactionState_TransactionStateSign:
 		stm.SetNonce(t.Nonce)
