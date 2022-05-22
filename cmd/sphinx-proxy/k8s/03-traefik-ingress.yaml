@@ -11,7 +11,7 @@ metadata:
 
 spec:
   rules:
-    - host: sphinx.proxy.api.npool.top
+    - host: proxy.procyon.vip
       http: &sphinx_proxy_grpc_rules
         paths:
           - path: /
@@ -21,5 +21,9 @@ spec:
                 name: sphinx-proxy
                 port:
                   number: 50001
-    - host: sphinx.proxy.api.xpool.top
+    - host: proxy.xpool.top
+      http: *sphinx_proxy_grpc_rules
+    - host: proxy.npool.top
+      http: *sphinx_proxy_grpc_rules
+    - host: proxy.ohhash.com
       http: *sphinx_proxy_grpc_rules
