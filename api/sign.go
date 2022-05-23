@@ -1,11 +1,14 @@
 package api
 
 import (
+	"context"
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
+	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 )
 
 type mSign struct {
@@ -172,14 +175,28 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 					)
 					continue
 				}
+				// TODO: think how to check direct error
 				if ssResponse.GetRPCExitMessage() != "" {
 					logger.Sugar().Errorf("proxy->sign signature for coin: %v transaction: %v error: %v",
 						ssResponse.GetCoinType(),
 						ssResponse.GetTransactionID(),
 						ssResponse.GetRPCExitMessage(),
 					)
+					if strings.Contains(
+						ssResponse.GetRPCExitMessage(),
+						"amount not enough",
+					) {
+						if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
+							TransactionID: ssResponse.GetTransactionID(),
+							State:         sphinxproxy.TransactionState_TransactionStateFail,
+						}); err != nil {
+							logger.Sugar().Infof("proxy->sign signature TransactionID: %v error: %v", ssResponse.GetTransactionID(), err)
+							continue
+						}
+					}
 					continue
 				}
+
 				pluginProxy.mpoolPush <- &sphinxproxy.ProxyPluginRequest{
 					CoinType:        ssResponse.GetCoinType(),
 					TransactionType: sphinxproxy.TransactionType_Broadcast,
