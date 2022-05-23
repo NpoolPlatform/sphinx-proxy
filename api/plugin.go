@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
-	"regexp"
+	"strings"
 	"sync"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
@@ -13,7 +13,6 @@ import (
 	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
-	"github.com/filecoin-project/go-state-types/exitcode"
 )
 
 type mPlugin struct {
@@ -244,7 +243,8 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				if psResponse.GetRPCExitMessage() != "" {
 					logger.Sugar().Errorf("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
 					if !isErrFILGasLow(psResponse.GetRPCExitMessage()) &&
-						!isErrTRC20Expired(psResponse.GetRPCExitMessage()) {
+						!isErrTRC20Expired(psResponse.GetRPCExitMessage()) &&
+						!isErrERC20GasLow(psResponse.GetRPCExitMessage()) {
 						continue
 					}
 					state = sphinxproxy.TransactionState_TransactionStateFail
@@ -266,7 +266,8 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				}
 
 				_state := sphinxproxy.TransactionState_TransactionStateDone
-				if psResponse.GetExitCode() != int64(exitcode.Ok) {
+				// 0: sync ok, other fail
+				if psResponse.GetExitCode() != int64(0) {
 					_state = sphinxproxy.TransactionState_TransactionStateFail
 				}
 				if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
@@ -317,16 +318,28 @@ func isErrFILGasLow(msg string) bool {
 	// messagepool.ErrGasFeeCapTooLow
 	// messagepool.go:76
 	// messagepool.go:884
-	return regexp.MustCompile(
+	return strings.Contains(
+		msg,
 		`gas fee cap too low`,
-	).MatchString(msg)
+	)
+}
+
+func isErrERC20GasLow(msg string) bool {
+	if msg == "" {
+		return false
+	}
+	return strings.Contains(
+		msg,
+		`Insufficient funds for gas * price + value`,
+	)
 }
 
 func isErrTRC20Expired(msg string) bool {
 	if msg == "" {
 		return false
 	}
-	return regexp.MustCompile(
+	return strings.Contains(
+		msg,
 		`Transaction expired`,
-	).MatchString(msg)
+	)
 }
