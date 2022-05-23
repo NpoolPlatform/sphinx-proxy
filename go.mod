@@ -9,7 +9,6 @@ require (
 	github.com/NpoolPlatform/message v0.0.0-20220520115554-2c9bbb3dbe95
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996
 	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220520120116-d577edac7325
-	github.com/filecoin-project/go-state-types v0.1.3
 	github.com/filecoin-project/specs-actors v0.9.14
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.8.0
@@ -41,6 +40,7 @@ require (
 	github.com/filecoin-project/go-address v0.0.6 // indirect
 	github.com/filecoin-project/go-bitfield v0.2.4 // indirect
 	github.com/filecoin-project/go-crypto v0.0.1 // indirect
+	github.com/filecoin-project/go-state-types v0.1.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-chassis/go-archaius v1.5.3 // indirect
 	github.com/go-chassis/openlog v1.1.3 // indirect
