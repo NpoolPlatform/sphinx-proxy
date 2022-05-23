@@ -330,7 +330,7 @@ func isErrERC20GasLow(msg string) bool {
 	}
 	return strings.Contains(
 		msg,
-		`Insufficient funds for gas * price + value`,
+		`insufficient funds for gas * price + value`,
 	)
 }
 
