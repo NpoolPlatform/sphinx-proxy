@@ -268,7 +268,10 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					if !isErrFILGasLow(psResponse.GetRPCExitMessage()) &&
 						!isErrTRC20Expired(psResponse.GetRPCExitMessage()) &&
 						!isErrETHFundsLow(psResponse.GetRPCExitMessage()) &&
+<<<<<<< HEAD
 						!isErrTRXBalanceLow(psResponse.GetRPCExitMessage()) &&
+=======
+>>>>>>> support bsc
 						!isErrBSCGasLow(psResponse.GetRPCExitMessage()) &&
 						!isErrERC20GasLow(psResponse.GetRPCExitMessage()) {
 						continue
