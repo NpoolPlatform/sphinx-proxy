@@ -244,6 +244,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					logger.Sugar().Errorf("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
 					if !isErrFILGasLow(psResponse.GetRPCExitMessage()) &&
 						!isErrTRC20Expired(psResponse.GetRPCExitMessage()) &&
+						!isErrETHFundsLow(psResponse.GetRPCExitMessage()) &&
 						!isErrERC20GasLow(psResponse.GetRPCExitMessage()) {
 						continue
 					}
@@ -325,6 +326,16 @@ func isErrFILGasLow(msg string) bool {
 }
 
 func isErrERC20GasLow(msg string) bool {
+	if msg == "" {
+		return false
+	}
+	return strings.Contains(
+		msg,
+		`intrinsic gas too low`,
+	)
+}
+
+func isErrETHFundsLow(msg string) bool {
 	if msg == "" {
 		return false
 	}
