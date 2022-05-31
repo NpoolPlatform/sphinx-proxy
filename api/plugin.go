@@ -356,6 +356,16 @@ func isErrBSCGasLow(msg string) bool {
 	)
 }
 
+func isErrBSCGasLow(msg string) bool {
+	if msg == "" {
+		return false
+	}
+	return strings.Contains(
+		msg,
+		`insufficient funds for gas * price + value`,
+	)
+}
+
 func isErrTRC20Expired(msg string) bool {
 	if msg == "" {
 		return false
