@@ -269,8 +269,9 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 						!isErrTRC20Expired(psResponse.GetRPCExitMessage()) &&
 						!isErrETHFundsLow(psResponse.GetRPCExitMessage()) &&
 						!isErrTRXBalanceLow(psResponse.GetRPCExitMessage()) &&
-						!isErrBSCGasLow(psResponse.GetRPCExitMessage()) &&
-						!isErrERC20GasLow(psResponse.GetRPCExitMessage()) {
+						!isErrERC20GasLow(psResponse.GetRPCExitMessage()) &&
+						!isErrBSCFundsLow(psResponse.GetRPCExitMessage()) &&
+						!isErrBSCGasLow(psResponse.GetRPCExitMessage()) {
 						continue
 					}
 					state = sphinxproxy.TransactionState_TransactionStateFail
@@ -376,7 +377,7 @@ func isErrBSCGasLow(msg string) bool {
 	}
 	return strings.Contains(
 		msg,
-		`insufficient funds for gas * price + value`,
+		`intrinsic gas too low`,
 	)
 }
 
@@ -387,6 +388,16 @@ func isErrTRC20Expired(msg string) bool {
 	return strings.Contains(
 		msg,
 		`Transaction expired`,
+	)
+}
+
+func isErrBSCFundsLow(msg string) bool {
+	if msg == "" {
+		return false
+	}
+	return strings.Contains(
+		msg,
+		`insufficient funds for gas * price + value`,
 	)
 }
 
