@@ -212,6 +212,15 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					continue
 				}
 
+				if psResponse.GetRPCExitMessage() != "" {
+					logger.Sugar().Infof("TransactionID: %v get balance error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
+					ch.(chan balanceDoneInfo) <- balanceDoneInfo{
+						success: false,
+						message: psResponse.GetRPCExitMessage(),
+					}
+					continue
+				}
+
 				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
 					success:    true,
 					balance:    psResponse.GetBalance(),
