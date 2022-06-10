@@ -126,7 +126,9 @@ func Transaction(exitChan chan struct{}) {
 						switch coinType {
 						case
 							sphinxplugin.CoinType_CoinTypeusdttrc20,
-							sphinxplugin.CoinType_CoinTypetusdttrc20:
+							sphinxplugin.CoinType_CoinTypetusdttrc20,
+							sphinxplugin.CoinType_CoinTypetron,
+							sphinxplugin.CoinType_CoinTypettron:
 							ppRequest.Message = &sphinxplugin.UnsignedMessage{}
 							ppRequest.Message.From = tran.From
 							ppRequest.Message.To = tran.To
@@ -194,7 +196,7 @@ func Transaction(exitChan chan struct{}) {
 								ContractID: tran.Pre.ContractID,
 								// sol
 								RecentBhash: recentBHash,
-								// trc20
+								// tron/trc20
 								TxData: txData,
 							},
 						}
