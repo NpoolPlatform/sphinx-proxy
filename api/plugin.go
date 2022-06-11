@@ -228,6 +228,20 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				}
 				logger.Sugar().Infof("TransactionID: %v get balance ok", psResponse.GetTransactionID())
 			case sphinxproxy.TransactionType_PreSign:
+				if psResponse.GetRPCExitMessage() != "" {
+					logger.Sugar().Errorf("PreSign TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
+					if isErrTRXBalanceLow(psResponse.GetRPCExitMessage()) {
+						if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
+							TransactionID: psResponse.GetTransactionID(),
+							State:         sphinxproxy.TransactionState_TransactionStateFail,
+						}); err != nil {
+							logger.Sugar().Infof("PreSign TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
+						}
+						continue
+					}
+
+				}
+
 				if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
 					TransactionID: psResponse.GetTransactionID(),
 					State:         sphinxproxy.TransactionState_TransactionStateSign,
@@ -254,6 +268,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					if !isErrFILGasLow(psResponse.GetRPCExitMessage()) &&
 						!isErrTRC20Expired(psResponse.GetRPCExitMessage()) &&
 						!isErrETHFundsLow(psResponse.GetRPCExitMessage()) &&
+						!isErrTRXBalanceLow(psResponse.GetRPCExitMessage()) &&
 						!isErrERC20GasLow(psResponse.GetRPCExitMessage()) {
 						continue
 					}
@@ -361,5 +376,15 @@ func isErrTRC20Expired(msg string) bool {
 	return strings.Contains(
 		msg,
 		`Transaction expired`,
+	)
+}
+
+func isErrTRXBalanceLow(msg string) bool {
+	if msg == "" {
+		return false
+	}
+	return strings.Contains(
+		msg,
+		`balance is not sufficient`,
 	)
 }
