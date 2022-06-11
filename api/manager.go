@@ -169,7 +169,9 @@ func Transaction(exitChan chan struct{}) {
 							recentBHash = tran.RecentBhash
 						case
 							sphinxplugin.CoinType_CoinTypeusdttrc20,
-							sphinxplugin.CoinType_CoinTypetusdttrc20:
+							sphinxplugin.CoinType_CoinTypetusdttrc20,
+							sphinxplugin.CoinType_CoinTypetron,
+							sphinxplugin.CoinType_CoinTypettron:
 							txData = tran.TxData
 						}
 
