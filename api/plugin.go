@@ -228,14 +228,12 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				}
 				logger.Sugar().Infof("TransactionID: %v get balance ok", psResponse.GetTransactionID())
 			case sphinxproxy.TransactionType_PreSign:
-				state := sphinxproxy.TransactionState_TransactionStateSync
 				if psResponse.GetRPCExitMessage() != "" {
 					logger.Sugar().Errorf("PreSign TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
 					if isErrTRXBalanceLow(psResponse.GetRPCExitMessage()) {
-						state = sphinxproxy.TransactionState_TransactionStateFail
 						if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
 							TransactionID: psResponse.GetTransactionID(),
-							State:         state,
+							State:         sphinxproxy.TransactionState_TransactionStateFail,
 						}); err != nil {
 							logger.Sugar().Infof("PreSign TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
 						}
