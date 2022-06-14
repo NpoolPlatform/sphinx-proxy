@@ -7,12 +7,16 @@ require (
 	github.com/NpoolPlatform/api-manager v0.0.0-20220205130236-69d286e72dba
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220404143809-82c40930388a
 <<<<<<< HEAD
+<<<<<<< HEAD
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220526050249-956b54fac9f1
 	github.com/NpoolPlatform/message v0.0.0-20220614090435-1c97b1765963
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996
 	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220614162840-63bb25722c34
 =======
 	github.com/NpoolPlatform/message v0.0.0-20220528144343-e875bfee0982
+=======
+	github.com/NpoolPlatform/message v0.0.0-20220614090435-1c97b1765963
+>>>>>>> support busd
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996
 	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220530145334-b4b76c341a1e
 >>>>>>> support bsc
