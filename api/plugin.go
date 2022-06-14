@@ -389,6 +389,7 @@ func isErrBSCGasLow(msg string) bool {
 		`intrinsic gas too low`,
 	)
 }
+
 func isErrTRC20Expired(msg string) bool {
 	if msg == "" {
 		return false
