@@ -161,10 +161,10 @@ func Transaction(exitChan chan struct{}) {
 							sphinxplugin.CoinType_CoinTypeusdterc20,
 							sphinxplugin.CoinType_CoinTypetethereum,
 							sphinxplugin.CoinType_CoinTypetusdterc20,
-							sphinxplugin.CoinType_CoinTypebsc,
-							sphinxplugin.CoinType_CoinTypetbsc,
-							sphinxplugin.CoinType_CoinTypebusdbep20,
-							sphinxplugin.CoinType_CoinTypetbusdbep20:
+							sphinxplugin.CoinType_CoinTypebinancecoin,
+							sphinxplugin.CoinType_CoinTypetbinancecoin,
+							sphinxplugin.CoinType_CoinTypebinanceusd,
+							sphinxplugin.CoinType_CoinTypetbinanceusd:
 							gasLimit = tran.Pre.GasLimit
 							nonce = tran.Pre.Nonce
 						case
