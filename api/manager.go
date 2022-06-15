@@ -160,7 +160,11 @@ func Transaction(exitChan chan struct{}) {
 							sphinxplugin.CoinType_CoinTypeethereum,
 							sphinxplugin.CoinType_CoinTypeusdterc20,
 							sphinxplugin.CoinType_CoinTypetethereum,
-							sphinxplugin.CoinType_CoinTypetusdterc20:
+							sphinxplugin.CoinType_CoinTypetusdterc20,
+							sphinxplugin.CoinType_CoinTypebinancecoin,
+							sphinxplugin.CoinType_CoinTypetbinancecoin,
+							sphinxplugin.CoinType_CoinTypebinanceusd,
+							sphinxplugin.CoinType_CoinTypetbinanceusd:
 							gasLimit = tran.Pre.GasLimit
 							nonce = tran.Pre.Nonce
 						case
@@ -192,7 +196,7 @@ func Transaction(exitChan chan struct{}) {
 								Nonce: nonce,
 								// TODO optimize btc
 								Unspent: tran.Utxo,
-								// eth/erc20
+								// eth/erc20/bsc/bep20
 								GasPrice:   tran.Pre.GasPrice,
 								ChainID:    tran.Pre.ChainID,
 								ContractID: tran.Pre.ContractID,

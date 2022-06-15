@@ -206,7 +206,7 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 					Signature: ssResponse.GetInfo().GetSignature(),
 					// btc
 					MsgTx: ssResponse.GetMsgTx(),
-					// eth/er20
+					// eth/er20/bsc/bep20
 					SignedRawTxHex: ssResponse.GetSignedRawTxHex(),
 				}
 			}

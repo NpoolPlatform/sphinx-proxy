@@ -7,9 +7,9 @@ require (
 	github.com/NpoolPlatform/api-manager v0.0.0-20220205130236-69d286e72dba
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220404143809-82c40930388a
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220526050249-956b54fac9f1
-	github.com/NpoolPlatform/message v0.0.0-20220610033203-71cfcc899eda
+	github.com/NpoolPlatform/message v0.0.0-20220615043307-04f7bd392d6e
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996
-	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220611115514-447d6344758b
+	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220615111041-1f66f3b8e0d0
 	github.com/filecoin-project/specs-actors v0.9.14
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.8.0
