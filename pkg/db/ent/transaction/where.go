@@ -161,6 +161,13 @@ func Amount(v uint64) predicate.Transaction {
 	})
 }
 
+// Payload applies equality check predicate on the "payload" field. It's identical to PayloadEQ.
+func Payload(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPayload), v))
+	})
+}
+
 // State applies equality check predicate on the "state" field. It's identical to StateEQ.
 func State(v uint8) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -1121,6 +1128,82 @@ func AmountLT(v uint64) predicate.Transaction {
 func AmountLTE(v uint64) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldAmount), v))
+	})
+}
+
+// PayloadEQ applies the EQ predicate on the "payload" field.
+func PayloadEQ(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPayload), v))
+	})
+}
+
+// PayloadNEQ applies the NEQ predicate on the "payload" field.
+func PayloadNEQ(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPayload), v))
+	})
+}
+
+// PayloadIn applies the In predicate on the "payload" field.
+func PayloadIn(vs ...[]byte) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldPayload), v...))
+	})
+}
+
+// PayloadNotIn applies the NotIn predicate on the "payload" field.
+func PayloadNotIn(vs ...[]byte) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldPayload), v...))
+	})
+}
+
+// PayloadGT applies the GT predicate on the "payload" field.
+func PayloadGT(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldPayload), v))
+	})
+}
+
+// PayloadGTE applies the GTE predicate on the "payload" field.
+func PayloadGTE(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldPayload), v))
+	})
+}
+
+// PayloadLT applies the LT predicate on the "payload" field.
+func PayloadLT(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldPayload), v))
+	})
+}
+
+// PayloadLTE applies the LTE predicate on the "payload" field.
+func PayloadLTE(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldPayload), v))
 	})
 }
 

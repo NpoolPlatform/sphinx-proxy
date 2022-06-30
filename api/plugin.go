@@ -1,19 +1,14 @@
 package api
 
 import (
-	"context"
 	"fmt"
-	"regexp"
 	"sync"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/coininfo"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
-	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
-	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
-	"github.com/filecoin-project/go-state-types/exitcode"
 )
 
 type mPlugin struct {
@@ -23,9 +18,6 @@ type mPlugin struct {
 	once         sync.Once
 	closeChan    chan struct{}
 	balance      chan *sphinxproxy.ProxyPluginRequest
-	preSign      chan *sphinxproxy.ProxyPluginRequest
-	mpoolPush    chan *sphinxproxy.ProxyPluginRequest
-	syncMsg      chan *sphinxproxy.ProxyPluginRequest
 	registerCoin chan *sphinxproxy.ProxyPluginResponse
 }
 
@@ -35,9 +27,6 @@ func newPluginStream(stream sphinxproxy.SphinxProxy_ProxyPluginServer) {
 		exitChan:     make(chan struct{}),
 		closeChan:    make(chan struct{}),
 		balance:      make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
-		preSign:      make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
-		mpoolPush:    make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
-		syncMsg:      make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
 		registerCoin: make(chan *sphinxproxy.ProxyPluginResponse),
 	}
 	wg := &sync.WaitGroup{}
@@ -77,24 +66,16 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer logger.Sugar().Warn("sphinx plugin stream send exit")
 
-	var request *sphinxproxy.ProxyPluginRequest
 	for {
 		select {
 		case <-p.exitChan:
 			return
 		case info := <-p.balance:
-			if err := p.pluginServer.Send(&sphinxproxy.ProxyPluginRequest{
-				CoinType:        info.GetCoinType(),
-				TransactionType: info.GetTransactionType(),
-				TransactionID:   info.GetTransactionID(),
-				Address:         info.GetAddress(),
-			}); err != nil {
+			if err := p.pluginServer.Send(info); err != nil {
 				logger.Sugar().Errorf(
-					"proxy->plugin TransactionID: %v TransactionType: %v CoinType: %v Address: %v error: %v",
+					"proxy->plugin TransactionID: %v CoinType: %v error: %v",
 					info.GetTransactionID(),
-					info.GetTransactionType(),
 					info.GetCoinType(),
-					info.GetAddress(),
 					err,
 				)
 				ch, ok := balanceDoneChannel.Load(info.GetTransactionID())
@@ -112,55 +93,16 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 					return
 				}
 			}
-			logger.Sugar().Infof("proxy->plugin TransactionID: %v Addr: %v ok", info.GetTransactionID(), info.GetAddress())
-			continue
-		case info := <-p.preSign:
-			request = &sphinxproxy.ProxyPluginRequest{
-				CoinType:        info.GetCoinType(),
-				TransactionType: info.GetTransactionType(),
-				TransactionID:   info.GetTransactionID(),
-				Address:         info.GetAddress(),
-				Message:         info.GetMessage(),
-			}
-		case info := <-p.mpoolPush:
-			request = &sphinxproxy.ProxyPluginRequest{
-				CoinType:        info.GetCoinType(),
-				TransactionType: info.GetTransactionType(),
-				TransactionID:   info.GetTransactionID(),
-				Message:         info.GetMessage(),
-				Signature:       info.GetSignature(),
-				MsgTx:           info.GetMsgTx(),
-				SignedRawTxHex:  info.GetSignedRawTxHex(),
-			}
-		case info := <-p.syncMsg:
-			request = &sphinxproxy.ProxyPluginRequest{
-				CoinType:        info.GetCoinType(),
-				TransactionType: info.GetTransactionType(),
-				TransactionID:   info.GetTransactionID(),
-				Message:         info.GetMessage(),
-				CID:             info.GetCID(),
-			}
-		}
-
-		if err := p.pluginServer.Send(request); err != nil {
-			logger.Sugar().Errorf(
-				"proxy->plugin TransactionID: %v TransactionType: %v CoinType: %v Address: %v error: %v",
-				request.GetTransactionID(),
-				request.GetTransactionType(),
-				request.GetCoinType(),
-				request.GetAddress(),
-				err,
+			logger.Sugar().Infof(
+				"proxy->plugin TransactionID: %v Addr: %v ok",
+				info.GetTransactionID(),
+				info.GetAddress(),
 			)
-			if checkCode(err) {
-				p.closeChan <- struct{}{}
-				return
-			}
+			continue
 		}
-		logger.Sugar().Infof("proxy->plugin TransactionType: %v TransactionID: %v Addr: %v ok", request.GetTransactionType(), request.GetTransactionID(), request.GetAddress())
 	}
 }
 
-// nolint
 func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer logger.Sugar().Warn("sphinx plugin stream recv exit")
@@ -207,68 +149,10 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			}
 
 			ch.(chan balanceDoneInfo) <- balanceDoneInfo{
-				success:    true,
-				balance:    psResponse.GetBalance(),
-				balanceStr: psResponse.GetBalanceStr(),
+				success: true,
+				payload: psResponse.GetPayload(),
 			}
 			logger.Sugar().Infof("TransactionID: %v get balance ok", psResponse.GetTransactionID())
-		case sphinxproxy.TransactionType_PreSign:
-			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
-				TransactionID: psResponse.GetTransactionID(),
-				State:         sphinxproxy.TransactionState_TransactionStateSign,
-				Nonce:         psResponse.GetMessage().GetNonce(),
-				RecentBhash:   psResponse.GetMessage().GetRecentBhash(),
-				UTXO:          psResponse.GetMessage().GetUnspent(),
-				Pre: &eth.PreSignInfo{
-					ChainID:    psResponse.GetMessage().GetChainID(),
-					ContractID: psResponse.GetMessage().GetContractID(),
-					Nonce:      psResponse.GetMessage().GetNonce(),
-					GasPrice:   psResponse.GetMessage().GetGasPrice(),
-					GasLimit:   psResponse.GetMessage().GetGasLimit(),
-				},
-			}); err != nil {
-				logger.Sugar().Infof("TransactionID: %v get nonce: %v error: %v", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce(), err)
-				continue
-			}
-			logger.Sugar().Infof("TransactionID: %v get nonce: %v ok", psResponse.GetTransactionID(), psResponse.GetMessage().GetNonce())
-		case sphinxproxy.TransactionType_Broadcast:
-			state := sphinxproxy.TransactionState_TransactionStateSync
-			if psResponse.GetRPCExitMessage() != "" {
-				logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
-				if !isErrGasLow(psResponse.GetRPCExitMessage()) {
-					continue
-				}
-				state = sphinxproxy.TransactionState_TransactionStateFail
-			}
-
-			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
-				TransactionID: psResponse.GetTransactionID(),
-				State:         state,
-				Cid:           psResponse.GetCID(),
-			}); err != nil {
-				logger.Sugar().Infof("Broadcast TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
-				continue
-			}
-			logger.Sugar().Infof("Broadcast TransactionID: %v message ok", psResponse.GetTransactionID())
-		case sphinxproxy.TransactionType_SyncMsgState:
-			if psResponse.GetRPCExitMessage() != "" {
-				logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), psResponse.GetRPCExitMessage())
-				continue
-			}
-
-			_state := sphinxproxy.TransactionState_TransactionStateDone
-			if psResponse.GetExitCode() != int64(exitcode.Ok) {
-				_state = sphinxproxy.TransactionState_TransactionStateFail
-			}
-			if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
-				TransactionID: psResponse.GetTransactionID(),
-				State:         _state,
-				ExitCode:      psResponse.GetExitCode(),
-			}); err != nil {
-				logger.Sugar().Infof("SyncMsgState TransactionID: %v error: %v", psResponse.GetTransactionID(), err)
-				continue
-			}
-			logger.Sugar().Infof("SyncMsgState TransactionID: %v ExitCode: %v message ok", psResponse.GetTransactionID(), psResponse.GetExitCode())
 		}
 	}
 }
@@ -296,14 +180,15 @@ func (p *mPlugin) watch(wg *sync.WaitGroup) {
 	})
 }
 
-func isErrGasLow(msg string) bool {
-	if msg == "" {
-		return false
-	}
-	// messagepool.ErrGasFeeCapTooLow
-	// messagepool.go:76
-	// messagepool.go:884
-	return regexp.MustCompile(
-		`minimum expected nonce is [0-9]{1,}: message nonce too low`,
-	).MatchString(msg)
-}
+// nolint
+// func isErrGasLow(msg string) bool {
+// 	if msg == "" {
+// 		return false
+// 	}
+// 	// messagepool.ErrGasFeeCapTooLow
+// 	// messagepool.go:76
+// 	// messagepool.go:884
+// 	return regexp.MustCompile(
+// 		`minimum expected nonce is [0-9]{1,}: message nonce too low`,
+// 	).MatchString(msg)
+// }

@@ -44,6 +44,7 @@ func main() {
 	}
 	if err := db.Init(); err != nil {
 		logger.Sugar().Errorf("fail to init db %v", err)
+		return
 	}
 	err = app.Run(os.Args)
 	if err != nil {

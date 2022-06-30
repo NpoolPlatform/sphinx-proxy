@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
-	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/predicate"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 )
@@ -53,12 +52,6 @@ func (tu *TransactionUpdate) AddNonce(u int64) *TransactionUpdate {
 // SetUtxo sets the "utxo" field.
 func (tu *TransactionUpdate) SetUtxo(s []*sphinxplugin.Unspent) *TransactionUpdate {
 	tu.mutation.SetUtxo(s)
-	return tu
-}
-
-// SetPre sets the "pre" field.
-func (tu *TransactionUpdate) SetPre(esi *eth.PreSignInfo) *TransactionUpdate {
-	tu.mutation.SetPre(esi)
 	return tu
 }
 
@@ -205,6 +198,12 @@ func (tu *TransactionUpdate) SetNillableAmount(u *uint64) *TransactionUpdate {
 // AddAmount adds u to the "amount" field.
 func (tu *TransactionUpdate) AddAmount(u int64) *TransactionUpdate {
 	tu.mutation.AddAmount(u)
+	return tu
+}
+
+// SetPayload sets the "payload" field.
+func (tu *TransactionUpdate) SetPayload(b []byte) *TransactionUpdate {
+	tu.mutation.SetPayload(b)
 	return tu
 }
 
@@ -422,13 +421,6 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: transaction.FieldUtxo,
 		})
 	}
-	if value, ok := tu.mutation.Pre(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: transaction.FieldPre,
-		})
-	}
 	if value, ok := tu.mutation.TransactionType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
@@ -518,6 +510,13 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeUint64,
 			Value:  value,
 			Column: transaction.FieldAmount,
+		})
+	}
+	if value, ok := tu.mutation.Payload(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: transaction.FieldPayload,
 		})
 	}
 	if value, ok := tu.mutation.State(); ok {
@@ -619,12 +618,6 @@ func (tuo *TransactionUpdateOne) AddNonce(u int64) *TransactionUpdateOne {
 // SetUtxo sets the "utxo" field.
 func (tuo *TransactionUpdateOne) SetUtxo(s []*sphinxplugin.Unspent) *TransactionUpdateOne {
 	tuo.mutation.SetUtxo(s)
-	return tuo
-}
-
-// SetPre sets the "pre" field.
-func (tuo *TransactionUpdateOne) SetPre(esi *eth.PreSignInfo) *TransactionUpdateOne {
-	tuo.mutation.SetPre(esi)
 	return tuo
 }
 
@@ -771,6 +764,12 @@ func (tuo *TransactionUpdateOne) SetNillableAmount(u *uint64) *TransactionUpdate
 // AddAmount adds u to the "amount" field.
 func (tuo *TransactionUpdateOne) AddAmount(u int64) *TransactionUpdateOne {
 	tuo.mutation.AddAmount(u)
+	return tuo
+}
+
+// SetPayload sets the "payload" field.
+func (tuo *TransactionUpdateOne) SetPayload(b []byte) *TransactionUpdateOne {
+	tuo.mutation.SetPayload(b)
 	return tuo
 }
 
@@ -1012,13 +1011,6 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Column: transaction.FieldUtxo,
 		})
 	}
-	if value, ok := tuo.mutation.Pre(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: transaction.FieldPre,
-		})
-	}
 	if value, ok := tuo.mutation.TransactionType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
@@ -1108,6 +1100,13 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Type:   field.TypeUint64,
 			Value:  value,
 			Column: transaction.FieldAmount,
+		})
+	}
+	if value, ok := tuo.mutation.Payload(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: transaction.FieldPayload,
 		})
 	}
 	if value, ok := tuo.mutation.State(); ok {

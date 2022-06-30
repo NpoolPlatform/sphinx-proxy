@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
-	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	"github.com/google/uuid"
 )
@@ -24,9 +23,6 @@ type Transaction struct {
 	// Utxo holds the value of the "utxo" field.
 	// only for btc
 	Utxo []*sphinxplugin.Unspent `json:"utxo,omitempty"`
-	// Pre holds the value of the "pre" field.
-	// only for eth
-	Pre *eth.PreSignInfo `json:"pre,omitempty"`
 	// TransactionType holds the value of the "transaction_type" field.
 	TransactionType int8 `json:"transaction_type,omitempty"`
 	// CoinType holds the value of the "coin_type" field.
@@ -34,6 +30,7 @@ type Transaction struct {
 	// TransactionID holds the value of the "transaction_id" field.
 	TransactionID string `json:"transaction_id,omitempty"`
 	// RecentBhash holds the value of the "recent_bhash" field.
+	// only for sol,abbreviation for 'recent_bloack_hash'
 	RecentBhash string `json:"recent_bhash,omitempty"`
 	// Cid holds the value of the "cid" field.
 	Cid string `json:"cid,omitempty"`
@@ -45,6 +42,9 @@ type Transaction struct {
 	To string `json:"to,omitempty"`
 	// Amount holds the value of the "amount" field.
 	Amount uint64 `json:"amount,omitempty"`
+	// Payload holds the value of the "payload" field.
+	// save nonce or sign info
+	Payload []byte `json:"payload,omitempty"`
 	// State holds the value of the "state" field.
 	State uint8 `json:"state,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -60,7 +60,7 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case transaction.FieldUtxo, transaction.FieldPre:
+		case transaction.FieldUtxo, transaction.FieldPayload:
 			values[i] = new([]byte)
 		case transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldCoinType, transaction.FieldExitCode, transaction.FieldAmount, transaction.FieldState, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
@@ -101,14 +101,6 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &t.Utxo); err != nil {
 					return fmt.Errorf("unmarshal field utxo: %w", err)
-				}
-			}
-		case transaction.FieldPre:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field pre", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &t.Pre); err != nil {
-					return fmt.Errorf("unmarshal field pre: %w", err)
 				}
 			}
 		case transaction.FieldTransactionType:
@@ -164,6 +156,12 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 				return fmt.Errorf("unexpected type %T for field amount", values[i])
 			} else if value.Valid {
 				t.Amount = uint64(value.Int64)
+			}
+		case transaction.FieldPayload:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field payload", values[i])
+			} else if value != nil {
+				t.Payload = *value
 			}
 		case transaction.FieldState:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -221,8 +219,6 @@ func (t *Transaction) String() string {
 	builder.WriteString(fmt.Sprintf("%v", t.Nonce))
 	builder.WriteString(", utxo=")
 	builder.WriteString(fmt.Sprintf("%v", t.Utxo))
-	builder.WriteString(", pre=")
-	builder.WriteString(fmt.Sprintf("%v", t.Pre))
 	builder.WriteString(", transaction_type=")
 	builder.WriteString(fmt.Sprintf("%v", t.TransactionType))
 	builder.WriteString(", coin_type=")
@@ -241,6 +237,8 @@ func (t *Transaction) String() string {
 	builder.WriteString(t.To)
 	builder.WriteString(", amount=")
 	builder.WriteString(fmt.Sprintf("%v", t.Amount))
+	builder.WriteString(", payload=")
+	builder.WriteString(fmt.Sprintf("%v", t.Payload))
 	builder.WriteString(", state=")
 	builder.WriteString(fmt.Sprintf("%v", t.State))
 	builder.WriteString(", created_at=")

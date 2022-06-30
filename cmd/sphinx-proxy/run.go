@@ -14,7 +14,7 @@ import (
 
 var runCmd = &cli.Command{
 	Name:    "run",
-	Aliases: []string{"s"},
+	Aliases: []string{"r"},
 	Usage:   "Run Sphinx Proxy daemon",
 	After: func(c *cli.Context) error {
 		if err := grpc2.HShutdown(); err != nil {
@@ -24,7 +24,6 @@ var runCmd = &cli.Command{
 		return logger.Sync()
 	},
 	Action: func(c *cli.Context) error {
-		go api.Transaction()
 		go func() {
 			if err := grpc2.RunGRPC(rpcRegister); err != nil {
 				logger.Sugar().Warnf("start grpc server error: %v", err)

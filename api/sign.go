@@ -14,7 +14,6 @@ type mSign struct {
 	once       sync.Once
 	closeChan  chan struct{}
 	walletNew  chan *sphinxproxy.ProxySignRequest
-	sign       chan *sphinxproxy.ProxySignRequest
 }
 
 func newSignStream(stream sphinxproxy.SphinxProxy_ProxySignServer) {
@@ -23,7 +22,6 @@ func newSignStream(stream sphinxproxy.SphinxProxy_ProxySignServer) {
 		exitChan:   make(chan struct{}),
 		closeChan:  make(chan struct{}),
 		walletNew:  make(chan *sphinxproxy.ProxySignRequest, channelBufSize),
-		sign:       make(chan *sphinxproxy.ProxySignRequest, channelBufSize),
 	}
 	slk.Lock()
 	lmSign = append(lmSign, lc)
@@ -48,14 +46,9 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 			return
 		case info := <-s.walletNew:
 			logger.Sugar().Infof("proxy->sign TransactionID: %v start", info.GetTransactionID())
-			if err := s.signServer.Send(&sphinxproxy.ProxySignRequest{
-				TransactionType: info.GetTransactionType(),
-				CoinType:        info.GetCoinType(),
-				TransactionID:   info.GetTransactionID(),
-			}); err != nil {
+			if err := s.signServer.Send(info); err != nil {
 				logger.Sugar().Errorf(
-					"proxy->sign TransactionID: %v TransactionType %v, CoinType: %v error: %v",
-					info.GetTransactionType(),
+					"proxy->sign TransactionID: %v, CoinType: %v error: %v",
 					info.GetCoinType(),
 					info.GetTransactionID(),
 					err,
@@ -66,29 +59,6 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 						message: fmt.Sprintf("proxy->sign send create wallet error: %v", err),
 					}
 				}
-				if checkCode(err) {
-					s.closeChan <- struct{}{}
-					return
-				}
-				continue
-			}
-			logger.Sugar().Infof("proxy->sign TransactionID: %v ok", info.GetTransactionID())
-		case info := <-s.sign:
-			logger.Sugar().Infof("proxy->sign TransactionID: %v start", info.GetTransactionID())
-			if err := s.signServer.Send(&sphinxproxy.ProxySignRequest{
-				TransactionType: info.GetTransactionType(),
-				CoinType:        info.GetCoinType(),
-				TransactionID:   info.GetTransactionID(),
-				Message:         info.GetMessage(),
-			}); err != nil {
-				logger.Sugar().Errorf(
-					"proxy->sign TransactionID: %v TransactionType %v, CoinType: %v Message: %v error: %v",
-					info.GetTransactionID(),
-					info.GetTransactionType(),
-					info.GetCoinType(),
-					info.GetMessage(),
-					err,
-				)
 				if checkCode(err) {
 					s.closeChan <- struct{}{}
 					return
@@ -119,9 +89,8 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 		}
 
 		logger.Sugar().Infof(
-			"proxy->sign recv TransactionID: %v TransactionType %v, CoinType: %v",
+			"proxy->sign recv TransactionID: %v, CoinType: %v",
 			ssResponse.GetTransactionID(),
-			ssResponse.GetTransactionType(),
 			ssResponse.GetCoinType(),
 		)
 
@@ -147,35 +116,8 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 				address: ssResponse.GetInfo().GetAddress(),
 			}
 			logger.Sugar().Infof("TransactionID: %v create wallet ok", ssResponse.GetTransactionID())
-		case sphinxproxy.TransactionType_Signature:
-			pluginProxy, err := getProxyPlugin(ssResponse.GetCoinType())
-			if err != nil {
-				logger.Sugar().Errorf("proxy->plugin no valid connection for coin: %v transaction: %v",
-					ssResponse.GetCoinType(),
-					ssResponse.GetTransactionID(),
-				)
-				continue
-			}
-			if ssResponse.GetRPCExitMessage() != "" {
-				logger.Sugar().Errorf("proxy->sign signature for coin: %v transaction: %v error: %v",
-					ssResponse.GetCoinType(),
-					ssResponse.GetTransactionID(),
-					ssResponse.GetRPCExitMessage(),
-				)
-				continue
-			}
-			pluginProxy.mpoolPush <- &sphinxproxy.ProxyPluginRequest{
-				CoinType:        ssResponse.GetCoinType(),
-				TransactionType: sphinxproxy.TransactionType_Broadcast,
-				TransactionID:   ssResponse.GetTransactionID(),
-				// fil/sol
-				Message:   ssResponse.GetInfo().GetMessage(),
-				Signature: ssResponse.GetInfo().GetSignature(),
-				// btc
-				MsgTx: ssResponse.GetMsgTx(),
-				// eth/er20
-				SignedRawTxHex: ssResponse.GetSignedRawTxHex(),
-			}
+		default:
+			logger.Sugar().Errorf("TransactionID: %v for TransactionType: %v not support", ssResponse.GetTransactionID(), ssResponse.GetTransactionType())
 		}
 	}
 }

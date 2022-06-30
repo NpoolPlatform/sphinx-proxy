@@ -3,6 +3,7 @@ package crud
 import (
 	"context"
 
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent"
@@ -10,8 +11,13 @@ import (
 	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 )
 
+type GetTransactionsParam struct {
+	CoinType         sphinxplugin.CoinType
+	TransactionState sphinxproxy.TransactionState
+}
+
 // GetTransactions ..
-func GetTransactions(ctx context.Context) ([]*ent.Transaction, error) {
+func GetTransactions(ctx context.Context, param GetTransactionsParam) ([]*ent.Transaction, error) {
 	client, err := db.Client()
 	if err != nil {
 		return nil, err
@@ -20,13 +26,10 @@ func GetTransactions(ctx context.Context) ([]*ent.Transaction, error) {
 		Transaction.
 		Query().
 		Where(
-			transaction.StateIn(
-				uint8(sphinxproxy.TransactionState_TransactionStateWait),
-				uint8(sphinxproxy.TransactionState_TransactionStateSign),
-				uint8(sphinxproxy.TransactionState_TransactionStateSync),
-			),
+			transaction.CoinTypeEQ(int32(param.CoinType)),
+			transaction.StateEQ(uint8(param.TransactionState)),
 		).
-		Order(ent.Asc(transaction.FieldCreatedAt, transaction.FieldNonce)).
+		Order(ent.Asc(transaction.FieldCreatedAt)).
 		Limit(constant.DefaultPageSize).
 		All(ctx)
 }

@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
-	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/predicate"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	"github.com/google/uuid"
@@ -38,7 +37,6 @@ type TransactionMutation struct {
 	nonce               *uint64
 	addnonce            *int64
 	utxo                *[]*sphinxplugin.Unspent
-	pre                 **eth.PreSignInfo
 	transaction_type    *int8
 	addtransaction_type *int8
 	coin_type           *int32
@@ -52,6 +50,7 @@ type TransactionMutation struct {
 	to                  *string
 	amount              *uint64
 	addamount           *int64
+	payload             *[]byte
 	state               *uint8
 	addstate            *int8
 	created_at          *uint32
@@ -260,42 +259,6 @@ func (m *TransactionMutation) OldUtxo(ctx context.Context) (v []*sphinxplugin.Un
 // ResetUtxo resets all changes to the "utxo" field.
 func (m *TransactionMutation) ResetUtxo() {
 	m.utxo = nil
-}
-
-// SetPre sets the "pre" field.
-func (m *TransactionMutation) SetPre(esi *eth.PreSignInfo) {
-	m.pre = &esi
-}
-
-// Pre returns the value of the "pre" field in the mutation.
-func (m *TransactionMutation) Pre() (r *eth.PreSignInfo, exists bool) {
-	v := m.pre
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPre returns the old "pre" field's value of the Transaction entity.
-// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TransactionMutation) OldPre(ctx context.Context) (v *eth.PreSignInfo, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPre is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPre requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPre: %w", err)
-	}
-	return oldValue.Pre, nil
-}
-
-// ResetPre resets all changes to the "pre" field.
-func (m *TransactionMutation) ResetPre() {
-	m.pre = nil
 }
 
 // SetTransactionType sets the "transaction_type" field.
@@ -702,6 +665,42 @@ func (m *TransactionMutation) ResetAmount() {
 	m.addamount = nil
 }
 
+// SetPayload sets the "payload" field.
+func (m *TransactionMutation) SetPayload(b []byte) {
+	m.payload = &b
+}
+
+// Payload returns the value of the "payload" field in the mutation.
+func (m *TransactionMutation) Payload() (r []byte, exists bool) {
+	v := m.payload
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPayload returns the old "payload" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldPayload(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPayload is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPayload requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPayload: %w", err)
+	}
+	return oldValue.Payload, nil
+}
+
+// ResetPayload resets all changes to the "payload" field.
+func (m *TransactionMutation) ResetPayload() {
+	m.payload = nil
+}
+
 // SetState sets the "state" field.
 func (m *TransactionMutation) SetState(u uint8) {
 	m.state = &u
@@ -952,9 +951,6 @@ func (m *TransactionMutation) Fields() []string {
 	if m.utxo != nil {
 		fields = append(fields, transaction.FieldUtxo)
 	}
-	if m.pre != nil {
-		fields = append(fields, transaction.FieldPre)
-	}
 	if m.transaction_type != nil {
 		fields = append(fields, transaction.FieldTransactionType)
 	}
@@ -982,6 +978,9 @@ func (m *TransactionMutation) Fields() []string {
 	if m.amount != nil {
 		fields = append(fields, transaction.FieldAmount)
 	}
+	if m.payload != nil {
+		fields = append(fields, transaction.FieldPayload)
+	}
 	if m.state != nil {
 		fields = append(fields, transaction.FieldState)
 	}
@@ -1006,8 +1005,6 @@ func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 		return m.Nonce()
 	case transaction.FieldUtxo:
 		return m.Utxo()
-	case transaction.FieldPre:
-		return m.Pre()
 	case transaction.FieldTransactionType:
 		return m.TransactionType()
 	case transaction.FieldCoinType:
@@ -1026,6 +1023,8 @@ func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 		return m.To()
 	case transaction.FieldAmount:
 		return m.Amount()
+	case transaction.FieldPayload:
+		return m.Payload()
 	case transaction.FieldState:
 		return m.State()
 	case transaction.FieldCreatedAt:
@@ -1047,8 +1046,6 @@ func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldNonce(ctx)
 	case transaction.FieldUtxo:
 		return m.OldUtxo(ctx)
-	case transaction.FieldPre:
-		return m.OldPre(ctx)
 	case transaction.FieldTransactionType:
 		return m.OldTransactionType(ctx)
 	case transaction.FieldCoinType:
@@ -1067,6 +1064,8 @@ func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldTo(ctx)
 	case transaction.FieldAmount:
 		return m.OldAmount(ctx)
+	case transaction.FieldPayload:
+		return m.OldPayload(ctx)
 	case transaction.FieldState:
 		return m.OldState(ctx)
 	case transaction.FieldCreatedAt:
@@ -1097,13 +1096,6 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUtxo(v)
-		return nil
-	case transaction.FieldPre:
-		v, ok := value.(*eth.PreSignInfo)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPre(v)
 		return nil
 	case transaction.FieldTransactionType:
 		v, ok := value.(int8)
@@ -1167,6 +1159,13 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAmount(v)
+		return nil
+	case transaction.FieldPayload:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPayload(v)
 		return nil
 	case transaction.FieldState:
 		v, ok := value.(uint8)
@@ -1362,9 +1361,6 @@ func (m *TransactionMutation) ResetField(name string) error {
 	case transaction.FieldUtxo:
 		m.ResetUtxo()
 		return nil
-	case transaction.FieldPre:
-		m.ResetPre()
-		return nil
 	case transaction.FieldTransactionType:
 		m.ResetTransactionType()
 		return nil
@@ -1391,6 +1387,9 @@ func (m *TransactionMutation) ResetField(name string) error {
 		return nil
 	case transaction.FieldAmount:
 		m.ResetAmount()
+		return nil
+	case transaction.FieldPayload:
+		m.ResetPayload()
 		return nil
 	case transaction.FieldState:
 		m.ResetState()

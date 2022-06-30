@@ -7,7 +7,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
-	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/google/uuid"
 )
 
@@ -27,9 +26,9 @@ func (Transaction) Fields() []ent.Field {
 		field.JSON("utxo", []*sphinxplugin.Unspent{}).
 			Default([]*sphinxplugin.Unspent{}).
 			Comment("only for btc"),
-		field.JSON("pre", &eth.PreSignInfo{}).
-			Default(&eth.PreSignInfo{}).
-			Comment("only for eth"),
+		// field.JSON("pre", &eth.PreSignInfo{}).
+		// 	Default(&eth.PreSignInfo{}).
+		// 	Comment("only for eth"),
 		field.Int8("transaction_type").
 			Default(0),
 		field.Int32("coin_type").
@@ -53,6 +52,9 @@ func (Transaction) Fields() []ent.Field {
 		field.Uint64("amount").
 			Positive().
 			Default(0),
+		field.Bytes("payload").
+			Default([]byte{}).
+			Comment("save nonce or sign info"),
 		field.Uint8("state").Default(0),
 		field.Uint32("created_at").
 			DefaultFunc(func() uint32 {
@@ -74,8 +76,6 @@ func (Transaction) Fields() []ent.Field {
 
 func (Transaction) Indexes() []ent.Index {
 	return []ent.Index{
-		// index.Fields("from", "nonce").
-		// 	Unique(),
 		index.Fields("created_at"),
 	}
 }

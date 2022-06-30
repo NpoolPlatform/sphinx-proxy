@@ -4,7 +4,6 @@ package transaction
 
 import (
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
-	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/google/uuid"
 )
 
@@ -17,8 +16,6 @@ const (
 	FieldNonce = "nonce"
 	// FieldUtxo holds the string denoting the utxo field in the database.
 	FieldUtxo = "utxo"
-	// FieldPre holds the string denoting the pre field in the database.
-	FieldPre = "pre"
 	// FieldTransactionType holds the string denoting the transaction_type field in the database.
 	FieldTransactionType = "transaction_type"
 	// FieldCoinType holds the string denoting the coin_type field in the database.
@@ -37,6 +34,8 @@ const (
 	FieldTo = "to"
 	// FieldAmount holds the string denoting the amount field in the database.
 	FieldAmount = "amount"
+	// FieldPayload holds the string denoting the payload field in the database.
+	FieldPayload = "payload"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -54,7 +53,6 @@ var Columns = []string{
 	FieldID,
 	FieldNonce,
 	FieldUtxo,
-	FieldPre,
 	FieldTransactionType,
 	FieldCoinType,
 	FieldTransactionID,
@@ -64,6 +62,7 @@ var Columns = []string{
 	FieldFrom,
 	FieldTo,
 	FieldAmount,
+	FieldPayload,
 	FieldState,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -85,8 +84,6 @@ var (
 	DefaultNonce uint64
 	// DefaultUtxo holds the default value on creation for the "utxo" field.
 	DefaultUtxo []*sphinxplugin.Unspent
-	// DefaultPre holds the default value on creation for the "pre" field.
-	DefaultPre *eth.PreSignInfo
 	// DefaultTransactionType holds the default value on creation for the "transaction_type" field.
 	DefaultTransactionType int8
 	// DefaultCoinType holds the default value on creation for the "coin_type" field.
@@ -111,6 +108,8 @@ var (
 	DefaultAmount uint64
 	// AmountValidator is a validator for the "amount" field. It is called by the builders before save.
 	AmountValidator func(uint64) error
+	// DefaultPayload holds the default value on creation for the "payload" field.
+	DefaultPayload []byte
 	// DefaultState holds the default value on creation for the "state" field.
 	DefaultState uint8
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
