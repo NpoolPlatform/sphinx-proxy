@@ -24,7 +24,8 @@ func UpdateTransaction(ctx context.Context, t *UpdateTransactionParams) error {
 	if err != nil {
 		return err
 	}
-	return client.
+
+	stmt := client.
 		Transaction.
 		Update().
 		Where(
@@ -32,8 +33,16 @@ func UpdateTransaction(ctx context.Context, t *UpdateTransactionParams) error {
 			transaction.StateEQ(uint8(t.State)),
 		).
 		SetPayload(t.Payload).
-		SetState(uint8(t.NextState)).
-		SetCid(t.Cid).
-		SetExitCode(t.ExitCode).
-		Exec(ctx)
+		SetState(uint8(t.NextState))
+
+	if t.Cid != "" {
+		stmt.
+			SetCid(t.Cid)
+	}
+	if t.ExitCode != 0 {
+		stmt.
+			SetExitCode(t.ExitCode)
+	}
+
+	return stmt.Exec(ctx)
 }
