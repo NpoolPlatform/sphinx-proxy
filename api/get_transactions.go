@@ -10,6 +10,7 @@ import (
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
+	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -20,11 +21,26 @@ func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransac
 	defer cancel()
 
 	// TODO: debug plugin env info include(position and ip)
-	if in.GetCoinType() == sphinxplugin.CoinType_CoinTypeUnKnow ||
-		in.GetTransactionState() == sphinxproxy.TransactionState_TransactionStateUnKnow ||
-		(in.GetENV() != "main" && in.GetENV() != "test") {
+	if in.GetTransactionState() == sphinxproxy.TransactionState_TransactionStateUnKnow {
 		return &sphinxproxy.GetTransactionsResponse{},
-			status.Error(codes.InvalidArgument, "Invalid argument CoinType&TransactionState&ENV must not empty")
+			status.Error(codes.InvalidArgument, "Invalid argument TransactionState must not empty")
+	}
+
+	if _, ok := sphinxproxy.TransactionState_name[int32(in.GetTransactionState())]; !ok {
+		return &sphinxproxy.GetTransactionsResponse{},
+			status.Error(codes.InvalidArgument, "Invalid argument TransactionState not support")
+	}
+
+	if in.GetCoinType() != sphinxplugin.CoinType_CoinTypeUnKnow {
+		if _, ok := sphinxplugin.CoinType_name[int32(in.GetCoinType())]; !ok {
+			return &sphinxproxy.GetTransactionsResponse{},
+				status.Error(codes.InvalidArgument, "Invalid argument CoinType not support")
+		}
+	}
+
+	if in.GetENV() != "" && in.GetENV() != "main" && in.GetENV() != "test" {
+		return &sphinxproxy.GetTransactionsResponse{},
+			status.Error(codes.InvalidArgument, "Invalid argument ENV only support main|test")
 	}
 
 	transInfos, err := crud.GetTransactions(ctx, crud.GetTransactionsParam{
@@ -45,7 +61,7 @@ func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransac
 	for _, info := range transInfos {
 		infos = append(infos, &sphinxproxy.TransactionInfo{
 			TransactionID: info.TransactionID,
-			Name:          "",
+			Name:          utils.TruncateCoinTypePrefix(sphinxplugin.CoinType(info.CoinType)),
 			Amount:        price.DBPriceToVisualPrice(info.Amount),
 			From:          info.From,
 			To:            info.To,

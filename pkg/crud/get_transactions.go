@@ -17,19 +17,24 @@ type GetTransactionsParam struct {
 }
 
 // GetTransactions ..
-func GetTransactions(ctx context.Context, param GetTransactionsParam) ([]*ent.Transaction, error) {
+func GetTransactions(ctx context.Context, params GetTransactionsParam) ([]*ent.Transaction, error) {
 	client, err := db.Client()
 	if err != nil {
 		return nil, err
 	}
-	return client.
+
+	stmt := client.
 		Transaction.
 		Query().
 		Where(
-			transaction.CoinTypeEQ(int32(param.CoinType)),
-			transaction.StateEQ(uint8(param.TransactionState)),
-		).
-		Order(ent.Asc(transaction.FieldCreatedAt)).
+			transaction.StateEQ(uint8(params.TransactionState)),
+		)
+
+	if params.CoinType != sphinxplugin.CoinType_CoinTypeUnKnow {
+		stmt = stmt.Where(transaction.CoinTypeEQ(int32(params.CoinType)))
+	}
+
+	return stmt.Order(ent.Asc(transaction.FieldCreatedAt)).
 		Limit(constant.DefaultPageSize).
 		All(ctx)
 }
