@@ -18,6 +18,19 @@ func GetTransaction(ctx context.Context, transactionID string) (*ent.Transaction
 	return client.
 		Transaction.
 		Query().
+		Select(
+			transaction.FieldTransactionID,
+			transaction.FieldCoinType,
+			transaction.FieldFrom,
+			transaction.FieldTo,
+			transaction.FieldAmount,
+			transaction.FieldCid,
+			transaction.FieldExitCode,
+			transaction.FieldPayload,
+			transaction.FieldState,
+			transaction.FieldCreatedAt,
+			transaction.FieldUpdatedAt,
+		).
 		Where(
 			transaction.TransactionIDEQ(transactionID),
 		).
@@ -37,6 +50,7 @@ func GetTransactionExist(ctx context.Context, params GetTransactionExistParam) (
 	stm := client.
 		Transaction.
 		Query().
+		Select(transaction.FieldID).
 		Where(
 			transaction.TransactionIDEQ(params.TransactionID),
 		)

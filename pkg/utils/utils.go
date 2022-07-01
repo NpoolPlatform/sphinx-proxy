@@ -26,15 +26,6 @@ func TruncateCoinTypePrefix(ct sphinxplugin.CoinType) string {
 	return strings.TrimPrefix(ct.String(), coinTypePrefix)
 }
 
-// ToCoinType ..
-func ToCoinType(coinType string) (sphinxplugin.CoinType, error) {
-	_coinType, ok := sphinxplugin.CoinType_value[fmt.Sprintf("%s%s", coinTypePrefix, coinType)]
-	if !ok {
-		return sphinxplugin.CoinType_CoinTypeUnKnow, ErrCoinTypeUnKnow
-	}
-	return sphinxplugin.CoinType(_coinType), nil
-}
-
 // TruncateTransactionStatePrefix ..
 func TruncateTransactionStatePrefix(ct sphinxproxy.TransactionState) string {
 	return strings.TrimPrefix(ct.String(), transactionStatePrefix)

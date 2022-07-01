@@ -5,9 +5,9 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
+	putils "github.com/NpoolPlatform/sphinx-plugin/pkg/utils"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
-	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -21,7 +21,7 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		return out, status.Error(codes.InvalidArgument, "Name empty")
 	}
 
-	coinType, err := utils.ToCoinType(in.GetName())
+	coinType, err := putils.ToCoinType(in.GetName())
 	if err != nil {
 		logger.Sugar().Errorf("CreateTransaction Name: %v invalid", in.GetName())
 		return out, status.Error(codes.InvalidArgument, "Name Invalid")

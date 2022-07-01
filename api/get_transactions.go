@@ -23,7 +23,8 @@ func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransac
 	if in.GetCoinType() == sphinxplugin.CoinType_CoinTypeUnKnow ||
 		in.GetTransactionState() == sphinxproxy.TransactionState_TransactionStateUnKnow ||
 		(in.GetENV() != "main" && in.GetENV() != "test") {
-		return &sphinxproxy.GetTransactionsResponse{}, nil
+		return &sphinxproxy.GetTransactionsResponse{},
+			status.Error(codes.InvalidArgument, "Invalid argument CoinType&TransactionState&ENV must not empty")
 	}
 
 	transInfos, err := crud.GetTransactions(ctx, crud.GetTransactionsParam{
@@ -44,10 +45,10 @@ func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransac
 	for _, info := range transInfos {
 		infos = append(infos, &sphinxproxy.TransactionInfo{
 			TransactionID: info.TransactionID,
-			// Name             :info.
-			Amount: price.DBPriceToVisualPrice(info.Amount),
-			From:   info.From,
-			To:     info.To,
+			Name:          "",
+			Amount:        price.DBPriceToVisualPrice(info.Amount),
+			From:          info.From,
+			To:            info.To,
 		})
 	}
 

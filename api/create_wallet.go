@@ -12,8 +12,8 @@ import (
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	cconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
 	ct "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
+	putils "github.com/NpoolPlatform/sphinx-plugin/pkg/utils"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
-	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -33,7 +33,7 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		return out, status.Error(codes.InvalidArgument, "Name empty")
 	}
 
-	coinType, err := utils.ToCoinType(in.GetName())
+	coinType, err := putils.ToCoinType(in.GetName())
 	if err != nil {
 		logger.Sugar().Errorf("CreateWallet Name: %v invalid", in.GetName())
 		return out, status.Error(codes.InvalidArgument, "Name Invalid")

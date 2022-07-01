@@ -3,7 +3,6 @@ package crud
 import (
 	"context"
 
-	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
@@ -13,13 +12,10 @@ import (
 type UpdateTransactionParams struct {
 	TransactionID string
 	State         sphinxproxy.TransactionState
-	RecentBhash   string
-	Nonce         uint64
-	// TODO optimize
-	UTXO []*sphinxplugin.Unspent
-	// Pre      *eth.PreSignInfo
-	Cid      string
-	ExitCode int64
+	NextState     sphinxproxy.TransactionState
+	Payload       []byte
+	Cid           string
+	ExitCode      int64
 }
 
 // UpdateTransaction update transaction info
@@ -28,28 +24,16 @@ func UpdateTransaction(ctx context.Context, t *UpdateTransactionParams) error {
 	if err != nil {
 		return err
 	}
-	stm := client.
+	return client.
 		Transaction.
 		Update().
-		Where(transaction.TransactionIDEQ(t.TransactionID))
-	switch t.State {
-	case sphinxproxy.TransactionState_TransactionStateSign:
-		stm.SetNonce(t.Nonce)
-		stm.SetUtxo(t.UTXO)
-		// nolint
-		// stm.SetPre(t.Pre)
-		stm.SetRecentBhash(t.RecentBhash)
-		stm.Where(transaction.StateEQ(uint8(sphinxproxy.TransactionState_TransactionStateWait)))
-	case sphinxproxy.TransactionState_TransactionStateSync:
-		stm.SetCid(t.Cid)
-		stm.Where(transaction.StateEQ(uint8(sphinxproxy.TransactionState_TransactionStateSign)))
-	case sphinxproxy.TransactionState_TransactionStateDone,
-		sphinxproxy.TransactionState_TransactionStateFail:
-		stm.SetExitCode(t.ExitCode)
-		stm.Where(transaction.StateEQ(uint8(sphinxproxy.TransactionState_TransactionStateSync)))
-	}
-
-	_, err = stm.SetState(uint8(t.State)).
-		Save(ctx)
-	return err
+		Where(
+			transaction.TransactionIDEQ(t.TransactionID),
+			transaction.StateEQ(uint8(t.State)),
+		).
+		SetPayload(t.Payload).
+		SetState(uint8(t.NextState)).
+		SetCid(t.Cid).
+		SetExitCode(t.ExitCode).
+		Exec(ctx)
 }
