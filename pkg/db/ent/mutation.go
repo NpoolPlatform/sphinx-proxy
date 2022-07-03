@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/predicate"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	"github.com/google/uuid"
@@ -31,38 +30,32 @@ const (
 // TransactionMutation represents an operation that mutates the Transaction nodes in the graph.
 type TransactionMutation struct {
 	config
-	op                  Op
-	typ                 string
-	id                  *uuid.UUID
-	nonce               *uint64
-	addnonce            *int64
-	utxo                *[]*sphinxplugin.Unspent
-	transaction_type    *int8
-	addtransaction_type *int8
-	coin_type           *int32
-	addcoin_type        *int32
-	transaction_id      *string
-	recent_bhash        *string
-	cid                 *string
-	exit_code           *int64
-	addexit_code        *int64
-	from                *string
-	to                  *string
-	amount              *uint64
-	addamount           *int64
-	payload             *[]byte
-	state               *uint8
-	addstate            *int8
-	created_at          *uint32
-	addcreated_at       *int32
-	updated_at          *uint32
-	addupdated_at       *int32
-	deleted_at          *uint32
-	adddeleted_at       *int32
-	clearedFields       map[string]struct{}
-	done                bool
-	oldValue            func(context.Context) (*Transaction, error)
-	predicates          []predicate.Transaction
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	coin_type      *int32
+	addcoin_type   *int32
+	transaction_id *string
+	cid            *string
+	exit_code      *int64
+	addexit_code   *int64
+	from           *string
+	to             *string
+	amount         *uint64
+	addamount      *int64
+	payload        *[]byte
+	state          *uint8
+	addstate       *int8
+	created_at     *uint32
+	addcreated_at  *int32
+	updated_at     *uint32
+	addupdated_at  *int32
+	deleted_at     *uint32
+	adddeleted_at  *int32
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*Transaction, error)
+	predicates     []predicate.Transaction
 }
 
 var _ ent.Mutation = (*TransactionMutation)(nil)
@@ -169,154 +162,6 @@ func (m *TransactionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	}
 }
 
-// SetNonce sets the "nonce" field.
-func (m *TransactionMutation) SetNonce(u uint64) {
-	m.nonce = &u
-	m.addnonce = nil
-}
-
-// Nonce returns the value of the "nonce" field in the mutation.
-func (m *TransactionMutation) Nonce() (r uint64, exists bool) {
-	v := m.nonce
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldNonce returns the old "nonce" field's value of the Transaction entity.
-// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TransactionMutation) OldNonce(ctx context.Context) (v uint64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldNonce is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldNonce requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldNonce: %w", err)
-	}
-	return oldValue.Nonce, nil
-}
-
-// AddNonce adds u to the "nonce" field.
-func (m *TransactionMutation) AddNonce(u int64) {
-	if m.addnonce != nil {
-		*m.addnonce += u
-	} else {
-		m.addnonce = &u
-	}
-}
-
-// AddedNonce returns the value that was added to the "nonce" field in this mutation.
-func (m *TransactionMutation) AddedNonce() (r int64, exists bool) {
-	v := m.addnonce
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetNonce resets all changes to the "nonce" field.
-func (m *TransactionMutation) ResetNonce() {
-	m.nonce = nil
-	m.addnonce = nil
-}
-
-// SetUtxo sets the "utxo" field.
-func (m *TransactionMutation) SetUtxo(s []*sphinxplugin.Unspent) {
-	m.utxo = &s
-}
-
-// Utxo returns the value of the "utxo" field in the mutation.
-func (m *TransactionMutation) Utxo() (r []*sphinxplugin.Unspent, exists bool) {
-	v := m.utxo
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUtxo returns the old "utxo" field's value of the Transaction entity.
-// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TransactionMutation) OldUtxo(ctx context.Context) (v []*sphinxplugin.Unspent, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUtxo is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUtxo requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUtxo: %w", err)
-	}
-	return oldValue.Utxo, nil
-}
-
-// ResetUtxo resets all changes to the "utxo" field.
-func (m *TransactionMutation) ResetUtxo() {
-	m.utxo = nil
-}
-
-// SetTransactionType sets the "transaction_type" field.
-func (m *TransactionMutation) SetTransactionType(i int8) {
-	m.transaction_type = &i
-	m.addtransaction_type = nil
-}
-
-// TransactionType returns the value of the "transaction_type" field in the mutation.
-func (m *TransactionMutation) TransactionType() (r int8, exists bool) {
-	v := m.transaction_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTransactionType returns the old "transaction_type" field's value of the Transaction entity.
-// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TransactionMutation) OldTransactionType(ctx context.Context) (v int8, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTransactionType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTransactionType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTransactionType: %w", err)
-	}
-	return oldValue.TransactionType, nil
-}
-
-// AddTransactionType adds i to the "transaction_type" field.
-func (m *TransactionMutation) AddTransactionType(i int8) {
-	if m.addtransaction_type != nil {
-		*m.addtransaction_type += i
-	} else {
-		m.addtransaction_type = &i
-	}
-}
-
-// AddedTransactionType returns the value that was added to the "transaction_type" field in this mutation.
-func (m *TransactionMutation) AddedTransactionType() (r int8, exists bool) {
-	v := m.addtransaction_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetTransactionType resets all changes to the "transaction_type" field.
-func (m *TransactionMutation) ResetTransactionType() {
-	m.transaction_type = nil
-	m.addtransaction_type = nil
-}
-
 // SetCoinType sets the "coin_type" field.
 func (m *TransactionMutation) SetCoinType(i int32) {
 	m.coin_type = &i
@@ -407,42 +252,6 @@ func (m *TransactionMutation) OldTransactionID(ctx context.Context) (v string, e
 // ResetTransactionID resets all changes to the "transaction_id" field.
 func (m *TransactionMutation) ResetTransactionID() {
 	m.transaction_id = nil
-}
-
-// SetRecentBhash sets the "recent_bhash" field.
-func (m *TransactionMutation) SetRecentBhash(s string) {
-	m.recent_bhash = &s
-}
-
-// RecentBhash returns the value of the "recent_bhash" field in the mutation.
-func (m *TransactionMutation) RecentBhash() (r string, exists bool) {
-	v := m.recent_bhash
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldRecentBhash returns the old "recent_bhash" field's value of the Transaction entity.
-// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TransactionMutation) OldRecentBhash(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRecentBhash is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRecentBhash requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRecentBhash: %w", err)
-	}
-	return oldValue.RecentBhash, nil
-}
-
-// ResetRecentBhash resets all changes to the "recent_bhash" field.
-func (m *TransactionMutation) ResetRecentBhash() {
-	m.recent_bhash = nil
 }
 
 // SetCid sets the "cid" field.
@@ -944,24 +753,12 @@ func (m *TransactionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TransactionMutation) Fields() []string {
-	fields := make([]string, 0, 16)
-	if m.nonce != nil {
-		fields = append(fields, transaction.FieldNonce)
-	}
-	if m.utxo != nil {
-		fields = append(fields, transaction.FieldUtxo)
-	}
-	if m.transaction_type != nil {
-		fields = append(fields, transaction.FieldTransactionType)
-	}
+	fields := make([]string, 0, 12)
 	if m.coin_type != nil {
 		fields = append(fields, transaction.FieldCoinType)
 	}
 	if m.transaction_id != nil {
 		fields = append(fields, transaction.FieldTransactionID)
-	}
-	if m.recent_bhash != nil {
-		fields = append(fields, transaction.FieldRecentBhash)
 	}
 	if m.cid != nil {
 		fields = append(fields, transaction.FieldCid)
@@ -1001,18 +798,10 @@ func (m *TransactionMutation) Fields() []string {
 // schema.
 func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case transaction.FieldNonce:
-		return m.Nonce()
-	case transaction.FieldUtxo:
-		return m.Utxo()
-	case transaction.FieldTransactionType:
-		return m.TransactionType()
 	case transaction.FieldCoinType:
 		return m.CoinType()
 	case transaction.FieldTransactionID:
 		return m.TransactionID()
-	case transaction.FieldRecentBhash:
-		return m.RecentBhash()
 	case transaction.FieldCid:
 		return m.Cid()
 	case transaction.FieldExitCode:
@@ -1042,18 +831,10 @@ func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case transaction.FieldNonce:
-		return m.OldNonce(ctx)
-	case transaction.FieldUtxo:
-		return m.OldUtxo(ctx)
-	case transaction.FieldTransactionType:
-		return m.OldTransactionType(ctx)
 	case transaction.FieldCoinType:
 		return m.OldCoinType(ctx)
 	case transaction.FieldTransactionID:
 		return m.OldTransactionID(ctx)
-	case transaction.FieldRecentBhash:
-		return m.OldRecentBhash(ctx)
 	case transaction.FieldCid:
 		return m.OldCid(ctx)
 	case transaction.FieldExitCode:
@@ -1083,27 +864,6 @@ func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Va
 // type.
 func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case transaction.FieldNonce:
-		v, ok := value.(uint64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetNonce(v)
-		return nil
-	case transaction.FieldUtxo:
-		v, ok := value.([]*sphinxplugin.Unspent)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUtxo(v)
-		return nil
-	case transaction.FieldTransactionType:
-		v, ok := value.(int8)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTransactionType(v)
-		return nil
 	case transaction.FieldCoinType:
 		v, ok := value.(int32)
 		if !ok {
@@ -1117,13 +877,6 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTransactionID(v)
-		return nil
-	case transaction.FieldRecentBhash:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetRecentBhash(v)
 		return nil
 	case transaction.FieldCid:
 		v, ok := value.(string)
@@ -1203,12 +956,6 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *TransactionMutation) AddedFields() []string {
 	var fields []string
-	if m.addnonce != nil {
-		fields = append(fields, transaction.FieldNonce)
-	}
-	if m.addtransaction_type != nil {
-		fields = append(fields, transaction.FieldTransactionType)
-	}
 	if m.addcoin_type != nil {
 		fields = append(fields, transaction.FieldCoinType)
 	}
@@ -1238,10 +985,6 @@ func (m *TransactionMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *TransactionMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case transaction.FieldNonce:
-		return m.AddedNonce()
-	case transaction.FieldTransactionType:
-		return m.AddedTransactionType()
 	case transaction.FieldCoinType:
 		return m.AddedCoinType()
 	case transaction.FieldExitCode:
@@ -1265,20 +1008,6 @@ func (m *TransactionMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *TransactionMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case transaction.FieldNonce:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddNonce(v)
-		return nil
-	case transaction.FieldTransactionType:
-		v, ok := value.(int8)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddTransactionType(v)
-		return nil
 	case transaction.FieldCoinType:
 		v, ok := value.(int32)
 		if !ok {
@@ -1355,23 +1084,11 @@ func (m *TransactionMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *TransactionMutation) ResetField(name string) error {
 	switch name {
-	case transaction.FieldNonce:
-		m.ResetNonce()
-		return nil
-	case transaction.FieldUtxo:
-		m.ResetUtxo()
-		return nil
-	case transaction.FieldTransactionType:
-		m.ResetTransactionType()
-		return nil
 	case transaction.FieldCoinType:
 		m.ResetCoinType()
 		return nil
 	case transaction.FieldTransactionID:
 		m.ResetTransactionID()
-		return nil
-	case transaction.FieldRecentBhash:
-		m.ResetRecentBhash()
 		return nil
 	case transaction.FieldCid:
 		m.ResetCid()

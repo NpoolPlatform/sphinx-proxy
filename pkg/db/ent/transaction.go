@@ -3,12 +3,10 @@
 package ent
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	"github.com/google/uuid"
 )
@@ -18,20 +16,10 @@ type Transaction struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// Nonce holds the value of the "nonce" field.
-	Nonce uint64 `json:"nonce,omitempty"`
-	// Utxo holds the value of the "utxo" field.
-	// only for btc
-	Utxo []*sphinxplugin.Unspent `json:"utxo,omitempty"`
-	// TransactionType holds the value of the "transaction_type" field.
-	TransactionType int8 `json:"transaction_type,omitempty"`
 	// CoinType holds the value of the "coin_type" field.
 	CoinType int32 `json:"coin_type,omitempty"`
 	// TransactionID holds the value of the "transaction_id" field.
 	TransactionID string `json:"transaction_id,omitempty"`
-	// RecentBhash holds the value of the "recent_bhash" field.
-	// only for sol,abbreviation for 'recent_bloack_hash'
-	RecentBhash string `json:"recent_bhash,omitempty"`
 	// Cid holds the value of the "cid" field.
 	Cid string `json:"cid,omitempty"`
 	// ExitCode holds the value of the "exit_code" field.
@@ -60,11 +48,11 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case transaction.FieldUtxo, transaction.FieldPayload:
+		case transaction.FieldPayload:
 			values[i] = new([]byte)
-		case transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldCoinType, transaction.FieldExitCode, transaction.FieldAmount, transaction.FieldState, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
+		case transaction.FieldCoinType, transaction.FieldExitCode, transaction.FieldAmount, transaction.FieldState, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
-		case transaction.FieldTransactionID, transaction.FieldRecentBhash, transaction.FieldCid, transaction.FieldFrom, transaction.FieldTo:
+		case transaction.FieldTransactionID, transaction.FieldCid, transaction.FieldFrom, transaction.FieldTo:
 			values[i] = new(sql.NullString)
 		case transaction.FieldID:
 			values[i] = new(uuid.UUID)
@@ -89,26 +77,6 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 			} else if value != nil {
 				t.ID = *value
 			}
-		case transaction.FieldNonce:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field nonce", values[i])
-			} else if value.Valid {
-				t.Nonce = uint64(value.Int64)
-			}
-		case transaction.FieldUtxo:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field utxo", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &t.Utxo); err != nil {
-					return fmt.Errorf("unmarshal field utxo: %w", err)
-				}
-			}
-		case transaction.FieldTransactionType:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field transaction_type", values[i])
-			} else if value.Valid {
-				t.TransactionType = int8(value.Int64)
-			}
 		case transaction.FieldCoinType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field coin_type", values[i])
@@ -120,12 +88,6 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 				return fmt.Errorf("unexpected type %T for field transaction_id", values[i])
 			} else if value.Valid {
 				t.TransactionID = value.String
-			}
-		case transaction.FieldRecentBhash:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field recent_bhash", values[i])
-			} else if value.Valid {
-				t.RecentBhash = value.String
 			}
 		case transaction.FieldCid:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -215,18 +177,10 @@ func (t *Transaction) String() string {
 	var builder strings.Builder
 	builder.WriteString("Transaction(")
 	builder.WriteString(fmt.Sprintf("id=%v", t.ID))
-	builder.WriteString(", nonce=")
-	builder.WriteString(fmt.Sprintf("%v", t.Nonce))
-	builder.WriteString(", utxo=")
-	builder.WriteString(fmt.Sprintf("%v", t.Utxo))
-	builder.WriteString(", transaction_type=")
-	builder.WriteString(fmt.Sprintf("%v", t.TransactionType))
 	builder.WriteString(", coin_type=")
 	builder.WriteString(fmt.Sprintf("%v", t.CoinType))
 	builder.WriteString(", transaction_id=")
 	builder.WriteString(t.TransactionID)
-	builder.WriteString(", recent_bhash=")
-	builder.WriteString(t.RecentBhash)
 	builder.WriteString(", cid=")
 	builder.WriteString(t.Cid)
 	builder.WriteString(", exit_code=")

@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	"github.com/google/uuid"
 )
@@ -22,40 +21,6 @@ type TransactionCreate struct {
 	mutation *TransactionMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
-}
-
-// SetNonce sets the "nonce" field.
-func (tc *TransactionCreate) SetNonce(u uint64) *TransactionCreate {
-	tc.mutation.SetNonce(u)
-	return tc
-}
-
-// SetNillableNonce sets the "nonce" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableNonce(u *uint64) *TransactionCreate {
-	if u != nil {
-		tc.SetNonce(*u)
-	}
-	return tc
-}
-
-// SetUtxo sets the "utxo" field.
-func (tc *TransactionCreate) SetUtxo(s []*sphinxplugin.Unspent) *TransactionCreate {
-	tc.mutation.SetUtxo(s)
-	return tc
-}
-
-// SetTransactionType sets the "transaction_type" field.
-func (tc *TransactionCreate) SetTransactionType(i int8) *TransactionCreate {
-	tc.mutation.SetTransactionType(i)
-	return tc
-}
-
-// SetNillableTransactionType sets the "transaction_type" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableTransactionType(i *int8) *TransactionCreate {
-	if i != nil {
-		tc.SetTransactionType(*i)
-	}
-	return tc
 }
 
 // SetCoinType sets the "coin_type" field.
@@ -75,20 +40,6 @@ func (tc *TransactionCreate) SetNillableCoinType(i *int32) *TransactionCreate {
 // SetTransactionID sets the "transaction_id" field.
 func (tc *TransactionCreate) SetTransactionID(s string) *TransactionCreate {
 	tc.mutation.SetTransactionID(s)
-	return tc
-}
-
-// SetRecentBhash sets the "recent_bhash" field.
-func (tc *TransactionCreate) SetRecentBhash(s string) *TransactionCreate {
-	tc.mutation.SetRecentBhash(s)
-	return tc
-}
-
-// SetNillableRecentBhash sets the "recent_bhash" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableRecentBhash(s *string) *TransactionCreate {
-	if s != nil {
-		tc.SetRecentBhash(*s)
-	}
 	return tc
 }
 
@@ -309,25 +260,9 @@ func (tc *TransactionCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tc *TransactionCreate) defaults() {
-	if _, ok := tc.mutation.Nonce(); !ok {
-		v := transaction.DefaultNonce
-		tc.mutation.SetNonce(v)
-	}
-	if _, ok := tc.mutation.Utxo(); !ok {
-		v := transaction.DefaultUtxo
-		tc.mutation.SetUtxo(v)
-	}
-	if _, ok := tc.mutation.TransactionType(); !ok {
-		v := transaction.DefaultTransactionType
-		tc.mutation.SetTransactionType(v)
-	}
 	if _, ok := tc.mutation.CoinType(); !ok {
 		v := transaction.DefaultCoinType
 		tc.mutation.SetCoinType(v)
-	}
-	if _, ok := tc.mutation.RecentBhash(); !ok {
-		v := transaction.DefaultRecentBhash
-		tc.mutation.SetRecentBhash(v)
 	}
 	if _, ok := tc.mutation.Cid(); !ok {
 		v := transaction.DefaultCid
@@ -377,15 +312,6 @@ func (tc *TransactionCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TransactionCreate) check() error {
-	if _, ok := tc.mutation.Nonce(); !ok {
-		return &ValidationError{Name: "nonce", err: errors.New(`ent: missing required field "Transaction.nonce"`)}
-	}
-	if _, ok := tc.mutation.Utxo(); !ok {
-		return &ValidationError{Name: "utxo", err: errors.New(`ent: missing required field "Transaction.utxo"`)}
-	}
-	if _, ok := tc.mutation.TransactionType(); !ok {
-		return &ValidationError{Name: "transaction_type", err: errors.New(`ent: missing required field "Transaction.transaction_type"`)}
-	}
 	if _, ok := tc.mutation.CoinType(); !ok {
 		return &ValidationError{Name: "coin_type", err: errors.New(`ent: missing required field "Transaction.coin_type"`)}
 	}
@@ -396,9 +322,6 @@ func (tc *TransactionCreate) check() error {
 		if err := transaction.TransactionIDValidator(v); err != nil {
 			return &ValidationError{Name: "transaction_id", err: fmt.Errorf(`ent: validator failed for field "Transaction.transaction_id": %w`, err)}
 		}
-	}
-	if _, ok := tc.mutation.RecentBhash(); !ok {
-		return &ValidationError{Name: "recent_bhash", err: errors.New(`ent: missing required field "Transaction.recent_bhash"`)}
 	}
 	if _, ok := tc.mutation.Cid(); !ok {
 		return &ValidationError{Name: "cid", err: errors.New(`ent: missing required field "Transaction.cid"`)}
@@ -482,30 +405,6 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := tc.mutation.Nonce(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: transaction.FieldNonce,
-		})
-		_node.Nonce = value
-	}
-	if value, ok := tc.mutation.Utxo(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: transaction.FieldUtxo,
-		})
-		_node.Utxo = value
-	}
-	if value, ok := tc.mutation.TransactionType(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: transaction.FieldTransactionType,
-		})
-		_node.TransactionType = value
-	}
 	if value, ok := tc.mutation.CoinType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
@@ -521,14 +420,6 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Column: transaction.FieldTransactionID,
 		})
 		_node.TransactionID = value
-	}
-	if value, ok := tc.mutation.RecentBhash(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: transaction.FieldRecentBhash,
-		})
-		_node.RecentBhash = value
 	}
 	if value, ok := tc.mutation.Cid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -617,7 +508,7 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Transaction.Create().
-//		SetNonce(v).
+//		SetCoinType(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -626,7 +517,7 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.TransactionUpsert) {
-//			SetNonce(v+v).
+//			SetCoinType(v+v).
 //		}).
 //		Exec(ctx)
 //
@@ -664,54 +555,6 @@ type (
 	}
 )
 
-// SetNonce sets the "nonce" field.
-func (u *TransactionUpsert) SetNonce(v uint64) *TransactionUpsert {
-	u.Set(transaction.FieldNonce, v)
-	return u
-}
-
-// UpdateNonce sets the "nonce" field to the value that was provided on create.
-func (u *TransactionUpsert) UpdateNonce() *TransactionUpsert {
-	u.SetExcluded(transaction.FieldNonce)
-	return u
-}
-
-// AddNonce adds v to the "nonce" field.
-func (u *TransactionUpsert) AddNonce(v uint64) *TransactionUpsert {
-	u.Add(transaction.FieldNonce, v)
-	return u
-}
-
-// SetUtxo sets the "utxo" field.
-func (u *TransactionUpsert) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUpsert {
-	u.Set(transaction.FieldUtxo, v)
-	return u
-}
-
-// UpdateUtxo sets the "utxo" field to the value that was provided on create.
-func (u *TransactionUpsert) UpdateUtxo() *TransactionUpsert {
-	u.SetExcluded(transaction.FieldUtxo)
-	return u
-}
-
-// SetTransactionType sets the "transaction_type" field.
-func (u *TransactionUpsert) SetTransactionType(v int8) *TransactionUpsert {
-	u.Set(transaction.FieldTransactionType, v)
-	return u
-}
-
-// UpdateTransactionType sets the "transaction_type" field to the value that was provided on create.
-func (u *TransactionUpsert) UpdateTransactionType() *TransactionUpsert {
-	u.SetExcluded(transaction.FieldTransactionType)
-	return u
-}
-
-// AddTransactionType adds v to the "transaction_type" field.
-func (u *TransactionUpsert) AddTransactionType(v int8) *TransactionUpsert {
-	u.Add(transaction.FieldTransactionType, v)
-	return u
-}
-
 // SetCoinType sets the "coin_type" field.
 func (u *TransactionUpsert) SetCoinType(v int32) *TransactionUpsert {
 	u.Set(transaction.FieldCoinType, v)
@@ -739,18 +582,6 @@ func (u *TransactionUpsert) SetTransactionID(v string) *TransactionUpsert {
 // UpdateTransactionID sets the "transaction_id" field to the value that was provided on create.
 func (u *TransactionUpsert) UpdateTransactionID() *TransactionUpsert {
 	u.SetExcluded(transaction.FieldTransactionID)
-	return u
-}
-
-// SetRecentBhash sets the "recent_bhash" field.
-func (u *TransactionUpsert) SetRecentBhash(v string) *TransactionUpsert {
-	u.Set(transaction.FieldRecentBhash, v)
-	return u
-}
-
-// UpdateRecentBhash sets the "recent_bhash" field to the value that was provided on create.
-func (u *TransactionUpsert) UpdateRecentBhash() *TransactionUpsert {
-	u.SetExcluded(transaction.FieldRecentBhash)
 	return u
 }
 
@@ -960,62 +791,6 @@ func (u *TransactionUpsertOne) Update(set func(*TransactionUpsert)) *Transaction
 	return u
 }
 
-// SetNonce sets the "nonce" field.
-func (u *TransactionUpsertOne) SetNonce(v uint64) *TransactionUpsertOne {
-	return u.Update(func(s *TransactionUpsert) {
-		s.SetNonce(v)
-	})
-}
-
-// AddNonce adds v to the "nonce" field.
-func (u *TransactionUpsertOne) AddNonce(v uint64) *TransactionUpsertOne {
-	return u.Update(func(s *TransactionUpsert) {
-		s.AddNonce(v)
-	})
-}
-
-// UpdateNonce sets the "nonce" field to the value that was provided on create.
-func (u *TransactionUpsertOne) UpdateNonce() *TransactionUpsertOne {
-	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateNonce()
-	})
-}
-
-// SetUtxo sets the "utxo" field.
-func (u *TransactionUpsertOne) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUpsertOne {
-	return u.Update(func(s *TransactionUpsert) {
-		s.SetUtxo(v)
-	})
-}
-
-// UpdateUtxo sets the "utxo" field to the value that was provided on create.
-func (u *TransactionUpsertOne) UpdateUtxo() *TransactionUpsertOne {
-	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateUtxo()
-	})
-}
-
-// SetTransactionType sets the "transaction_type" field.
-func (u *TransactionUpsertOne) SetTransactionType(v int8) *TransactionUpsertOne {
-	return u.Update(func(s *TransactionUpsert) {
-		s.SetTransactionType(v)
-	})
-}
-
-// AddTransactionType adds v to the "transaction_type" field.
-func (u *TransactionUpsertOne) AddTransactionType(v int8) *TransactionUpsertOne {
-	return u.Update(func(s *TransactionUpsert) {
-		s.AddTransactionType(v)
-	})
-}
-
-// UpdateTransactionType sets the "transaction_type" field to the value that was provided on create.
-func (u *TransactionUpsertOne) UpdateTransactionType() *TransactionUpsertOne {
-	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateTransactionType()
-	})
-}
-
 // SetCoinType sets the "coin_type" field.
 func (u *TransactionUpsertOne) SetCoinType(v int32) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1048,20 +823,6 @@ func (u *TransactionUpsertOne) SetTransactionID(v string) *TransactionUpsertOne 
 func (u *TransactionUpsertOne) UpdateTransactionID() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateTransactionID()
-	})
-}
-
-// SetRecentBhash sets the "recent_bhash" field.
-func (u *TransactionUpsertOne) SetRecentBhash(v string) *TransactionUpsertOne {
-	return u.Update(func(s *TransactionUpsert) {
-		s.SetRecentBhash(v)
-	})
-}
-
-// UpdateRecentBhash sets the "recent_bhash" field to the value that was provided on create.
-func (u *TransactionUpsertOne) UpdateRecentBhash() *TransactionUpsertOne {
-	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateRecentBhash()
 	})
 }
 
@@ -1379,7 +1140,7 @@ func (tcb *TransactionCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.TransactionUpsert) {
-//			SetNonce(v+v).
+//			SetCoinType(v+v).
 //		}).
 //		Exec(ctx)
 //
@@ -1463,62 +1224,6 @@ func (u *TransactionUpsertBulk) Update(set func(*TransactionUpsert)) *Transactio
 	return u
 }
 
-// SetNonce sets the "nonce" field.
-func (u *TransactionUpsertBulk) SetNonce(v uint64) *TransactionUpsertBulk {
-	return u.Update(func(s *TransactionUpsert) {
-		s.SetNonce(v)
-	})
-}
-
-// AddNonce adds v to the "nonce" field.
-func (u *TransactionUpsertBulk) AddNonce(v uint64) *TransactionUpsertBulk {
-	return u.Update(func(s *TransactionUpsert) {
-		s.AddNonce(v)
-	})
-}
-
-// UpdateNonce sets the "nonce" field to the value that was provided on create.
-func (u *TransactionUpsertBulk) UpdateNonce() *TransactionUpsertBulk {
-	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateNonce()
-	})
-}
-
-// SetUtxo sets the "utxo" field.
-func (u *TransactionUpsertBulk) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUpsertBulk {
-	return u.Update(func(s *TransactionUpsert) {
-		s.SetUtxo(v)
-	})
-}
-
-// UpdateUtxo sets the "utxo" field to the value that was provided on create.
-func (u *TransactionUpsertBulk) UpdateUtxo() *TransactionUpsertBulk {
-	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateUtxo()
-	})
-}
-
-// SetTransactionType sets the "transaction_type" field.
-func (u *TransactionUpsertBulk) SetTransactionType(v int8) *TransactionUpsertBulk {
-	return u.Update(func(s *TransactionUpsert) {
-		s.SetTransactionType(v)
-	})
-}
-
-// AddTransactionType adds v to the "transaction_type" field.
-func (u *TransactionUpsertBulk) AddTransactionType(v int8) *TransactionUpsertBulk {
-	return u.Update(func(s *TransactionUpsert) {
-		s.AddTransactionType(v)
-	})
-}
-
-// UpdateTransactionType sets the "transaction_type" field to the value that was provided on create.
-func (u *TransactionUpsertBulk) UpdateTransactionType() *TransactionUpsertBulk {
-	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateTransactionType()
-	})
-}
-
 // SetCoinType sets the "coin_type" field.
 func (u *TransactionUpsertBulk) SetCoinType(v int32) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1551,20 +1256,6 @@ func (u *TransactionUpsertBulk) SetTransactionID(v string) *TransactionUpsertBul
 func (u *TransactionUpsertBulk) UpdateTransactionID() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateTransactionID()
-	})
-}
-
-// SetRecentBhash sets the "recent_bhash" field.
-func (u *TransactionUpsertBulk) SetRecentBhash(v string) *TransactionUpsertBulk {
-	return u.Update(func(s *TransactionUpsert) {
-		s.SetRecentBhash(v)
-	})
-}
-
-// UpdateRecentBhash sets the "recent_bhash" field to the value that was provided on create.
-func (u *TransactionUpsertBulk) UpdateRecentBhash() *TransactionUpsertBulk {
-	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateRecentBhash()
 	})
 }
 

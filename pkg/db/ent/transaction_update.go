@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/predicate"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 )
@@ -25,54 +24,6 @@ type TransactionUpdate struct {
 // Where appends a list predicates to the TransactionUpdate builder.
 func (tu *TransactionUpdate) Where(ps ...predicate.Transaction) *TransactionUpdate {
 	tu.mutation.Where(ps...)
-	return tu
-}
-
-// SetNonce sets the "nonce" field.
-func (tu *TransactionUpdate) SetNonce(u uint64) *TransactionUpdate {
-	tu.mutation.ResetNonce()
-	tu.mutation.SetNonce(u)
-	return tu
-}
-
-// SetNillableNonce sets the "nonce" field if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableNonce(u *uint64) *TransactionUpdate {
-	if u != nil {
-		tu.SetNonce(*u)
-	}
-	return tu
-}
-
-// AddNonce adds u to the "nonce" field.
-func (tu *TransactionUpdate) AddNonce(u int64) *TransactionUpdate {
-	tu.mutation.AddNonce(u)
-	return tu
-}
-
-// SetUtxo sets the "utxo" field.
-func (tu *TransactionUpdate) SetUtxo(s []*sphinxplugin.Unspent) *TransactionUpdate {
-	tu.mutation.SetUtxo(s)
-	return tu
-}
-
-// SetTransactionType sets the "transaction_type" field.
-func (tu *TransactionUpdate) SetTransactionType(i int8) *TransactionUpdate {
-	tu.mutation.ResetTransactionType()
-	tu.mutation.SetTransactionType(i)
-	return tu
-}
-
-// SetNillableTransactionType sets the "transaction_type" field if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableTransactionType(i *int8) *TransactionUpdate {
-	if i != nil {
-		tu.SetTransactionType(*i)
-	}
-	return tu
-}
-
-// AddTransactionType adds i to the "transaction_type" field.
-func (tu *TransactionUpdate) AddTransactionType(i int8) *TransactionUpdate {
-	tu.mutation.AddTransactionType(i)
 	return tu
 }
 
@@ -100,20 +51,6 @@ func (tu *TransactionUpdate) AddCoinType(i int32) *TransactionUpdate {
 // SetTransactionID sets the "transaction_id" field.
 func (tu *TransactionUpdate) SetTransactionID(s string) *TransactionUpdate {
 	tu.mutation.SetTransactionID(s)
-	return tu
-}
-
-// SetRecentBhash sets the "recent_bhash" field.
-func (tu *TransactionUpdate) SetRecentBhash(s string) *TransactionUpdate {
-	tu.mutation.SetRecentBhash(s)
-	return tu
-}
-
-// SetNillableRecentBhash sets the "recent_bhash" field if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableRecentBhash(s *string) *TransactionUpdate {
-	if s != nil {
-		tu.SetRecentBhash(*s)
-	}
 	return tu
 }
 
@@ -400,41 +337,6 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := tu.mutation.Nonce(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: transaction.FieldNonce,
-		})
-	}
-	if value, ok := tu.mutation.AddedNonce(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: transaction.FieldNonce,
-		})
-	}
-	if value, ok := tu.mutation.Utxo(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: transaction.FieldUtxo,
-		})
-	}
-	if value, ok := tu.mutation.TransactionType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: transaction.FieldTransactionType,
-		})
-	}
-	if value, ok := tu.mutation.AddedTransactionType(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: transaction.FieldTransactionType,
-		})
-	}
 	if value, ok := tu.mutation.CoinType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
@@ -454,13 +356,6 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: transaction.FieldTransactionID,
-		})
-	}
-	if value, ok := tu.mutation.RecentBhash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: transaction.FieldRecentBhash,
 		})
 	}
 	if value, ok := tu.mutation.Cid(); ok {
@@ -594,54 +489,6 @@ type TransactionUpdateOne struct {
 	mutation *TransactionMutation
 }
 
-// SetNonce sets the "nonce" field.
-func (tuo *TransactionUpdateOne) SetNonce(u uint64) *TransactionUpdateOne {
-	tuo.mutation.ResetNonce()
-	tuo.mutation.SetNonce(u)
-	return tuo
-}
-
-// SetNillableNonce sets the "nonce" field if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableNonce(u *uint64) *TransactionUpdateOne {
-	if u != nil {
-		tuo.SetNonce(*u)
-	}
-	return tuo
-}
-
-// AddNonce adds u to the "nonce" field.
-func (tuo *TransactionUpdateOne) AddNonce(u int64) *TransactionUpdateOne {
-	tuo.mutation.AddNonce(u)
-	return tuo
-}
-
-// SetUtxo sets the "utxo" field.
-func (tuo *TransactionUpdateOne) SetUtxo(s []*sphinxplugin.Unspent) *TransactionUpdateOne {
-	tuo.mutation.SetUtxo(s)
-	return tuo
-}
-
-// SetTransactionType sets the "transaction_type" field.
-func (tuo *TransactionUpdateOne) SetTransactionType(i int8) *TransactionUpdateOne {
-	tuo.mutation.ResetTransactionType()
-	tuo.mutation.SetTransactionType(i)
-	return tuo
-}
-
-// SetNillableTransactionType sets the "transaction_type" field if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableTransactionType(i *int8) *TransactionUpdateOne {
-	if i != nil {
-		tuo.SetTransactionType(*i)
-	}
-	return tuo
-}
-
-// AddTransactionType adds i to the "transaction_type" field.
-func (tuo *TransactionUpdateOne) AddTransactionType(i int8) *TransactionUpdateOne {
-	tuo.mutation.AddTransactionType(i)
-	return tuo
-}
-
 // SetCoinType sets the "coin_type" field.
 func (tuo *TransactionUpdateOne) SetCoinType(i int32) *TransactionUpdateOne {
 	tuo.mutation.ResetCoinType()
@@ -666,20 +513,6 @@ func (tuo *TransactionUpdateOne) AddCoinType(i int32) *TransactionUpdateOne {
 // SetTransactionID sets the "transaction_id" field.
 func (tuo *TransactionUpdateOne) SetTransactionID(s string) *TransactionUpdateOne {
 	tuo.mutation.SetTransactionID(s)
-	return tuo
-}
-
-// SetRecentBhash sets the "recent_bhash" field.
-func (tuo *TransactionUpdateOne) SetRecentBhash(s string) *TransactionUpdateOne {
-	tuo.mutation.SetRecentBhash(s)
-	return tuo
-}
-
-// SetNillableRecentBhash sets the "recent_bhash" field if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableRecentBhash(s *string) *TransactionUpdateOne {
-	if s != nil {
-		tuo.SetRecentBhash(*s)
-	}
 	return tuo
 }
 
@@ -990,41 +823,6 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			}
 		}
 	}
-	if value, ok := tuo.mutation.Nonce(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: transaction.FieldNonce,
-		})
-	}
-	if value, ok := tuo.mutation.AddedNonce(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: transaction.FieldNonce,
-		})
-	}
-	if value, ok := tuo.mutation.Utxo(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: transaction.FieldUtxo,
-		})
-	}
-	if value, ok := tuo.mutation.TransactionType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: transaction.FieldTransactionType,
-		})
-	}
-	if value, ok := tuo.mutation.AddedTransactionType(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt8,
-			Value:  value,
-			Column: transaction.FieldTransactionType,
-		})
-	}
 	if value, ok := tuo.mutation.CoinType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt32,
@@ -1044,13 +842,6 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Type:   field.TypeString,
 			Value:  value,
 			Column: transaction.FieldTransactionID,
-		})
-	}
-	if value, ok := tuo.mutation.RecentBhash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: transaction.FieldRecentBhash,
 		})
 	}
 	if value, ok := tuo.mutation.Cid(); ok {

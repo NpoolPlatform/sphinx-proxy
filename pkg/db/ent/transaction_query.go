@@ -255,12 +255,12 @@ func (tq *TransactionQuery) Clone() *TransactionQuery {
 // Example:
 //
 //	var v []struct {
-//		Nonce uint64 `json:"nonce,omitempty"`
+//		CoinType int32 `json:"coin_type,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Transaction.Query().
-//		GroupBy(transaction.FieldNonce).
+//		GroupBy(transaction.FieldCoinType).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -282,11 +282,11 @@ func (tq *TransactionQuery) GroupBy(field string, fields ...string) *Transaction
 // Example:
 //
 //	var v []struct {
-//		Nonce uint64 `json:"nonce,omitempty"`
+//		CoinType int32 `json:"coin_type,omitempty"`
 //	}
 //
 //	client.Transaction.Query().
-//		Select(transaction.FieldNonce).
+//		Select(transaction.FieldCoinType).
 //		Scan(ctx, &v)
 //
 func (tq *TransactionQuery) Select(fields ...string) *TransactionSelect {

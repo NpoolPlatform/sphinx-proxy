@@ -11,12 +11,8 @@ var (
 	// TransactionsColumns holds the columns for the "transactions" table.
 	TransactionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "nonce", Type: field.TypeUint64, Default: 0},
-		{Name: "utxo", Type: field.TypeJSON},
-		{Name: "transaction_type", Type: field.TypeInt8, Default: 0},
 		{Name: "coin_type", Type: field.TypeInt32, Default: 0},
 		{Name: "transaction_id", Type: field.TypeString, Unique: true},
-		{Name: "recent_bhash", Type: field.TypeString, Default: ""},
 		{Name: "cid", Type: field.TypeString, Default: ""},
 		{Name: "exit_code", Type: field.TypeInt64, Default: -1},
 		{Name: "from", Type: field.TypeString, Default: ""},
@@ -37,7 +33,7 @@ var (
 			{
 				Name:    "transaction_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[14]},
+				Columns: []*schema.Column{TransactionsColumns[10]},
 			},
 		},
 	}
