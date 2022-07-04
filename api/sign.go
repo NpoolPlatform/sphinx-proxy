@@ -1,8 +1,11 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
+
+	plugin_types "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
@@ -111,9 +114,20 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 				continue
 			}
 
+			naResponse := &plugin_types.NewAccountResponse{}
+			err = json.Unmarshal(ssResponse.GetPayload(), naResponse)
+			if err != nil {
+				logger.Sugar().Infof("TransactionID: %v create wallet error: %v", ssResponse.GetTransactionID(), err)
+				ch.(chan walletDoneInfo) <- walletDoneInfo{
+					success: false,
+					message: ssResponse.GetRPCExitMessage(),
+				}
+				continue
+			}
+
 			ch.(chan walletDoneInfo) <- walletDoneInfo{
 				success: true,
-				address: ssResponse.GetInfo().GetAddress(),
+				address: naResponse.Address,
 			}
 			logger.Sugar().Infof("TransactionID: %v create wallet ok", ssResponse.GetTransactionID())
 		default:

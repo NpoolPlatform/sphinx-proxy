@@ -63,6 +63,7 @@ func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransac
 			TransactionID: info.TransactionID,
 			Name:          utils.TruncateCoinTypePrefix(sphinxplugin.CoinType(info.CoinType)),
 			Amount:        price.DBPriceToVisualPrice(info.Amount),
+			Payload:       info.Payload,
 			From:          info.From,
 			To:            info.To,
 		})
