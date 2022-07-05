@@ -33,15 +33,12 @@ func UpdateTransaction(ctx context.Context, t *UpdateTransactionParams) error {
 			transaction.StateEQ(uint8(t.State)),
 		).
 		SetPayload(t.Payload).
-		SetState(uint8(t.NextState))
+		SetState(uint8(t.NextState)).
+		SetExitCode(t.ExitCode)
 
 	if t.Cid != "" {
 		stmt.
 			SetCid(t.Cid)
-	}
-	if t.ExitCode != 0 {
-		stmt.
-			SetExitCode(t.ExitCode)
 	}
 
 	return stmt.Exec(ctx)

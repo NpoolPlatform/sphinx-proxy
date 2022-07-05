@@ -54,7 +54,7 @@ func (s *Server) UpdateTransaction(ctx context.Context, in *sphinxproxy.UpdateTr
 		ExitCode:      in.GetExitCode(),
 	})
 	if err != nil {
-		logger.Sugar().Errorf("GetTransactions call GetTransactions error: %v", err)
+		logger.Sugar().Errorf("UpdateTransaction call error: %v", err)
 		return &sphinxproxy.UpdateTransactionResponse{},
 			status.Error(codes.Internal, "internal server error")
 	}
