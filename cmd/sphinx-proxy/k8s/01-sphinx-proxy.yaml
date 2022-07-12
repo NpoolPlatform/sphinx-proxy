@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: sphinx-proxy
   namespace: kube-system
+  annotations:
+    "sidecar.jaegertracing.io/inject": "true"
 spec:
   replicas: 1
   selector:
@@ -14,29 +16,29 @@ spec:
         app: sphinx-proxy
     spec:
       containers:
-      - name: sphinx-proxy
-        image: uhub.service.ucloud.cn/entropypool/sphinx-proxy:latest
-        imagePullPolicy: Always
-        env:
-        - name: ENV_ENVIRONMENT_TARGET
-          valueFrom:
-            configMapKeyRef:
-              name: system-environment
-              key: environment.target
-        - name: ENV_CONSUL_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: system-environment
-              key: environment.consul_host
-        - name: ENV_CONSUL_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: system-environment
-              key: environment.consul_port
-        - name: ENV_CLUSTER_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
+        - name: sphinx-proxy
+          image: uhub.service.ucloud.cn/entropypool/sphinx-proxy:latest
+          imagePullPolicy: Always
+          env:
+            - name: ENV_ENVIRONMENT_TARGET
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.target
+            - name: ENV_CONSUL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.consul_host
+            - name: ENV_CONSUL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.consul_port
+            - name: ENV_CLUSTER_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
 
 ---
 apiVersion: v1
@@ -47,8 +49,8 @@ metadata:
 
 spec:
   ports:
-  - name: http
-    port: 50000
+    - name: http
+      port: 50000
   selector:
     app: sphinx-proxy
 
@@ -63,7 +65,7 @@ metadata:
 
 spec:
   ports:
-  - name: grpc
-    port: 50001
+    - name: grpc
+      port: 50001
   selector:
     app: sphinx-proxy
