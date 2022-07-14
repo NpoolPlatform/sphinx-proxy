@@ -6,7 +6,7 @@ require (
 	entgo.io/ent v0.10.1
 	github.com/NpoolPlatform/api-manager v0.0.0-20220205130236-69d286e72dba
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220713074036-182dafb1d980
-	github.com/NpoolPlatform/message v0.0.0-20220714095839-2f1e941833fa
+	github.com/NpoolPlatform/message v0.0.0-20220714124453-6fc782d1b998
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996
 	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220714122301-07415a8850fa
 	github.com/google/uuid v1.3.0
