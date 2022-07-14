@@ -63,6 +63,30 @@ func getProxyPlugin(coinType sphinxplugin.CoinType) (*mPlugin, error) {
 	return lmPlugin[coinType][rnd.Intn(len(lmPlugin[coinType]))], nil
 }
 
+func haveCoin(name string) (bool, error) {
+	ackConn, err := grpc2.GetGRPCConn(scconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		return false, err
+	}
+	defer ackConn.Close()
+
+	client := coininfo.NewSphinxCoinInfoClient(ackConn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), constant.GrpcTimeout)
+	defer cancel()
+
+	// define in plugin
+	ret, err := client.GetCoinInfos(ctx, &coininfo.GetCoinInfosRequest{
+		Name: name,
+	})
+	if err != nil {
+		return false, err
+	} else if ret.Total > 0 {
+		return true, nil
+	}
+	return false, nil
+}
+
 func registerCoin(coinInfo *coininfo.CreateCoinInfoRequest) error {
 	ackConn, err := grpc2.GetGRPCConn(scconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {

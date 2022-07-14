@@ -7,6 +7,7 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/price"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
+	pconst "github.com/NpoolPlatform/sphinx-plugin/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
@@ -17,6 +18,7 @@ import (
 
 // GetTransactions ..
 func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransactionsRequest) (out *sphinxproxy.GetTransactionsResponse, err error) {
+	pluginSN := pconst.GetPluginSN(ctx)
 	ctx, cancel := context.WithTimeout(ctx, sconst.GrpcTimeout)
 	defer cancel()
 
@@ -67,6 +69,16 @@ func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransac
 			From:          info.From,
 			To:            info.To,
 		})
+	}
+
+	if len(infos) > 0 {
+		logger.Sugar().Infof(
+			"%v ask for tasks,CoinType:%v CoinTransactionState:%v Rows:%v",
+			pluginSN,
+			in.GetCoinType(),
+			in.GetTransactionState(),
+			len(infos),
+		)
 	}
 
 	return &sphinxproxy.GetTransactionsResponse{
