@@ -18,7 +18,7 @@ import (
 
 // GetTransactions ..
 func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransactionsRequest) (out *sphinxproxy.GetTransactionsResponse, err error) {
-	pluginSN := pconst.GetPluginSN(ctx)
+	pluginInfo := pconst.GetPluginInfo(ctx)
 	ctx, cancel := context.WithTimeout(ctx, sconst.GrpcTimeout)
 	defer cancel()
 
@@ -73,8 +73,8 @@ func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransac
 
 	if len(infos) > 0 {
 		logger.Sugar().Infof(
-			"%v ask for tasks,CoinType:%v CoinTransactionState:%v Rows:%v",
-			pluginSN,
+			"%v get tasks,CoinType:%v CoinTransactionState:%v Rows:%v",
+			pluginInfo,
 			in.GetCoinType(),
 			in.GetTransactionState(),
 			len(infos),

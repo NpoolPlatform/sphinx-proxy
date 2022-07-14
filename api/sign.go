@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sync"
 
+	putils "github.com/NpoolPlatform/sphinx-plugin/pkg/rpc"
 	plugin_types "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
@@ -41,7 +42,7 @@ func newSignStream(stream sphinxproxy.SphinxProxy_ProxySignServer) {
 
 func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer logger.Sugar().Warn("sphinx sign stream send exit")
+	defer func() { logger.Sugar().Warn("sphinx sign stream send exit") }()
 
 	for {
 		select {
@@ -62,7 +63,7 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 						message: fmt.Sprintf("proxy->sign send create wallet error: %v", err),
 					}
 				}
-				if checkCode(err) {
+				if putils.CheckCode(err) {
 					s.closeChan <- struct{}{}
 					return
 				}
@@ -75,7 +76,7 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 
 func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer logger.Sugar().Warn("sphinx sign stream recv exit")
+	defer func() { logger.Sugar().Warn("sphinx sign stream recv exit") }()
 
 	for {
 		ssResponse, err := s.signServer.Recv()
@@ -84,7 +85,7 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 				"proxy->sign error: %v",
 				err,
 			)
-			if checkCode(err) {
+			if putils.CheckCode(err) {
 				s.closeChan <- struct{}{}
 				return
 			}
@@ -138,7 +139,7 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 
 func (s *mSign) watch(wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer logger.Sugar().Warn("sphinx sign stream watch exit")
+	defer func() { logger.Sugar().Warn("sphinx sign stream watch exit") }()
 
 	<-s.closeChan
 	slk.Lock()

@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"errors"
-	"io"
 	"math/rand"
 	"sync"
 	"time"
@@ -14,8 +13,6 @@ import (
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	scconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
 	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 /*
@@ -102,13 +99,4 @@ func registerCoin(coinInfo *coininfo.CreateCoinInfoRequest) error {
 	// define in plugin
 	_, err = client.CreateCoinInfo(ctx, coinInfo)
 	return err
-}
-
-func checkCode(err error) bool {
-	if err == io.EOF ||
-		status.Code(err) == codes.Unavailable ||
-		status.Code(err) == codes.Canceled {
-		return true
-	}
-	return false
 }
