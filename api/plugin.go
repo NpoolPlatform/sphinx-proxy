@@ -67,7 +67,7 @@ func (lp lmPluginType) append(coinType sphinxplugin.CoinType, pluginInfo string,
 appendCoinType:
 	{
 		lp[coinType] = append(lp[coinType], lmp)
-		logger.Sugar().Infof("plugin %v, CoinType: %v is registered", pluginInfo, coinType)
+		logger.Sugar().Infof("plugin %v %v is registered", pluginInfo, coinType)
 	}
 }
 
@@ -86,17 +86,18 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 		case info := <-p.balance:
 			if err := p.pluginServer.Send(info); err != nil {
 				logger.Sugar().Errorf(
-					"proxy->plugin %v: TransactionID: %v ,CoinType:  %v, error: %v",
+					"proxy->plugin %v %v, TransactionID: %v , error: %v",
 					p.pluginInfo,
-					info.GetTransactionID(),
 					info.GetCoinType(),
+					info.GetTransactionID(),
 					err,
 				)
 				ch, ok := balanceDoneChannel.Load(info.GetTransactionID())
 				if !ok {
 					logger.Sugar().Warnf(
-						"%v: TransactionID: %v ,Addr: %v get balance maybe timeout",
+						"%v %v: TransactionID: %v, Addr: %v get balance maybe timeout",
 						p.pluginInfo,
+						info.GetCoinType(),
 						info.GetTransactionID(),
 						info.GetAddress(),
 					)
@@ -104,7 +105,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 
 				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
 					success: false,
-					message: fmt.Sprintf("proxy->plugin %v: ,send get wallet balance error: %v", p.pluginInfo, err),
+					message: "send get wallet balance error",
 				}
 
 				if putils.CheckCode(err) {
@@ -113,8 +114,9 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 				}
 			}
 			logger.Sugar().Infof(
-				"proxy->plugin %v: TransactionID: %v ,Addr: %v ok",
+				"proxy->plugin %v %v: TransactionID: %v ,Addr: %v ok",
 				p.pluginInfo,
+				info.GetCoinType(),
 				info.GetTransactionID(),
 				info.GetAddress(),
 			)
@@ -174,7 +176,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			case sphinxproxy.TransactionType_Balance:
 				ch, ok := balanceDoneChannel.Load(psResponse.GetTransactionID())
 				if !ok {
-					logger.Sugar().Warnf("TransactionID: %v get balance maybe timeout at %v", psResponse.GetTransactionID(), p.pluginInfo)
+					logger.Sugar().Warnf("%v %v :TransactionID: %v get balance maybe timeout", p.pluginInfo, psResponse.GetCoinType(), psResponse.GetTransactionID())
 					continue
 				}
 
@@ -196,7 +198,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					success: true,
 					payload: psResponse.GetPayload(),
 				}
-				logger.Sugar().Infof("%v: TransactionID: %v get balance ok", p.pluginInfo, psResponse.GetTransactionID())
+				logger.Sugar().Infof("%v %v : TransactionID: %v get balance ok", p.pluginInfo, psResponse.GetCoinType(), psResponse.GetTransactionID())
 			}
 		}
 	}
@@ -204,11 +206,11 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 
 func (p *mPlugin) watch(wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer logger.Sugar().Warn("sphinx plugin stream watch exit")
+	defer logger.Sugar().Warnf("sphinx plugin %v stream watch exit", p.pluginInfo)
 
 	select {
 	case <-p.exitChan:
-		logger.Sugar().Info("plugin watch chan exit")
+		logger.Sugar().Info("plugin %v watch chan exit", p.pluginInfo)
 		return
 	case <-p.closeChan:
 		logger.Sugar().Info("plugin watch chan close")
@@ -216,7 +218,7 @@ func (p *mPlugin) watch(wg *sync.WaitGroup) {
 		nlmPlugin := make([]*mPlugin, 0, len(lmPlugin[p.coinType]))
 		for _, plugin := range lmPlugin[p.coinType] {
 			if plugin.pluginServer == p.pluginServer {
-				logger.Sugar().Info("some plugin client closed, proxy remove it")
+				logger.Sugar().Info("some plugin %v client closed, proxy remove it", p.pluginInfo)
 				continue
 			}
 			nlmPlugin = append(nlmPlugin, plugin)

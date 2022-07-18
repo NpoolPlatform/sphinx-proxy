@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"sync"
 
 	putils "github.com/NpoolPlatform/sphinx-plugin/pkg/rpc"
@@ -67,7 +66,7 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 				if ch, ok := walletDoneChannel.Load(info.GetTransactionID()); ok {
 					ch.(chan walletDoneInfo) <- walletDoneInfo{
 						success: false,
-						message: fmt.Sprintf("proxy->sign send create wallet error: %v", err),
+						message: "create wallet error",
 					}
 				}
 				if putils.CheckCode(err) {
