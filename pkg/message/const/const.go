@@ -1,7 +1,6 @@
 package constant
 
 import (
-	"strings"
 	"time"
 )
 
@@ -19,8 +18,3 @@ const (
 	// TaskTimeout ..
 	TaskTimeout = time.Second * 10
 )
-
-// FormatServiceName ..
-func FormatServiceName() string {
-	return strings.Title(ServiceName) //nolint
-}
