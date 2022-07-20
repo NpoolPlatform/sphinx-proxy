@@ -3,6 +3,7 @@
 package transaction
 
 import (
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/google/uuid"
 )
 
@@ -13,6 +14,8 @@ const (
 	FieldID = "id"
 	// FieldCoinType holds the string denoting the coin_type field in the database.
 	FieldCoinType = "coin_type"
+	// FieldUtxo holds the string denoting the utxo field in the database.
+	FieldUtxo = "utxo"
 	// FieldTransactionID holds the string denoting the transaction_id field in the database.
 	FieldTransactionID = "transaction_id"
 	// FieldCid holds the string denoting the cid field in the database.
@@ -43,6 +46,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCoinType,
+	FieldUtxo,
 	FieldTransactionID,
 	FieldCid,
 	FieldExitCode,
@@ -69,6 +73,8 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultCoinType holds the default value on creation for the "coin_type" field.
 	DefaultCoinType int32
+	// DefaultUtxo holds the default value on creation for the "utxo" field.
+	DefaultUtxo []*sphinxplugin.Unspent
 	// TransactionIDValidator is a validator for the "transaction_id" field. It is called by the builders before save.
 	TransactionIDValidator func(string) error
 	// DefaultCid holds the default value on creation for the "cid" field.

@@ -3,10 +3,12 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	"github.com/google/uuid"
 )
@@ -18,6 +20,8 @@ type Transaction struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// CoinType holds the value of the "coin_type" field.
 	CoinType int32 `json:"coin_type,omitempty"`
+	// only for btc
+	Utxo []*sphinxplugin.Unspent `json:"utxo,omitempty"`
 	// TransactionID holds the value of the "transaction_id" field.
 	TransactionID string `json:"transaction_id,omitempty"`
 	// Cid holds the value of the "cid" field.
@@ -47,7 +51,7 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case transaction.FieldPayload:
+		case transaction.FieldUtxo, transaction.FieldPayload:
 			values[i] = new([]byte)
 		case transaction.FieldCoinType, transaction.FieldExitCode, transaction.FieldAmount, transaction.FieldState, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
@@ -81,6 +85,14 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 				return fmt.Errorf("unexpected type %T for field coin_type", values[i])
 			} else if value.Valid {
 				t.CoinType = int32(value.Int64)
+			}
+		case transaction.FieldUtxo:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field utxo", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &t.Utxo); err != nil {
+					return fmt.Errorf("unmarshal field utxo: %w", err)
+				}
 			}
 		case transaction.FieldTransactionID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -178,6 +190,9 @@ func (t *Transaction) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("coin_type=")
 	builder.WriteString(fmt.Sprintf("%v", t.CoinType))
+	builder.WriteString(", ")
+	builder.WriteString("utxo=")
+	builder.WriteString(fmt.Sprintf("%v", t.Utxo))
 	builder.WriteString(", ")
 	builder.WriteString("transaction_id=")
 	builder.WriteString(t.TransactionID)

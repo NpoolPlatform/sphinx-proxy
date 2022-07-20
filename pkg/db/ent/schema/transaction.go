@@ -6,6 +6,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
+	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/google/uuid"
 )
 
@@ -22,6 +24,25 @@ func (Transaction) Fields() []ent.Field {
 			Unique(),
 		field.Int32("coin_type").
 			Default(0),
+		field.Uint64("nonce").
+			Default(0).
+			Comment("--will remove"),
+		field.JSON("utxo", []*sphinxplugin.Unspent{}).
+			Optional().
+			Default([]*sphinxplugin.Unspent{}).
+			Comment("only for btc--will remove"),
+		field.JSON("pre", &eth.PreSignInfo{}).
+			Default(&eth.PreSignInfo{}).
+			Comment("--will remove"),
+		field.Int8("transaction_type").
+			Default(0).
+			Comment("--will remove"),
+		field.String("recent_bhash").
+			Default("").
+			Comment("--will remove"),
+		field.Bytes("tx_data").
+			Default([]byte{}).
+			Comment("--will remove"),
 		field.String("transaction_id").
 			Unique().
 			NotEmpty(),

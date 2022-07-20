@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	"github.com/google/uuid"
 )
@@ -34,6 +35,12 @@ func (tc *TransactionCreate) SetNillableCoinType(i *int32) *TransactionCreate {
 	if i != nil {
 		tc.SetCoinType(*i)
 	}
+	return tc
+}
+
+// SetUtxo sets the "utxo" field.
+func (tc *TransactionCreate) SetUtxo(s []*sphinxplugin.Unspent) *TransactionCreate {
+	tc.mutation.SetUtxo(s)
 	return tc
 }
 
@@ -270,6 +277,10 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultCoinType
 		tc.mutation.SetCoinType(v)
 	}
+	if _, ok := tc.mutation.Utxo(); !ok {
+		v := transaction.DefaultUtxo
+		tc.mutation.SetUtxo(v)
+	}
 	if _, ok := tc.mutation.Cid(); !ok {
 		v := transaction.DefaultCid
 		tc.mutation.SetCid(v)
@@ -320,6 +331,9 @@ func (tc *TransactionCreate) defaults() {
 func (tc *TransactionCreate) check() error {
 	if _, ok := tc.mutation.CoinType(); !ok {
 		return &ValidationError{Name: "coin_type", err: errors.New(`ent: missing required field "Transaction.coin_type"`)}
+	}
+	if _, ok := tc.mutation.Utxo(); !ok {
+		return &ValidationError{Name: "utxo", err: errors.New(`ent: missing required field "Transaction.utxo"`)}
 	}
 	if _, ok := tc.mutation.TransactionID(); !ok {
 		return &ValidationError{Name: "transaction_id", err: errors.New(`ent: missing required field "Transaction.transaction_id"`)}
@@ -418,6 +432,14 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Column: transaction.FieldCoinType,
 		})
 		_node.CoinType = value
+	}
+	if value, ok := tc.mutation.Utxo(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: transaction.FieldUtxo,
+		})
+		_node.Utxo = value
 	}
 	if value, ok := tc.mutation.TransactionID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -576,6 +598,18 @@ func (u *TransactionUpsert) UpdateCoinType() *TransactionUpsert {
 // AddCoinType adds v to the "coin_type" field.
 func (u *TransactionUpsert) AddCoinType(v int32) *TransactionUpsert {
 	u.Add(transaction.FieldCoinType, v)
+	return u
+}
+
+// SetUtxo sets the "utxo" field.
+func (u *TransactionUpsert) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUpsert {
+	u.Set(transaction.FieldUtxo, v)
+	return u
+}
+
+// UpdateUtxo sets the "utxo" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateUtxo() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldUtxo)
 	return u
 }
 
@@ -815,6 +849,20 @@ func (u *TransactionUpsertOne) AddCoinType(v int32) *TransactionUpsertOne {
 func (u *TransactionUpsertOne) UpdateCoinType() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateCoinType()
+	})
+}
+
+// SetUtxo sets the "utxo" field.
+func (u *TransactionUpsertOne) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetUtxo(v)
+	})
+}
+
+// UpdateUtxo sets the "utxo" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateUtxo() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateUtxo()
 	})
 }
 
@@ -1248,6 +1296,20 @@ func (u *TransactionUpsertBulk) AddCoinType(v int32) *TransactionUpsertBulk {
 func (u *TransactionUpsertBulk) UpdateCoinType() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateCoinType()
+	})
+}
+
+// SetUtxo sets the "utxo" field.
+func (u *TransactionUpsertBulk) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetUtxo(v)
+	})
+}
+
+// UpdateUtxo sets the "utxo" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateUtxo() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateUtxo()
 	})
 }
 

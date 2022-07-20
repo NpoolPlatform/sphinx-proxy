@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/predicate"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 )
@@ -45,6 +46,12 @@ func (tu *TransactionUpdate) SetNillableCoinType(i *int32) *TransactionUpdate {
 // AddCoinType adds i to the "coin_type" field.
 func (tu *TransactionUpdate) AddCoinType(i int32) *TransactionUpdate {
 	tu.mutation.AddCoinType(i)
+	return tu
+}
+
+// SetUtxo sets the "utxo" field.
+func (tu *TransactionUpdate) SetUtxo(s []*sphinxplugin.Unspent) *TransactionUpdate {
+	tu.mutation.SetUtxo(s)
 	return tu
 }
 
@@ -351,6 +358,13 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: transaction.FieldCoinType,
 		})
 	}
+	if value, ok := tu.mutation.Utxo(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: transaction.FieldUtxo,
+		})
+	}
 	if value, ok := tu.mutation.TransactionID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -507,6 +521,12 @@ func (tuo *TransactionUpdateOne) SetNillableCoinType(i *int32) *TransactionUpdat
 // AddCoinType adds i to the "coin_type" field.
 func (tuo *TransactionUpdateOne) AddCoinType(i int32) *TransactionUpdateOne {
 	tuo.mutation.AddCoinType(i)
+	return tuo
+}
+
+// SetUtxo sets the "utxo" field.
+func (tuo *TransactionUpdateOne) SetUtxo(s []*sphinxplugin.Unspent) *TransactionUpdateOne {
+	tuo.mutation.SetUtxo(s)
 	return tuo
 }
 
@@ -841,6 +861,13 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Type:   field.TypeInt32,
 			Value:  value,
 			Column: transaction.FieldCoinType,
+		})
+	}
+	if value, ok := tuo.mutation.Utxo(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: transaction.FieldUtxo,
 		})
 	}
 	if value, ok := tuo.mutation.TransactionID(); ok {

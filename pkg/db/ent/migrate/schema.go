@@ -12,6 +12,7 @@ var (
 	TransactionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "coin_type", Type: field.TypeInt32, Default: 0},
+		{Name: "utxo", Type: field.TypeJSON},
 		{Name: "transaction_id", Type: field.TypeString, Unique: true},
 		{Name: "cid", Type: field.TypeString, Default: ""},
 		{Name: "exit_code", Type: field.TypeInt64, Default: -1},
@@ -33,7 +34,7 @@ var (
 			{
 				Name:    "transaction_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[10]},
+				Columns: []*schema.Column{TransactionsColumns[11]},
 			},
 		},
 	}
