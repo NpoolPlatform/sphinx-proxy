@@ -14,8 +14,18 @@ const (
 	FieldID = "id"
 	// FieldCoinType holds the string denoting the coin_type field in the database.
 	FieldCoinType = "coin_type"
+	// FieldNonce holds the string denoting the nonce field in the database.
+	FieldNonce = "nonce"
 	// FieldUtxo holds the string denoting the utxo field in the database.
 	FieldUtxo = "utxo"
+	// FieldPre holds the string denoting the pre field in the database.
+	FieldPre = "pre"
+	// FieldTransactionType holds the string denoting the transaction_type field in the database.
+	FieldTransactionType = "transaction_type"
+	// FieldRecentBhash holds the string denoting the recent_bhash field in the database.
+	FieldRecentBhash = "recent_bhash"
+	// FieldTxData holds the string denoting the tx_data field in the database.
+	FieldTxData = "tx_data"
 	// FieldTransactionID holds the string denoting the transaction_id field in the database.
 	FieldTransactionID = "transaction_id"
 	// FieldCid holds the string denoting the cid field in the database.
@@ -46,7 +56,12 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCoinType,
+	FieldNonce,
 	FieldUtxo,
+	FieldPre,
+	FieldTransactionType,
+	FieldRecentBhash,
+	FieldTxData,
 	FieldTransactionID,
 	FieldCid,
 	FieldExitCode,
@@ -73,26 +88,28 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultCoinType holds the default value on creation for the "coin_type" field.
 	DefaultCoinType int32
+	// DefaultNonce holds the default value on creation for the "nonce" field.
+	DefaultNonce uint64
 	// DefaultUtxo holds the default value on creation for the "utxo" field.
 	DefaultUtxo []*sphinxplugin.Unspent
-	// TransactionIDValidator is a validator for the "transaction_id" field. It is called by the builders before save.
-	TransactionIDValidator func(string) error
+	// DefaultPre holds the default value on creation for the "pre" field.
+	DefaultPre *sphinxplugin.Unspent
+	// DefaultTransactionType holds the default value on creation for the "transaction_type" field.
+	DefaultTransactionType int8
+	// DefaultRecentBhash holds the default value on creation for the "recent_bhash" field.
+	DefaultRecentBhash string
+	// DefaultTxData holds the default value on creation for the "tx_data" field.
+	DefaultTxData []byte
 	// DefaultCid holds the default value on creation for the "cid" field.
 	DefaultCid string
 	// DefaultExitCode holds the default value on creation for the "exit_code" field.
 	DefaultExitCode int64
 	// DefaultFrom holds the default value on creation for the "from" field.
 	DefaultFrom string
-	// FromValidator is a validator for the "from" field. It is called by the builders before save.
-	FromValidator func(string) error
 	// DefaultTo holds the default value on creation for the "to" field.
 	DefaultTo string
-	// ToValidator is a validator for the "to" field. It is called by the builders before save.
-	ToValidator func(string) error
 	// DefaultAmount holds the default value on creation for the "amount" field.
 	DefaultAmount uint64
-	// AmountValidator is a validator for the "amount" field. It is called by the builders before save.
-	AmountValidator func(uint64) error
 	// DefaultPayload holds the default value on creation for the "payload" field.
 	DefaultPayload []byte
 	// DefaultState holds the default value on creation for the "state" field.

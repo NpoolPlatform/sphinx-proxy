@@ -86,6 +86,34 @@ func CoinType(v int32) predicate.Transaction {
 	})
 }
 
+// Nonce applies equality check predicate on the "nonce" field. It's identical to NonceEQ.
+func Nonce(v uint64) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNonce), v))
+	})
+}
+
+// TransactionType applies equality check predicate on the "transaction_type" field. It's identical to TransactionTypeEQ.
+func TransactionType(v int8) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTransactionType), v))
+	})
+}
+
+// RecentBhash applies equality check predicate on the "recent_bhash" field. It's identical to RecentBhashEQ.
+func RecentBhash(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRecentBhash), v))
+	})
+}
+
+// TxData applies equality check predicate on the "tx_data" field. It's identical to TxDataEQ.
+func TxData(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTxData), v))
+	})
+}
+
 // TransactionID applies equality check predicate on the "transaction_id" field. It's identical to TransactionIDEQ.
 func TransactionID(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -239,6 +267,443 @@ func CoinTypeLTE(v int32) predicate.Transaction {
 	})
 }
 
+// CoinTypeIsNil applies the IsNil predicate on the "coin_type" field.
+func CoinTypeIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldCoinType)))
+	})
+}
+
+// CoinTypeNotNil applies the NotNil predicate on the "coin_type" field.
+func CoinTypeNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldCoinType)))
+	})
+}
+
+// NonceEQ applies the EQ predicate on the "nonce" field.
+func NonceEQ(v uint64) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNonce), v))
+	})
+}
+
+// NonceNEQ applies the NEQ predicate on the "nonce" field.
+func NonceNEQ(v uint64) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldNonce), v))
+	})
+}
+
+// NonceIn applies the In predicate on the "nonce" field.
+func NonceIn(vs ...uint64) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldNonce), v...))
+	})
+}
+
+// NonceNotIn applies the NotIn predicate on the "nonce" field.
+func NonceNotIn(vs ...uint64) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldNonce), v...))
+	})
+}
+
+// NonceGT applies the GT predicate on the "nonce" field.
+func NonceGT(v uint64) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldNonce), v))
+	})
+}
+
+// NonceGTE applies the GTE predicate on the "nonce" field.
+func NonceGTE(v uint64) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldNonce), v))
+	})
+}
+
+// NonceLT applies the LT predicate on the "nonce" field.
+func NonceLT(v uint64) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldNonce), v))
+	})
+}
+
+// NonceLTE applies the LTE predicate on the "nonce" field.
+func NonceLTE(v uint64) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldNonce), v))
+	})
+}
+
+// NonceIsNil applies the IsNil predicate on the "nonce" field.
+func NonceIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldNonce)))
+	})
+}
+
+// NonceNotNil applies the NotNil predicate on the "nonce" field.
+func NonceNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldNonce)))
+	})
+}
+
+// UtxoIsNil applies the IsNil predicate on the "utxo" field.
+func UtxoIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldUtxo)))
+	})
+}
+
+// UtxoNotNil applies the NotNil predicate on the "utxo" field.
+func UtxoNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldUtxo)))
+	})
+}
+
+// PreIsNil applies the IsNil predicate on the "pre" field.
+func PreIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldPre)))
+	})
+}
+
+// PreNotNil applies the NotNil predicate on the "pre" field.
+func PreNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldPre)))
+	})
+}
+
+// TransactionTypeEQ applies the EQ predicate on the "transaction_type" field.
+func TransactionTypeEQ(v int8) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTransactionType), v))
+	})
+}
+
+// TransactionTypeNEQ applies the NEQ predicate on the "transaction_type" field.
+func TransactionTypeNEQ(v int8) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTransactionType), v))
+	})
+}
+
+// TransactionTypeIn applies the In predicate on the "transaction_type" field.
+func TransactionTypeIn(vs ...int8) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTransactionType), v...))
+	})
+}
+
+// TransactionTypeNotIn applies the NotIn predicate on the "transaction_type" field.
+func TransactionTypeNotIn(vs ...int8) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTransactionType), v...))
+	})
+}
+
+// TransactionTypeGT applies the GT predicate on the "transaction_type" field.
+func TransactionTypeGT(v int8) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTransactionType), v))
+	})
+}
+
+// TransactionTypeGTE applies the GTE predicate on the "transaction_type" field.
+func TransactionTypeGTE(v int8) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTransactionType), v))
+	})
+}
+
+// TransactionTypeLT applies the LT predicate on the "transaction_type" field.
+func TransactionTypeLT(v int8) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTransactionType), v))
+	})
+}
+
+// TransactionTypeLTE applies the LTE predicate on the "transaction_type" field.
+func TransactionTypeLTE(v int8) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTransactionType), v))
+	})
+}
+
+// TransactionTypeIsNil applies the IsNil predicate on the "transaction_type" field.
+func TransactionTypeIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldTransactionType)))
+	})
+}
+
+// TransactionTypeNotNil applies the NotNil predicate on the "transaction_type" field.
+func TransactionTypeNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldTransactionType)))
+	})
+}
+
+// RecentBhashEQ applies the EQ predicate on the "recent_bhash" field.
+func RecentBhashEQ(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashNEQ applies the NEQ predicate on the "recent_bhash" field.
+func RecentBhashNEQ(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashIn applies the In predicate on the "recent_bhash" field.
+func RecentBhashIn(vs ...string) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldRecentBhash), v...))
+	})
+}
+
+// RecentBhashNotIn applies the NotIn predicate on the "recent_bhash" field.
+func RecentBhashNotIn(vs ...string) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldRecentBhash), v...))
+	})
+}
+
+// RecentBhashGT applies the GT predicate on the "recent_bhash" field.
+func RecentBhashGT(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashGTE applies the GTE predicate on the "recent_bhash" field.
+func RecentBhashGTE(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashLT applies the LT predicate on the "recent_bhash" field.
+func RecentBhashLT(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashLTE applies the LTE predicate on the "recent_bhash" field.
+func RecentBhashLTE(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashContains applies the Contains predicate on the "recent_bhash" field.
+func RecentBhashContains(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashHasPrefix applies the HasPrefix predicate on the "recent_bhash" field.
+func RecentBhashHasPrefix(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashHasSuffix applies the HasSuffix predicate on the "recent_bhash" field.
+func RecentBhashHasSuffix(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashIsNil applies the IsNil predicate on the "recent_bhash" field.
+func RecentBhashIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldRecentBhash)))
+	})
+}
+
+// RecentBhashNotNil applies the NotNil predicate on the "recent_bhash" field.
+func RecentBhashNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldRecentBhash)))
+	})
+}
+
+// RecentBhashEqualFold applies the EqualFold predicate on the "recent_bhash" field.
+func RecentBhashEqualFold(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldRecentBhash), v))
+	})
+}
+
+// RecentBhashContainsFold applies the ContainsFold predicate on the "recent_bhash" field.
+func RecentBhashContainsFold(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldRecentBhash), v))
+	})
+}
+
+// TxDataEQ applies the EQ predicate on the "tx_data" field.
+func TxDataEQ(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTxData), v))
+	})
+}
+
+// TxDataNEQ applies the NEQ predicate on the "tx_data" field.
+func TxDataNEQ(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTxData), v))
+	})
+}
+
+// TxDataIn applies the In predicate on the "tx_data" field.
+func TxDataIn(vs ...[]byte) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTxData), v...))
+	})
+}
+
+// TxDataNotIn applies the NotIn predicate on the "tx_data" field.
+func TxDataNotIn(vs ...[]byte) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTxData), v...))
+	})
+}
+
+// TxDataGT applies the GT predicate on the "tx_data" field.
+func TxDataGT(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTxData), v))
+	})
+}
+
+// TxDataGTE applies the GTE predicate on the "tx_data" field.
+func TxDataGTE(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTxData), v))
+	})
+}
+
+// TxDataLT applies the LT predicate on the "tx_data" field.
+func TxDataLT(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTxData), v))
+	})
+}
+
+// TxDataLTE applies the LTE predicate on the "tx_data" field.
+func TxDataLTE(v []byte) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTxData), v))
+	})
+}
+
+// TxDataIsNil applies the IsNil predicate on the "tx_data" field.
+func TxDataIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldTxData)))
+	})
+}
+
+// TxDataNotNil applies the NotNil predicate on the "tx_data" field.
+func TxDataNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldTxData)))
+	})
+}
+
 // TransactionIDEQ applies the EQ predicate on the "transaction_id" field.
 func TransactionIDEQ(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -333,6 +798,20 @@ func TransactionIDHasPrefix(v string) predicate.Transaction {
 func TransactionIDHasSuffix(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.HasSuffix(s.C(FieldTransactionID), v))
+	})
+}
+
+// TransactionIDIsNil applies the IsNil predicate on the "transaction_id" field.
+func TransactionIDIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldTransactionID)))
+	})
+}
+
+// TransactionIDNotNil applies the NotNil predicate on the "transaction_id" field.
+func TransactionIDNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldTransactionID)))
 	})
 }
 
@@ -447,6 +926,20 @@ func CidHasSuffix(v string) predicate.Transaction {
 	})
 }
 
+// CidIsNil applies the IsNil predicate on the "cid" field.
+func CidIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldCid)))
+	})
+}
+
+// CidNotNil applies the NotNil predicate on the "cid" field.
+func CidNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldCid)))
+	})
+}
+
 // CidEqualFold applies the EqualFold predicate on the "cid" field.
 func CidEqualFold(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -534,6 +1027,20 @@ func ExitCodeLT(v int64) predicate.Transaction {
 func ExitCodeLTE(v int64) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldExitCode), v))
+	})
+}
+
+// ExitCodeIsNil applies the IsNil predicate on the "exit_code" field.
+func ExitCodeIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldExitCode)))
+	})
+}
+
+// ExitCodeNotNil applies the NotNil predicate on the "exit_code" field.
+func ExitCodeNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldExitCode)))
 	})
 }
 
@@ -631,6 +1138,20 @@ func FromHasPrefix(v string) predicate.Transaction {
 func FromHasSuffix(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.HasSuffix(s.C(FieldFrom), v))
+	})
+}
+
+// FromIsNil applies the IsNil predicate on the "from" field.
+func FromIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldFrom)))
+	})
+}
+
+// FromNotNil applies the NotNil predicate on the "from" field.
+func FromNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldFrom)))
 	})
 }
 
@@ -745,6 +1266,20 @@ func ToHasSuffix(v string) predicate.Transaction {
 	})
 }
 
+// ToIsNil applies the IsNil predicate on the "to" field.
+func ToIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldTo)))
+	})
+}
+
+// ToNotNil applies the NotNil predicate on the "to" field.
+func ToNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldTo)))
+	})
+}
+
 // ToEqualFold applies the EqualFold predicate on the "to" field.
 func ToEqualFold(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -835,6 +1370,20 @@ func AmountLTE(v uint64) predicate.Transaction {
 	})
 }
 
+// AmountIsNil applies the IsNil predicate on the "amount" field.
+func AmountIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldAmount)))
+	})
+}
+
+// AmountNotNil applies the NotNil predicate on the "amount" field.
+func AmountNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldAmount)))
+	})
+}
+
 // PayloadEQ applies the EQ predicate on the "payload" field.
 func PayloadEQ(v []byte) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -908,6 +1457,20 @@ func PayloadLT(v []byte) predicate.Transaction {
 func PayloadLTE(v []byte) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldPayload), v))
+	})
+}
+
+// PayloadIsNil applies the IsNil predicate on the "payload" field.
+func PayloadIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldPayload)))
+	})
+}
+
+// PayloadNotNil applies the NotNil predicate on the "payload" field.
+func PayloadNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldPayload)))
 	})
 }
 
@@ -987,6 +1550,20 @@ func StateLTE(v uint8) predicate.Transaction {
 	})
 }
 
+// StateIsNil applies the IsNil predicate on the "state" field.
+func StateIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldState)))
+	})
+}
+
+// StateNotNil applies the NotNil predicate on the "state" field.
+func StateNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldState)))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v uint32) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -1060,6 +1637,20 @@ func CreatedAtLT(v uint32) predicate.Transaction {
 func CreatedAtLTE(v uint32) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtIsNil applies the IsNil predicate on the "created_at" field.
+func CreatedAtIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldCreatedAt)))
+	})
+}
+
+// CreatedAtNotNil applies the NotNil predicate on the "created_at" field.
+func CreatedAtNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldCreatedAt)))
 	})
 }
 
@@ -1139,6 +1730,20 @@ func UpdatedAtLTE(v uint32) predicate.Transaction {
 	})
 }
 
+// UpdatedAtIsNil applies the IsNil predicate on the "updated_at" field.
+func UpdatedAtIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldUpdatedAt)))
+	})
+}
+
+// UpdatedAtNotNil applies the NotNil predicate on the "updated_at" field.
+func UpdatedAtNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldUpdatedAt)))
+	})
+}
+
 // DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
 func DeletedAtEQ(v uint32) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -1212,6 +1817,20 @@ func DeletedAtLT(v uint32) predicate.Transaction {
 func DeletedAtLTE(v uint32) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldDeletedAt), v))
+	})
+}
+
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldDeletedAt)))
+	})
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldDeletedAt)))
 	})
 }
 

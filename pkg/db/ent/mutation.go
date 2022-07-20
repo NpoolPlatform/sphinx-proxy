@@ -31,33 +31,40 @@ const (
 // TransactionMutation represents an operation that mutates the Transaction nodes in the graph.
 type TransactionMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uuid.UUID
-	coin_type      *int32
-	addcoin_type   *int32
-	utxo           *[]*sphinxplugin.Unspent
-	transaction_id *string
-	cid            *string
-	exit_code      *int64
-	addexit_code   *int64
-	from           *string
-	to             *string
-	amount         *uint64
-	addamount      *int64
-	payload        *[]byte
-	state          *uint8
-	addstate       *int8
-	created_at     *uint32
-	addcreated_at  *int32
-	updated_at     *uint32
-	addupdated_at  *int32
-	deleted_at     *uint32
-	adddeleted_at  *int32
-	clearedFields  map[string]struct{}
-	done           bool
-	oldValue       func(context.Context) (*Transaction, error)
-	predicates     []predicate.Transaction
+	op                  Op
+	typ                 string
+	id                  *uuid.UUID
+	coin_type           *int32
+	addcoin_type        *int32
+	nonce               *uint64
+	addnonce            *int64
+	utxo                *[]*sphinxplugin.Unspent
+	pre                 **sphinxplugin.Unspent
+	transaction_type    *int8
+	addtransaction_type *int8
+	recent_bhash        *string
+	tx_data             *[]byte
+	transaction_id      *string
+	cid                 *string
+	exit_code           *int64
+	addexit_code        *int64
+	from                *string
+	to                  *string
+	amount              *uint64
+	addamount           *int64
+	payload             *[]byte
+	state               *uint8
+	addstate            *int8
+	created_at          *uint32
+	addcreated_at       *int32
+	updated_at          *uint32
+	addupdated_at       *int32
+	deleted_at          *uint32
+	adddeleted_at       *int32
+	clearedFields       map[string]struct{}
+	done                bool
+	oldValue            func(context.Context) (*Transaction, error)
+	predicates          []predicate.Transaction
 }
 
 var _ ent.Mutation = (*TransactionMutation)(nil)
@@ -214,10 +221,94 @@ func (m *TransactionMutation) AddedCoinType() (r int32, exists bool) {
 	return *v, true
 }
 
+// ClearCoinType clears the value of the "coin_type" field.
+func (m *TransactionMutation) ClearCoinType() {
+	m.coin_type = nil
+	m.addcoin_type = nil
+	m.clearedFields[transaction.FieldCoinType] = struct{}{}
+}
+
+// CoinTypeCleared returns if the "coin_type" field was cleared in this mutation.
+func (m *TransactionMutation) CoinTypeCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldCoinType]
+	return ok
+}
+
 // ResetCoinType resets all changes to the "coin_type" field.
 func (m *TransactionMutation) ResetCoinType() {
 	m.coin_type = nil
 	m.addcoin_type = nil
+	delete(m.clearedFields, transaction.FieldCoinType)
+}
+
+// SetNonce sets the "nonce" field.
+func (m *TransactionMutation) SetNonce(u uint64) {
+	m.nonce = &u
+	m.addnonce = nil
+}
+
+// Nonce returns the value of the "nonce" field in the mutation.
+func (m *TransactionMutation) Nonce() (r uint64, exists bool) {
+	v := m.nonce
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNonce returns the old "nonce" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldNonce(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNonce is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNonce requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNonce: %w", err)
+	}
+	return oldValue.Nonce, nil
+}
+
+// AddNonce adds u to the "nonce" field.
+func (m *TransactionMutation) AddNonce(u int64) {
+	if m.addnonce != nil {
+		*m.addnonce += u
+	} else {
+		m.addnonce = &u
+	}
+}
+
+// AddedNonce returns the value that was added to the "nonce" field in this mutation.
+func (m *TransactionMutation) AddedNonce() (r int64, exists bool) {
+	v := m.addnonce
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearNonce clears the value of the "nonce" field.
+func (m *TransactionMutation) ClearNonce() {
+	m.nonce = nil
+	m.addnonce = nil
+	m.clearedFields[transaction.FieldNonce] = struct{}{}
+}
+
+// NonceCleared returns if the "nonce" field was cleared in this mutation.
+func (m *TransactionMutation) NonceCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldNonce]
+	return ok
+}
+
+// ResetNonce resets all changes to the "nonce" field.
+func (m *TransactionMutation) ResetNonce() {
+	m.nonce = nil
+	m.addnonce = nil
+	delete(m.clearedFields, transaction.FieldNonce)
 }
 
 // SetUtxo sets the "utxo" field.
@@ -251,9 +342,239 @@ func (m *TransactionMutation) OldUtxo(ctx context.Context) (v []*sphinxplugin.Un
 	return oldValue.Utxo, nil
 }
 
+// ClearUtxo clears the value of the "utxo" field.
+func (m *TransactionMutation) ClearUtxo() {
+	m.utxo = nil
+	m.clearedFields[transaction.FieldUtxo] = struct{}{}
+}
+
+// UtxoCleared returns if the "utxo" field was cleared in this mutation.
+func (m *TransactionMutation) UtxoCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldUtxo]
+	return ok
+}
+
 // ResetUtxo resets all changes to the "utxo" field.
 func (m *TransactionMutation) ResetUtxo() {
 	m.utxo = nil
+	delete(m.clearedFields, transaction.FieldUtxo)
+}
+
+// SetPre sets the "pre" field.
+func (m *TransactionMutation) SetPre(s *sphinxplugin.Unspent) {
+	m.pre = &s
+}
+
+// Pre returns the value of the "pre" field in the mutation.
+func (m *TransactionMutation) Pre() (r *sphinxplugin.Unspent, exists bool) {
+	v := m.pre
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPre returns the old "pre" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldPre(ctx context.Context) (v *sphinxplugin.Unspent, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPre is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPre requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPre: %w", err)
+	}
+	return oldValue.Pre, nil
+}
+
+// ClearPre clears the value of the "pre" field.
+func (m *TransactionMutation) ClearPre() {
+	m.pre = nil
+	m.clearedFields[transaction.FieldPre] = struct{}{}
+}
+
+// PreCleared returns if the "pre" field was cleared in this mutation.
+func (m *TransactionMutation) PreCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldPre]
+	return ok
+}
+
+// ResetPre resets all changes to the "pre" field.
+func (m *TransactionMutation) ResetPre() {
+	m.pre = nil
+	delete(m.clearedFields, transaction.FieldPre)
+}
+
+// SetTransactionType sets the "transaction_type" field.
+func (m *TransactionMutation) SetTransactionType(i int8) {
+	m.transaction_type = &i
+	m.addtransaction_type = nil
+}
+
+// TransactionType returns the value of the "transaction_type" field in the mutation.
+func (m *TransactionMutation) TransactionType() (r int8, exists bool) {
+	v := m.transaction_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTransactionType returns the old "transaction_type" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldTransactionType(ctx context.Context) (v int8, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTransactionType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTransactionType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTransactionType: %w", err)
+	}
+	return oldValue.TransactionType, nil
+}
+
+// AddTransactionType adds i to the "transaction_type" field.
+func (m *TransactionMutation) AddTransactionType(i int8) {
+	if m.addtransaction_type != nil {
+		*m.addtransaction_type += i
+	} else {
+		m.addtransaction_type = &i
+	}
+}
+
+// AddedTransactionType returns the value that was added to the "transaction_type" field in this mutation.
+func (m *TransactionMutation) AddedTransactionType() (r int8, exists bool) {
+	v := m.addtransaction_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearTransactionType clears the value of the "transaction_type" field.
+func (m *TransactionMutation) ClearTransactionType() {
+	m.transaction_type = nil
+	m.addtransaction_type = nil
+	m.clearedFields[transaction.FieldTransactionType] = struct{}{}
+}
+
+// TransactionTypeCleared returns if the "transaction_type" field was cleared in this mutation.
+func (m *TransactionMutation) TransactionTypeCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldTransactionType]
+	return ok
+}
+
+// ResetTransactionType resets all changes to the "transaction_type" field.
+func (m *TransactionMutation) ResetTransactionType() {
+	m.transaction_type = nil
+	m.addtransaction_type = nil
+	delete(m.clearedFields, transaction.FieldTransactionType)
+}
+
+// SetRecentBhash sets the "recent_bhash" field.
+func (m *TransactionMutation) SetRecentBhash(s string) {
+	m.recent_bhash = &s
+}
+
+// RecentBhash returns the value of the "recent_bhash" field in the mutation.
+func (m *TransactionMutation) RecentBhash() (r string, exists bool) {
+	v := m.recent_bhash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRecentBhash returns the old "recent_bhash" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldRecentBhash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRecentBhash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRecentBhash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRecentBhash: %w", err)
+	}
+	return oldValue.RecentBhash, nil
+}
+
+// ClearRecentBhash clears the value of the "recent_bhash" field.
+func (m *TransactionMutation) ClearRecentBhash() {
+	m.recent_bhash = nil
+	m.clearedFields[transaction.FieldRecentBhash] = struct{}{}
+}
+
+// RecentBhashCleared returns if the "recent_bhash" field was cleared in this mutation.
+func (m *TransactionMutation) RecentBhashCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldRecentBhash]
+	return ok
+}
+
+// ResetRecentBhash resets all changes to the "recent_bhash" field.
+func (m *TransactionMutation) ResetRecentBhash() {
+	m.recent_bhash = nil
+	delete(m.clearedFields, transaction.FieldRecentBhash)
+}
+
+// SetTxData sets the "tx_data" field.
+func (m *TransactionMutation) SetTxData(b []byte) {
+	m.tx_data = &b
+}
+
+// TxData returns the value of the "tx_data" field in the mutation.
+func (m *TransactionMutation) TxData() (r []byte, exists bool) {
+	v := m.tx_data
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTxData returns the old "tx_data" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldTxData(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTxData is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTxData requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTxData: %w", err)
+	}
+	return oldValue.TxData, nil
+}
+
+// ClearTxData clears the value of the "tx_data" field.
+func (m *TransactionMutation) ClearTxData() {
+	m.tx_data = nil
+	m.clearedFields[transaction.FieldTxData] = struct{}{}
+}
+
+// TxDataCleared returns if the "tx_data" field was cleared in this mutation.
+func (m *TransactionMutation) TxDataCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldTxData]
+	return ok
+}
+
+// ResetTxData resets all changes to the "tx_data" field.
+func (m *TransactionMutation) ResetTxData() {
+	m.tx_data = nil
+	delete(m.clearedFields, transaction.FieldTxData)
 }
 
 // SetTransactionID sets the "transaction_id" field.
@@ -287,9 +608,22 @@ func (m *TransactionMutation) OldTransactionID(ctx context.Context) (v string, e
 	return oldValue.TransactionID, nil
 }
 
+// ClearTransactionID clears the value of the "transaction_id" field.
+func (m *TransactionMutation) ClearTransactionID() {
+	m.transaction_id = nil
+	m.clearedFields[transaction.FieldTransactionID] = struct{}{}
+}
+
+// TransactionIDCleared returns if the "transaction_id" field was cleared in this mutation.
+func (m *TransactionMutation) TransactionIDCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldTransactionID]
+	return ok
+}
+
 // ResetTransactionID resets all changes to the "transaction_id" field.
 func (m *TransactionMutation) ResetTransactionID() {
 	m.transaction_id = nil
+	delete(m.clearedFields, transaction.FieldTransactionID)
 }
 
 // SetCid sets the "cid" field.
@@ -323,9 +657,22 @@ func (m *TransactionMutation) OldCid(ctx context.Context) (v string, err error) 
 	return oldValue.Cid, nil
 }
 
+// ClearCid clears the value of the "cid" field.
+func (m *TransactionMutation) ClearCid() {
+	m.cid = nil
+	m.clearedFields[transaction.FieldCid] = struct{}{}
+}
+
+// CidCleared returns if the "cid" field was cleared in this mutation.
+func (m *TransactionMutation) CidCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldCid]
+	return ok
+}
+
 // ResetCid resets all changes to the "cid" field.
 func (m *TransactionMutation) ResetCid() {
 	m.cid = nil
+	delete(m.clearedFields, transaction.FieldCid)
 }
 
 // SetExitCode sets the "exit_code" field.
@@ -378,10 +725,24 @@ func (m *TransactionMutation) AddedExitCode() (r int64, exists bool) {
 	return *v, true
 }
 
+// ClearExitCode clears the value of the "exit_code" field.
+func (m *TransactionMutation) ClearExitCode() {
+	m.exit_code = nil
+	m.addexit_code = nil
+	m.clearedFields[transaction.FieldExitCode] = struct{}{}
+}
+
+// ExitCodeCleared returns if the "exit_code" field was cleared in this mutation.
+func (m *TransactionMutation) ExitCodeCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldExitCode]
+	return ok
+}
+
 // ResetExitCode resets all changes to the "exit_code" field.
 func (m *TransactionMutation) ResetExitCode() {
 	m.exit_code = nil
 	m.addexit_code = nil
+	delete(m.clearedFields, transaction.FieldExitCode)
 }
 
 // SetFrom sets the "from" field.
@@ -415,9 +776,22 @@ func (m *TransactionMutation) OldFrom(ctx context.Context) (v string, err error)
 	return oldValue.From, nil
 }
 
+// ClearFrom clears the value of the "from" field.
+func (m *TransactionMutation) ClearFrom() {
+	m.from = nil
+	m.clearedFields[transaction.FieldFrom] = struct{}{}
+}
+
+// FromCleared returns if the "from" field was cleared in this mutation.
+func (m *TransactionMutation) FromCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldFrom]
+	return ok
+}
+
 // ResetFrom resets all changes to the "from" field.
 func (m *TransactionMutation) ResetFrom() {
 	m.from = nil
+	delete(m.clearedFields, transaction.FieldFrom)
 }
 
 // SetTo sets the "to" field.
@@ -451,9 +825,22 @@ func (m *TransactionMutation) OldTo(ctx context.Context) (v string, err error) {
 	return oldValue.To, nil
 }
 
+// ClearTo clears the value of the "to" field.
+func (m *TransactionMutation) ClearTo() {
+	m.to = nil
+	m.clearedFields[transaction.FieldTo] = struct{}{}
+}
+
+// ToCleared returns if the "to" field was cleared in this mutation.
+func (m *TransactionMutation) ToCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldTo]
+	return ok
+}
+
 // ResetTo resets all changes to the "to" field.
 func (m *TransactionMutation) ResetTo() {
 	m.to = nil
+	delete(m.clearedFields, transaction.FieldTo)
 }
 
 // SetAmount sets the "amount" field.
@@ -506,10 +893,24 @@ func (m *TransactionMutation) AddedAmount() (r int64, exists bool) {
 	return *v, true
 }
 
+// ClearAmount clears the value of the "amount" field.
+func (m *TransactionMutation) ClearAmount() {
+	m.amount = nil
+	m.addamount = nil
+	m.clearedFields[transaction.FieldAmount] = struct{}{}
+}
+
+// AmountCleared returns if the "amount" field was cleared in this mutation.
+func (m *TransactionMutation) AmountCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldAmount]
+	return ok
+}
+
 // ResetAmount resets all changes to the "amount" field.
 func (m *TransactionMutation) ResetAmount() {
 	m.amount = nil
 	m.addamount = nil
+	delete(m.clearedFields, transaction.FieldAmount)
 }
 
 // SetPayload sets the "payload" field.
@@ -543,9 +944,22 @@ func (m *TransactionMutation) OldPayload(ctx context.Context) (v []byte, err err
 	return oldValue.Payload, nil
 }
 
+// ClearPayload clears the value of the "payload" field.
+func (m *TransactionMutation) ClearPayload() {
+	m.payload = nil
+	m.clearedFields[transaction.FieldPayload] = struct{}{}
+}
+
+// PayloadCleared returns if the "payload" field was cleared in this mutation.
+func (m *TransactionMutation) PayloadCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldPayload]
+	return ok
+}
+
 // ResetPayload resets all changes to the "payload" field.
 func (m *TransactionMutation) ResetPayload() {
 	m.payload = nil
+	delete(m.clearedFields, transaction.FieldPayload)
 }
 
 // SetState sets the "state" field.
@@ -598,10 +1012,24 @@ func (m *TransactionMutation) AddedState() (r int8, exists bool) {
 	return *v, true
 }
 
+// ClearState clears the value of the "state" field.
+func (m *TransactionMutation) ClearState() {
+	m.state = nil
+	m.addstate = nil
+	m.clearedFields[transaction.FieldState] = struct{}{}
+}
+
+// StateCleared returns if the "state" field was cleared in this mutation.
+func (m *TransactionMutation) StateCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldState]
+	return ok
+}
+
 // ResetState resets all changes to the "state" field.
 func (m *TransactionMutation) ResetState() {
 	m.state = nil
 	m.addstate = nil
+	delete(m.clearedFields, transaction.FieldState)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -654,10 +1082,24 @@ func (m *TransactionMutation) AddedCreatedAt() (r int32, exists bool) {
 	return *v, true
 }
 
+// ClearCreatedAt clears the value of the "created_at" field.
+func (m *TransactionMutation) ClearCreatedAt() {
+	m.created_at = nil
+	m.addcreated_at = nil
+	m.clearedFields[transaction.FieldCreatedAt] = struct{}{}
+}
+
+// CreatedAtCleared returns if the "created_at" field was cleared in this mutation.
+func (m *TransactionMutation) CreatedAtCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldCreatedAt]
+	return ok
+}
+
 // ResetCreatedAt resets all changes to the "created_at" field.
 func (m *TransactionMutation) ResetCreatedAt() {
 	m.created_at = nil
 	m.addcreated_at = nil
+	delete(m.clearedFields, transaction.FieldCreatedAt)
 }
 
 // SetUpdatedAt sets the "updated_at" field.
@@ -710,10 +1152,24 @@ func (m *TransactionMutation) AddedUpdatedAt() (r int32, exists bool) {
 	return *v, true
 }
 
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (m *TransactionMutation) ClearUpdatedAt() {
+	m.updated_at = nil
+	m.addupdated_at = nil
+	m.clearedFields[transaction.FieldUpdatedAt] = struct{}{}
+}
+
+// UpdatedAtCleared returns if the "updated_at" field was cleared in this mutation.
+func (m *TransactionMutation) UpdatedAtCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldUpdatedAt]
+	return ok
+}
+
 // ResetUpdatedAt resets all changes to the "updated_at" field.
 func (m *TransactionMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 	m.addupdated_at = nil
+	delete(m.clearedFields, transaction.FieldUpdatedAt)
 }
 
 // SetDeletedAt sets the "deleted_at" field.
@@ -766,10 +1222,24 @@ func (m *TransactionMutation) AddedDeletedAt() (r int32, exists bool) {
 	return *v, true
 }
 
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *TransactionMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.adddeleted_at = nil
+	m.clearedFields[transaction.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *TransactionMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldDeletedAt]
+	return ok
+}
+
 // ResetDeletedAt resets all changes to the "deleted_at" field.
 func (m *TransactionMutation) ResetDeletedAt() {
 	m.deleted_at = nil
 	m.adddeleted_at = nil
+	delete(m.clearedFields, transaction.FieldDeletedAt)
 }
 
 // Where appends a list predicates to the TransactionMutation builder.
@@ -791,12 +1261,27 @@ func (m *TransactionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TransactionMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 18)
 	if m.coin_type != nil {
 		fields = append(fields, transaction.FieldCoinType)
 	}
+	if m.nonce != nil {
+		fields = append(fields, transaction.FieldNonce)
+	}
 	if m.utxo != nil {
 		fields = append(fields, transaction.FieldUtxo)
+	}
+	if m.pre != nil {
+		fields = append(fields, transaction.FieldPre)
+	}
+	if m.transaction_type != nil {
+		fields = append(fields, transaction.FieldTransactionType)
+	}
+	if m.recent_bhash != nil {
+		fields = append(fields, transaction.FieldRecentBhash)
+	}
+	if m.tx_data != nil {
+		fields = append(fields, transaction.FieldTxData)
 	}
 	if m.transaction_id != nil {
 		fields = append(fields, transaction.FieldTransactionID)
@@ -841,8 +1326,18 @@ func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case transaction.FieldCoinType:
 		return m.CoinType()
+	case transaction.FieldNonce:
+		return m.Nonce()
 	case transaction.FieldUtxo:
 		return m.Utxo()
+	case transaction.FieldPre:
+		return m.Pre()
+	case transaction.FieldTransactionType:
+		return m.TransactionType()
+	case transaction.FieldRecentBhash:
+		return m.RecentBhash()
+	case transaction.FieldTxData:
+		return m.TxData()
 	case transaction.FieldTransactionID:
 		return m.TransactionID()
 	case transaction.FieldCid:
@@ -876,8 +1371,18 @@ func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Va
 	switch name {
 	case transaction.FieldCoinType:
 		return m.OldCoinType(ctx)
+	case transaction.FieldNonce:
+		return m.OldNonce(ctx)
 	case transaction.FieldUtxo:
 		return m.OldUtxo(ctx)
+	case transaction.FieldPre:
+		return m.OldPre(ctx)
+	case transaction.FieldTransactionType:
+		return m.OldTransactionType(ctx)
+	case transaction.FieldRecentBhash:
+		return m.OldRecentBhash(ctx)
+	case transaction.FieldTxData:
+		return m.OldTxData(ctx)
 	case transaction.FieldTransactionID:
 		return m.OldTransactionID(ctx)
 	case transaction.FieldCid:
@@ -916,12 +1421,47 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCoinType(v)
 		return nil
+	case transaction.FieldNonce:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNonce(v)
+		return nil
 	case transaction.FieldUtxo:
 		v, ok := value.([]*sphinxplugin.Unspent)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUtxo(v)
+		return nil
+	case transaction.FieldPre:
+		v, ok := value.(*sphinxplugin.Unspent)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPre(v)
+		return nil
+	case transaction.FieldTransactionType:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTransactionType(v)
+		return nil
+	case transaction.FieldRecentBhash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRecentBhash(v)
+		return nil
+	case transaction.FieldTxData:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTxData(v)
 		return nil
 	case transaction.FieldTransactionID:
 		v, ok := value.(string)
@@ -1011,6 +1551,12 @@ func (m *TransactionMutation) AddedFields() []string {
 	if m.addcoin_type != nil {
 		fields = append(fields, transaction.FieldCoinType)
 	}
+	if m.addnonce != nil {
+		fields = append(fields, transaction.FieldNonce)
+	}
+	if m.addtransaction_type != nil {
+		fields = append(fields, transaction.FieldTransactionType)
+	}
 	if m.addexit_code != nil {
 		fields = append(fields, transaction.FieldExitCode)
 	}
@@ -1039,6 +1585,10 @@ func (m *TransactionMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case transaction.FieldCoinType:
 		return m.AddedCoinType()
+	case transaction.FieldNonce:
+		return m.AddedNonce()
+	case transaction.FieldTransactionType:
+		return m.AddedTransactionType()
 	case transaction.FieldExitCode:
 		return m.AddedExitCode()
 	case transaction.FieldAmount:
@@ -1066,6 +1616,20 @@ func (m *TransactionMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddCoinType(v)
+		return nil
+	case transaction.FieldNonce:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNonce(v)
+		return nil
+	case transaction.FieldTransactionType:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTransactionType(v)
 		return nil
 	case transaction.FieldExitCode:
 		v, ok := value.(int64)
@@ -1116,7 +1680,62 @@ func (m *TransactionMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *TransactionMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(transaction.FieldCoinType) {
+		fields = append(fields, transaction.FieldCoinType)
+	}
+	if m.FieldCleared(transaction.FieldNonce) {
+		fields = append(fields, transaction.FieldNonce)
+	}
+	if m.FieldCleared(transaction.FieldUtxo) {
+		fields = append(fields, transaction.FieldUtxo)
+	}
+	if m.FieldCleared(transaction.FieldPre) {
+		fields = append(fields, transaction.FieldPre)
+	}
+	if m.FieldCleared(transaction.FieldTransactionType) {
+		fields = append(fields, transaction.FieldTransactionType)
+	}
+	if m.FieldCleared(transaction.FieldRecentBhash) {
+		fields = append(fields, transaction.FieldRecentBhash)
+	}
+	if m.FieldCleared(transaction.FieldTxData) {
+		fields = append(fields, transaction.FieldTxData)
+	}
+	if m.FieldCleared(transaction.FieldTransactionID) {
+		fields = append(fields, transaction.FieldTransactionID)
+	}
+	if m.FieldCleared(transaction.FieldCid) {
+		fields = append(fields, transaction.FieldCid)
+	}
+	if m.FieldCleared(transaction.FieldExitCode) {
+		fields = append(fields, transaction.FieldExitCode)
+	}
+	if m.FieldCleared(transaction.FieldFrom) {
+		fields = append(fields, transaction.FieldFrom)
+	}
+	if m.FieldCleared(transaction.FieldTo) {
+		fields = append(fields, transaction.FieldTo)
+	}
+	if m.FieldCleared(transaction.FieldAmount) {
+		fields = append(fields, transaction.FieldAmount)
+	}
+	if m.FieldCleared(transaction.FieldPayload) {
+		fields = append(fields, transaction.FieldPayload)
+	}
+	if m.FieldCleared(transaction.FieldState) {
+		fields = append(fields, transaction.FieldState)
+	}
+	if m.FieldCleared(transaction.FieldCreatedAt) {
+		fields = append(fields, transaction.FieldCreatedAt)
+	}
+	if m.FieldCleared(transaction.FieldUpdatedAt) {
+		fields = append(fields, transaction.FieldUpdatedAt)
+	}
+	if m.FieldCleared(transaction.FieldDeletedAt) {
+		fields = append(fields, transaction.FieldDeletedAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1129,6 +1748,62 @@ func (m *TransactionMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *TransactionMutation) ClearField(name string) error {
+	switch name {
+	case transaction.FieldCoinType:
+		m.ClearCoinType()
+		return nil
+	case transaction.FieldNonce:
+		m.ClearNonce()
+		return nil
+	case transaction.FieldUtxo:
+		m.ClearUtxo()
+		return nil
+	case transaction.FieldPre:
+		m.ClearPre()
+		return nil
+	case transaction.FieldTransactionType:
+		m.ClearTransactionType()
+		return nil
+	case transaction.FieldRecentBhash:
+		m.ClearRecentBhash()
+		return nil
+	case transaction.FieldTxData:
+		m.ClearTxData()
+		return nil
+	case transaction.FieldTransactionID:
+		m.ClearTransactionID()
+		return nil
+	case transaction.FieldCid:
+		m.ClearCid()
+		return nil
+	case transaction.FieldExitCode:
+		m.ClearExitCode()
+		return nil
+	case transaction.FieldFrom:
+		m.ClearFrom()
+		return nil
+	case transaction.FieldTo:
+		m.ClearTo()
+		return nil
+	case transaction.FieldAmount:
+		m.ClearAmount()
+		return nil
+	case transaction.FieldPayload:
+		m.ClearPayload()
+		return nil
+	case transaction.FieldState:
+		m.ClearState()
+		return nil
+	case transaction.FieldCreatedAt:
+		m.ClearCreatedAt()
+		return nil
+	case transaction.FieldUpdatedAt:
+		m.ClearUpdatedAt()
+		return nil
+	case transaction.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	}
 	return fmt.Errorf("unknown Transaction nullable field %s", name)
 }
 
@@ -1139,8 +1814,23 @@ func (m *TransactionMutation) ResetField(name string) error {
 	case transaction.FieldCoinType:
 		m.ResetCoinType()
 		return nil
+	case transaction.FieldNonce:
+		m.ResetNonce()
+		return nil
 	case transaction.FieldUtxo:
 		m.ResetUtxo()
+		return nil
+	case transaction.FieldPre:
+		m.ResetPre()
+		return nil
+	case transaction.FieldTransactionType:
+		m.ResetTransactionType()
+		return nil
+	case transaction.FieldRecentBhash:
+		m.ResetRecentBhash()
+		return nil
+	case transaction.FieldTxData:
+		m.ResetTxData()
 		return nil
 	case transaction.FieldTransactionID:
 		m.ResetTransactionID()

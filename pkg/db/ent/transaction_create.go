@@ -38,15 +38,77 @@ func (tc *TransactionCreate) SetNillableCoinType(i *int32) *TransactionCreate {
 	return tc
 }
 
+// SetNonce sets the "nonce" field.
+func (tc *TransactionCreate) SetNonce(u uint64) *TransactionCreate {
+	tc.mutation.SetNonce(u)
+	return tc
+}
+
+// SetNillableNonce sets the "nonce" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableNonce(u *uint64) *TransactionCreate {
+	if u != nil {
+		tc.SetNonce(*u)
+	}
+	return tc
+}
+
 // SetUtxo sets the "utxo" field.
 func (tc *TransactionCreate) SetUtxo(s []*sphinxplugin.Unspent) *TransactionCreate {
 	tc.mutation.SetUtxo(s)
 	return tc
 }
 
+// SetPre sets the "pre" field.
+func (tc *TransactionCreate) SetPre(s *sphinxplugin.Unspent) *TransactionCreate {
+	tc.mutation.SetPre(s)
+	return tc
+}
+
+// SetTransactionType sets the "transaction_type" field.
+func (tc *TransactionCreate) SetTransactionType(i int8) *TransactionCreate {
+	tc.mutation.SetTransactionType(i)
+	return tc
+}
+
+// SetNillableTransactionType sets the "transaction_type" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableTransactionType(i *int8) *TransactionCreate {
+	if i != nil {
+		tc.SetTransactionType(*i)
+	}
+	return tc
+}
+
+// SetRecentBhash sets the "recent_bhash" field.
+func (tc *TransactionCreate) SetRecentBhash(s string) *TransactionCreate {
+	tc.mutation.SetRecentBhash(s)
+	return tc
+}
+
+// SetNillableRecentBhash sets the "recent_bhash" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableRecentBhash(s *string) *TransactionCreate {
+	if s != nil {
+		tc.SetRecentBhash(*s)
+	}
+	return tc
+}
+
+// SetTxData sets the "tx_data" field.
+func (tc *TransactionCreate) SetTxData(b []byte) *TransactionCreate {
+	tc.mutation.SetTxData(b)
+	return tc
+}
+
 // SetTransactionID sets the "transaction_id" field.
 func (tc *TransactionCreate) SetTransactionID(s string) *TransactionCreate {
 	tc.mutation.SetTransactionID(s)
+	return tc
+}
+
+// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableTransactionID(s *string) *TransactionCreate {
+	if s != nil {
+		tc.SetTransactionID(*s)
+	}
 	return tc
 }
 
@@ -277,9 +339,29 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultCoinType
 		tc.mutation.SetCoinType(v)
 	}
+	if _, ok := tc.mutation.Nonce(); !ok {
+		v := transaction.DefaultNonce
+		tc.mutation.SetNonce(v)
+	}
 	if _, ok := tc.mutation.Utxo(); !ok {
 		v := transaction.DefaultUtxo
 		tc.mutation.SetUtxo(v)
+	}
+	if _, ok := tc.mutation.Pre(); !ok {
+		v := transaction.DefaultPre
+		tc.mutation.SetPre(v)
+	}
+	if _, ok := tc.mutation.TransactionType(); !ok {
+		v := transaction.DefaultTransactionType
+		tc.mutation.SetTransactionType(v)
+	}
+	if _, ok := tc.mutation.RecentBhash(); !ok {
+		v := transaction.DefaultRecentBhash
+		tc.mutation.SetRecentBhash(v)
+	}
+	if _, ok := tc.mutation.TxData(); !ok {
+		v := transaction.DefaultTxData
+		tc.mutation.SetTxData(v)
 	}
 	if _, ok := tc.mutation.Cid(); !ok {
 		v := transaction.DefaultCid
@@ -329,65 +411,6 @@ func (tc *TransactionCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TransactionCreate) check() error {
-	if _, ok := tc.mutation.CoinType(); !ok {
-		return &ValidationError{Name: "coin_type", err: errors.New(`ent: missing required field "Transaction.coin_type"`)}
-	}
-	if _, ok := tc.mutation.Utxo(); !ok {
-		return &ValidationError{Name: "utxo", err: errors.New(`ent: missing required field "Transaction.utxo"`)}
-	}
-	if _, ok := tc.mutation.TransactionID(); !ok {
-		return &ValidationError{Name: "transaction_id", err: errors.New(`ent: missing required field "Transaction.transaction_id"`)}
-	}
-	if v, ok := tc.mutation.TransactionID(); ok {
-		if err := transaction.TransactionIDValidator(v); err != nil {
-			return &ValidationError{Name: "transaction_id", err: fmt.Errorf(`ent: validator failed for field "Transaction.transaction_id": %w`, err)}
-		}
-	}
-	if _, ok := tc.mutation.Cid(); !ok {
-		return &ValidationError{Name: "cid", err: errors.New(`ent: missing required field "Transaction.cid"`)}
-	}
-	if _, ok := tc.mutation.ExitCode(); !ok {
-		return &ValidationError{Name: "exit_code", err: errors.New(`ent: missing required field "Transaction.exit_code"`)}
-	}
-	if _, ok := tc.mutation.From(); !ok {
-		return &ValidationError{Name: "from", err: errors.New(`ent: missing required field "Transaction.from"`)}
-	}
-	if v, ok := tc.mutation.From(); ok {
-		if err := transaction.FromValidator(v); err != nil {
-			return &ValidationError{Name: "from", err: fmt.Errorf(`ent: validator failed for field "Transaction.from": %w`, err)}
-		}
-	}
-	if _, ok := tc.mutation.To(); !ok {
-		return &ValidationError{Name: "to", err: errors.New(`ent: missing required field "Transaction.to"`)}
-	}
-	if v, ok := tc.mutation.To(); ok {
-		if err := transaction.ToValidator(v); err != nil {
-			return &ValidationError{Name: "to", err: fmt.Errorf(`ent: validator failed for field "Transaction.to": %w`, err)}
-		}
-	}
-	if _, ok := tc.mutation.Amount(); !ok {
-		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "Transaction.amount"`)}
-	}
-	if v, ok := tc.mutation.Amount(); ok {
-		if err := transaction.AmountValidator(v); err != nil {
-			return &ValidationError{Name: "amount", err: fmt.Errorf(`ent: validator failed for field "Transaction.amount": %w`, err)}
-		}
-	}
-	if _, ok := tc.mutation.Payload(); !ok {
-		return &ValidationError{Name: "payload", err: errors.New(`ent: missing required field "Transaction.payload"`)}
-	}
-	if _, ok := tc.mutation.State(); !ok {
-		return &ValidationError{Name: "state", err: errors.New(`ent: missing required field "Transaction.state"`)}
-	}
-	if _, ok := tc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Transaction.created_at"`)}
-	}
-	if _, ok := tc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Transaction.updated_at"`)}
-	}
-	if _, ok := tc.mutation.DeletedAt(); !ok {
-		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "Transaction.deleted_at"`)}
-	}
 	return nil
 }
 
@@ -433,6 +456,14 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		})
 		_node.CoinType = value
 	}
+	if value, ok := tc.mutation.Nonce(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint64,
+			Value:  value,
+			Column: transaction.FieldNonce,
+		})
+		_node.Nonce = value
+	}
 	if value, ok := tc.mutation.Utxo(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
@@ -440,6 +471,38 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Column: transaction.FieldUtxo,
 		})
 		_node.Utxo = value
+	}
+	if value, ok := tc.mutation.Pre(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: transaction.FieldPre,
+		})
+		_node.Pre = value
+	}
+	if value, ok := tc.mutation.TransactionType(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt8,
+			Value:  value,
+			Column: transaction.FieldTransactionType,
+		})
+		_node.TransactionType = value
+	}
+	if value, ok := tc.mutation.RecentBhash(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldRecentBhash,
+		})
+		_node.RecentBhash = value
+	}
+	if value, ok := tc.mutation.TxData(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: transaction.FieldTxData,
+		})
+		_node.TxData = value
 	}
 	if value, ok := tc.mutation.TransactionID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -601,6 +664,36 @@ func (u *TransactionUpsert) AddCoinType(v int32) *TransactionUpsert {
 	return u
 }
 
+// ClearCoinType clears the value of the "coin_type" field.
+func (u *TransactionUpsert) ClearCoinType() *TransactionUpsert {
+	u.SetNull(transaction.FieldCoinType)
+	return u
+}
+
+// SetNonce sets the "nonce" field.
+func (u *TransactionUpsert) SetNonce(v uint64) *TransactionUpsert {
+	u.Set(transaction.FieldNonce, v)
+	return u
+}
+
+// UpdateNonce sets the "nonce" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateNonce() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldNonce)
+	return u
+}
+
+// AddNonce adds v to the "nonce" field.
+func (u *TransactionUpsert) AddNonce(v uint64) *TransactionUpsert {
+	u.Add(transaction.FieldNonce, v)
+	return u
+}
+
+// ClearNonce clears the value of the "nonce" field.
+func (u *TransactionUpsert) ClearNonce() *TransactionUpsert {
+	u.SetNull(transaction.FieldNonce)
+	return u
+}
+
 // SetUtxo sets the "utxo" field.
 func (u *TransactionUpsert) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUpsert {
 	u.Set(transaction.FieldUtxo, v)
@@ -610,6 +703,90 @@ func (u *TransactionUpsert) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUpser
 // UpdateUtxo sets the "utxo" field to the value that was provided on create.
 func (u *TransactionUpsert) UpdateUtxo() *TransactionUpsert {
 	u.SetExcluded(transaction.FieldUtxo)
+	return u
+}
+
+// ClearUtxo clears the value of the "utxo" field.
+func (u *TransactionUpsert) ClearUtxo() *TransactionUpsert {
+	u.SetNull(transaction.FieldUtxo)
+	return u
+}
+
+// SetPre sets the "pre" field.
+func (u *TransactionUpsert) SetPre(v *sphinxplugin.Unspent) *TransactionUpsert {
+	u.Set(transaction.FieldPre, v)
+	return u
+}
+
+// UpdatePre sets the "pre" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdatePre() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldPre)
+	return u
+}
+
+// ClearPre clears the value of the "pre" field.
+func (u *TransactionUpsert) ClearPre() *TransactionUpsert {
+	u.SetNull(transaction.FieldPre)
+	return u
+}
+
+// SetTransactionType sets the "transaction_type" field.
+func (u *TransactionUpsert) SetTransactionType(v int8) *TransactionUpsert {
+	u.Set(transaction.FieldTransactionType, v)
+	return u
+}
+
+// UpdateTransactionType sets the "transaction_type" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateTransactionType() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldTransactionType)
+	return u
+}
+
+// AddTransactionType adds v to the "transaction_type" field.
+func (u *TransactionUpsert) AddTransactionType(v int8) *TransactionUpsert {
+	u.Add(transaction.FieldTransactionType, v)
+	return u
+}
+
+// ClearTransactionType clears the value of the "transaction_type" field.
+func (u *TransactionUpsert) ClearTransactionType() *TransactionUpsert {
+	u.SetNull(transaction.FieldTransactionType)
+	return u
+}
+
+// SetRecentBhash sets the "recent_bhash" field.
+func (u *TransactionUpsert) SetRecentBhash(v string) *TransactionUpsert {
+	u.Set(transaction.FieldRecentBhash, v)
+	return u
+}
+
+// UpdateRecentBhash sets the "recent_bhash" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateRecentBhash() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldRecentBhash)
+	return u
+}
+
+// ClearRecentBhash clears the value of the "recent_bhash" field.
+func (u *TransactionUpsert) ClearRecentBhash() *TransactionUpsert {
+	u.SetNull(transaction.FieldRecentBhash)
+	return u
+}
+
+// SetTxData sets the "tx_data" field.
+func (u *TransactionUpsert) SetTxData(v []byte) *TransactionUpsert {
+	u.Set(transaction.FieldTxData, v)
+	return u
+}
+
+// UpdateTxData sets the "tx_data" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateTxData() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldTxData)
+	return u
+}
+
+// ClearTxData clears the value of the "tx_data" field.
+func (u *TransactionUpsert) ClearTxData() *TransactionUpsert {
+	u.SetNull(transaction.FieldTxData)
 	return u
 }
 
@@ -625,6 +802,12 @@ func (u *TransactionUpsert) UpdateTransactionID() *TransactionUpsert {
 	return u
 }
 
+// ClearTransactionID clears the value of the "transaction_id" field.
+func (u *TransactionUpsert) ClearTransactionID() *TransactionUpsert {
+	u.SetNull(transaction.FieldTransactionID)
+	return u
+}
+
 // SetCid sets the "cid" field.
 func (u *TransactionUpsert) SetCid(v string) *TransactionUpsert {
 	u.Set(transaction.FieldCid, v)
@@ -634,6 +817,12 @@ func (u *TransactionUpsert) SetCid(v string) *TransactionUpsert {
 // UpdateCid sets the "cid" field to the value that was provided on create.
 func (u *TransactionUpsert) UpdateCid() *TransactionUpsert {
 	u.SetExcluded(transaction.FieldCid)
+	return u
+}
+
+// ClearCid clears the value of the "cid" field.
+func (u *TransactionUpsert) ClearCid() *TransactionUpsert {
+	u.SetNull(transaction.FieldCid)
 	return u
 }
 
@@ -655,6 +844,12 @@ func (u *TransactionUpsert) AddExitCode(v int64) *TransactionUpsert {
 	return u
 }
 
+// ClearExitCode clears the value of the "exit_code" field.
+func (u *TransactionUpsert) ClearExitCode() *TransactionUpsert {
+	u.SetNull(transaction.FieldExitCode)
+	return u
+}
+
 // SetFrom sets the "from" field.
 func (u *TransactionUpsert) SetFrom(v string) *TransactionUpsert {
 	u.Set(transaction.FieldFrom, v)
@@ -667,6 +862,12 @@ func (u *TransactionUpsert) UpdateFrom() *TransactionUpsert {
 	return u
 }
 
+// ClearFrom clears the value of the "from" field.
+func (u *TransactionUpsert) ClearFrom() *TransactionUpsert {
+	u.SetNull(transaction.FieldFrom)
+	return u
+}
+
 // SetTo sets the "to" field.
 func (u *TransactionUpsert) SetTo(v string) *TransactionUpsert {
 	u.Set(transaction.FieldTo, v)
@@ -676,6 +877,12 @@ func (u *TransactionUpsert) SetTo(v string) *TransactionUpsert {
 // UpdateTo sets the "to" field to the value that was provided on create.
 func (u *TransactionUpsert) UpdateTo() *TransactionUpsert {
 	u.SetExcluded(transaction.FieldTo)
+	return u
+}
+
+// ClearTo clears the value of the "to" field.
+func (u *TransactionUpsert) ClearTo() *TransactionUpsert {
+	u.SetNull(transaction.FieldTo)
 	return u
 }
 
@@ -697,6 +904,12 @@ func (u *TransactionUpsert) AddAmount(v uint64) *TransactionUpsert {
 	return u
 }
 
+// ClearAmount clears the value of the "amount" field.
+func (u *TransactionUpsert) ClearAmount() *TransactionUpsert {
+	u.SetNull(transaction.FieldAmount)
+	return u
+}
+
 // SetPayload sets the "payload" field.
 func (u *TransactionUpsert) SetPayload(v []byte) *TransactionUpsert {
 	u.Set(transaction.FieldPayload, v)
@@ -706,6 +919,12 @@ func (u *TransactionUpsert) SetPayload(v []byte) *TransactionUpsert {
 // UpdatePayload sets the "payload" field to the value that was provided on create.
 func (u *TransactionUpsert) UpdatePayload() *TransactionUpsert {
 	u.SetExcluded(transaction.FieldPayload)
+	return u
+}
+
+// ClearPayload clears the value of the "payload" field.
+func (u *TransactionUpsert) ClearPayload() *TransactionUpsert {
+	u.SetNull(transaction.FieldPayload)
 	return u
 }
 
@@ -727,6 +946,12 @@ func (u *TransactionUpsert) AddState(v uint8) *TransactionUpsert {
 	return u
 }
 
+// ClearState clears the value of the "state" field.
+func (u *TransactionUpsert) ClearState() *TransactionUpsert {
+	u.SetNull(transaction.FieldState)
+	return u
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (u *TransactionUpsert) SetCreatedAt(v uint32) *TransactionUpsert {
 	u.Set(transaction.FieldCreatedAt, v)
@@ -742,6 +967,12 @@ func (u *TransactionUpsert) UpdateCreatedAt() *TransactionUpsert {
 // AddCreatedAt adds v to the "created_at" field.
 func (u *TransactionUpsert) AddCreatedAt(v uint32) *TransactionUpsert {
 	u.Add(transaction.FieldCreatedAt, v)
+	return u
+}
+
+// ClearCreatedAt clears the value of the "created_at" field.
+func (u *TransactionUpsert) ClearCreatedAt() *TransactionUpsert {
+	u.SetNull(transaction.FieldCreatedAt)
 	return u
 }
 
@@ -763,6 +994,12 @@ func (u *TransactionUpsert) AddUpdatedAt(v uint32) *TransactionUpsert {
 	return u
 }
 
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (u *TransactionUpsert) ClearUpdatedAt() *TransactionUpsert {
+	u.SetNull(transaction.FieldUpdatedAt)
+	return u
+}
+
 // SetDeletedAt sets the "deleted_at" field.
 func (u *TransactionUpsert) SetDeletedAt(v uint32) *TransactionUpsert {
 	u.Set(transaction.FieldDeletedAt, v)
@@ -778,6 +1015,12 @@ func (u *TransactionUpsert) UpdateDeletedAt() *TransactionUpsert {
 // AddDeletedAt adds v to the "deleted_at" field.
 func (u *TransactionUpsert) AddDeletedAt(v uint32) *TransactionUpsert {
 	u.Add(transaction.FieldDeletedAt, v)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *TransactionUpsert) ClearDeletedAt() *TransactionUpsert {
+	u.SetNull(transaction.FieldDeletedAt)
 	return u
 }
 
@@ -852,6 +1095,41 @@ func (u *TransactionUpsertOne) UpdateCoinType() *TransactionUpsertOne {
 	})
 }
 
+// ClearCoinType clears the value of the "coin_type" field.
+func (u *TransactionUpsertOne) ClearCoinType() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearCoinType()
+	})
+}
+
+// SetNonce sets the "nonce" field.
+func (u *TransactionUpsertOne) SetNonce(v uint64) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetNonce(v)
+	})
+}
+
+// AddNonce adds v to the "nonce" field.
+func (u *TransactionUpsertOne) AddNonce(v uint64) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddNonce(v)
+	})
+}
+
+// UpdateNonce sets the "nonce" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateNonce() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateNonce()
+	})
+}
+
+// ClearNonce clears the value of the "nonce" field.
+func (u *TransactionUpsertOne) ClearNonce() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearNonce()
+	})
+}
+
 // SetUtxo sets the "utxo" field.
 func (u *TransactionUpsertOne) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -863,6 +1141,104 @@ func (u *TransactionUpsertOne) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUp
 func (u *TransactionUpsertOne) UpdateUtxo() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateUtxo()
+	})
+}
+
+// ClearUtxo clears the value of the "utxo" field.
+func (u *TransactionUpsertOne) ClearUtxo() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearUtxo()
+	})
+}
+
+// SetPre sets the "pre" field.
+func (u *TransactionUpsertOne) SetPre(v *sphinxplugin.Unspent) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetPre(v)
+	})
+}
+
+// UpdatePre sets the "pre" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdatePre() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdatePre()
+	})
+}
+
+// ClearPre clears the value of the "pre" field.
+func (u *TransactionUpsertOne) ClearPre() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearPre()
+	})
+}
+
+// SetTransactionType sets the "transaction_type" field.
+func (u *TransactionUpsertOne) SetTransactionType(v int8) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetTransactionType(v)
+	})
+}
+
+// AddTransactionType adds v to the "transaction_type" field.
+func (u *TransactionUpsertOne) AddTransactionType(v int8) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddTransactionType(v)
+	})
+}
+
+// UpdateTransactionType sets the "transaction_type" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateTransactionType() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateTransactionType()
+	})
+}
+
+// ClearTransactionType clears the value of the "transaction_type" field.
+func (u *TransactionUpsertOne) ClearTransactionType() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearTransactionType()
+	})
+}
+
+// SetRecentBhash sets the "recent_bhash" field.
+func (u *TransactionUpsertOne) SetRecentBhash(v string) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetRecentBhash(v)
+	})
+}
+
+// UpdateRecentBhash sets the "recent_bhash" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateRecentBhash() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateRecentBhash()
+	})
+}
+
+// ClearRecentBhash clears the value of the "recent_bhash" field.
+func (u *TransactionUpsertOne) ClearRecentBhash() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearRecentBhash()
+	})
+}
+
+// SetTxData sets the "tx_data" field.
+func (u *TransactionUpsertOne) SetTxData(v []byte) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetTxData(v)
+	})
+}
+
+// UpdateTxData sets the "tx_data" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateTxData() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateTxData()
+	})
+}
+
+// ClearTxData clears the value of the "tx_data" field.
+func (u *TransactionUpsertOne) ClearTxData() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearTxData()
 	})
 }
 
@@ -880,6 +1256,13 @@ func (u *TransactionUpsertOne) UpdateTransactionID() *TransactionUpsertOne {
 	})
 }
 
+// ClearTransactionID clears the value of the "transaction_id" field.
+func (u *TransactionUpsertOne) ClearTransactionID() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearTransactionID()
+	})
+}
+
 // SetCid sets the "cid" field.
 func (u *TransactionUpsertOne) SetCid(v string) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -891,6 +1274,13 @@ func (u *TransactionUpsertOne) SetCid(v string) *TransactionUpsertOne {
 func (u *TransactionUpsertOne) UpdateCid() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateCid()
+	})
+}
+
+// ClearCid clears the value of the "cid" field.
+func (u *TransactionUpsertOne) ClearCid() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearCid()
 	})
 }
 
@@ -915,6 +1305,13 @@ func (u *TransactionUpsertOne) UpdateExitCode() *TransactionUpsertOne {
 	})
 }
 
+// ClearExitCode clears the value of the "exit_code" field.
+func (u *TransactionUpsertOne) ClearExitCode() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearExitCode()
+	})
+}
+
 // SetFrom sets the "from" field.
 func (u *TransactionUpsertOne) SetFrom(v string) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -929,6 +1326,13 @@ func (u *TransactionUpsertOne) UpdateFrom() *TransactionUpsertOne {
 	})
 }
 
+// ClearFrom clears the value of the "from" field.
+func (u *TransactionUpsertOne) ClearFrom() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearFrom()
+	})
+}
+
 // SetTo sets the "to" field.
 func (u *TransactionUpsertOne) SetTo(v string) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -940,6 +1344,13 @@ func (u *TransactionUpsertOne) SetTo(v string) *TransactionUpsertOne {
 func (u *TransactionUpsertOne) UpdateTo() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateTo()
+	})
+}
+
+// ClearTo clears the value of the "to" field.
+func (u *TransactionUpsertOne) ClearTo() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearTo()
 	})
 }
 
@@ -964,6 +1375,13 @@ func (u *TransactionUpsertOne) UpdateAmount() *TransactionUpsertOne {
 	})
 }
 
+// ClearAmount clears the value of the "amount" field.
+func (u *TransactionUpsertOne) ClearAmount() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearAmount()
+	})
+}
+
 // SetPayload sets the "payload" field.
 func (u *TransactionUpsertOne) SetPayload(v []byte) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -975,6 +1393,13 @@ func (u *TransactionUpsertOne) SetPayload(v []byte) *TransactionUpsertOne {
 func (u *TransactionUpsertOne) UpdatePayload() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdatePayload()
+	})
+}
+
+// ClearPayload clears the value of the "payload" field.
+func (u *TransactionUpsertOne) ClearPayload() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearPayload()
 	})
 }
 
@@ -999,6 +1424,13 @@ func (u *TransactionUpsertOne) UpdateState() *TransactionUpsertOne {
 	})
 }
 
+// ClearState clears the value of the "state" field.
+func (u *TransactionUpsertOne) ClearState() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearState()
+	})
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (u *TransactionUpsertOne) SetCreatedAt(v uint32) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1017,6 +1449,13 @@ func (u *TransactionUpsertOne) AddCreatedAt(v uint32) *TransactionUpsertOne {
 func (u *TransactionUpsertOne) UpdateCreatedAt() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateCreatedAt()
+	})
+}
+
+// ClearCreatedAt clears the value of the "created_at" field.
+func (u *TransactionUpsertOne) ClearCreatedAt() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearCreatedAt()
 	})
 }
 
@@ -1041,6 +1480,13 @@ func (u *TransactionUpsertOne) UpdateUpdatedAt() *TransactionUpsertOne {
 	})
 }
 
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (u *TransactionUpsertOne) ClearUpdatedAt() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearUpdatedAt()
+	})
+}
+
 // SetDeletedAt sets the "deleted_at" field.
 func (u *TransactionUpsertOne) SetDeletedAt(v uint32) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1059,6 +1505,13 @@ func (u *TransactionUpsertOne) AddDeletedAt(v uint32) *TransactionUpsertOne {
 func (u *TransactionUpsertOne) UpdateDeletedAt() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *TransactionUpsertOne) ClearDeletedAt() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 
@@ -1299,6 +1752,41 @@ func (u *TransactionUpsertBulk) UpdateCoinType() *TransactionUpsertBulk {
 	})
 }
 
+// ClearCoinType clears the value of the "coin_type" field.
+func (u *TransactionUpsertBulk) ClearCoinType() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearCoinType()
+	})
+}
+
+// SetNonce sets the "nonce" field.
+func (u *TransactionUpsertBulk) SetNonce(v uint64) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetNonce(v)
+	})
+}
+
+// AddNonce adds v to the "nonce" field.
+func (u *TransactionUpsertBulk) AddNonce(v uint64) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddNonce(v)
+	})
+}
+
+// UpdateNonce sets the "nonce" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateNonce() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateNonce()
+	})
+}
+
+// ClearNonce clears the value of the "nonce" field.
+func (u *TransactionUpsertBulk) ClearNonce() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearNonce()
+	})
+}
+
 // SetUtxo sets the "utxo" field.
 func (u *TransactionUpsertBulk) SetUtxo(v []*sphinxplugin.Unspent) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1310,6 +1798,104 @@ func (u *TransactionUpsertBulk) SetUtxo(v []*sphinxplugin.Unspent) *TransactionU
 func (u *TransactionUpsertBulk) UpdateUtxo() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateUtxo()
+	})
+}
+
+// ClearUtxo clears the value of the "utxo" field.
+func (u *TransactionUpsertBulk) ClearUtxo() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearUtxo()
+	})
+}
+
+// SetPre sets the "pre" field.
+func (u *TransactionUpsertBulk) SetPre(v *sphinxplugin.Unspent) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetPre(v)
+	})
+}
+
+// UpdatePre sets the "pre" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdatePre() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdatePre()
+	})
+}
+
+// ClearPre clears the value of the "pre" field.
+func (u *TransactionUpsertBulk) ClearPre() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearPre()
+	})
+}
+
+// SetTransactionType sets the "transaction_type" field.
+func (u *TransactionUpsertBulk) SetTransactionType(v int8) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetTransactionType(v)
+	})
+}
+
+// AddTransactionType adds v to the "transaction_type" field.
+func (u *TransactionUpsertBulk) AddTransactionType(v int8) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddTransactionType(v)
+	})
+}
+
+// UpdateTransactionType sets the "transaction_type" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateTransactionType() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateTransactionType()
+	})
+}
+
+// ClearTransactionType clears the value of the "transaction_type" field.
+func (u *TransactionUpsertBulk) ClearTransactionType() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearTransactionType()
+	})
+}
+
+// SetRecentBhash sets the "recent_bhash" field.
+func (u *TransactionUpsertBulk) SetRecentBhash(v string) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetRecentBhash(v)
+	})
+}
+
+// UpdateRecentBhash sets the "recent_bhash" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateRecentBhash() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateRecentBhash()
+	})
+}
+
+// ClearRecentBhash clears the value of the "recent_bhash" field.
+func (u *TransactionUpsertBulk) ClearRecentBhash() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearRecentBhash()
+	})
+}
+
+// SetTxData sets the "tx_data" field.
+func (u *TransactionUpsertBulk) SetTxData(v []byte) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetTxData(v)
+	})
+}
+
+// UpdateTxData sets the "tx_data" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateTxData() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateTxData()
+	})
+}
+
+// ClearTxData clears the value of the "tx_data" field.
+func (u *TransactionUpsertBulk) ClearTxData() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearTxData()
 	})
 }
 
@@ -1327,6 +1913,13 @@ func (u *TransactionUpsertBulk) UpdateTransactionID() *TransactionUpsertBulk {
 	})
 }
 
+// ClearTransactionID clears the value of the "transaction_id" field.
+func (u *TransactionUpsertBulk) ClearTransactionID() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearTransactionID()
+	})
+}
+
 // SetCid sets the "cid" field.
 func (u *TransactionUpsertBulk) SetCid(v string) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1338,6 +1931,13 @@ func (u *TransactionUpsertBulk) SetCid(v string) *TransactionUpsertBulk {
 func (u *TransactionUpsertBulk) UpdateCid() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateCid()
+	})
+}
+
+// ClearCid clears the value of the "cid" field.
+func (u *TransactionUpsertBulk) ClearCid() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearCid()
 	})
 }
 
@@ -1362,6 +1962,13 @@ func (u *TransactionUpsertBulk) UpdateExitCode() *TransactionUpsertBulk {
 	})
 }
 
+// ClearExitCode clears the value of the "exit_code" field.
+func (u *TransactionUpsertBulk) ClearExitCode() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearExitCode()
+	})
+}
+
 // SetFrom sets the "from" field.
 func (u *TransactionUpsertBulk) SetFrom(v string) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1376,6 +1983,13 @@ func (u *TransactionUpsertBulk) UpdateFrom() *TransactionUpsertBulk {
 	})
 }
 
+// ClearFrom clears the value of the "from" field.
+func (u *TransactionUpsertBulk) ClearFrom() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearFrom()
+	})
+}
+
 // SetTo sets the "to" field.
 func (u *TransactionUpsertBulk) SetTo(v string) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1387,6 +2001,13 @@ func (u *TransactionUpsertBulk) SetTo(v string) *TransactionUpsertBulk {
 func (u *TransactionUpsertBulk) UpdateTo() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateTo()
+	})
+}
+
+// ClearTo clears the value of the "to" field.
+func (u *TransactionUpsertBulk) ClearTo() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearTo()
 	})
 }
 
@@ -1411,6 +2032,13 @@ func (u *TransactionUpsertBulk) UpdateAmount() *TransactionUpsertBulk {
 	})
 }
 
+// ClearAmount clears the value of the "amount" field.
+func (u *TransactionUpsertBulk) ClearAmount() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearAmount()
+	})
+}
+
 // SetPayload sets the "payload" field.
 func (u *TransactionUpsertBulk) SetPayload(v []byte) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1422,6 +2050,13 @@ func (u *TransactionUpsertBulk) SetPayload(v []byte) *TransactionUpsertBulk {
 func (u *TransactionUpsertBulk) UpdatePayload() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdatePayload()
+	})
+}
+
+// ClearPayload clears the value of the "payload" field.
+func (u *TransactionUpsertBulk) ClearPayload() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearPayload()
 	})
 }
 
@@ -1446,6 +2081,13 @@ func (u *TransactionUpsertBulk) UpdateState() *TransactionUpsertBulk {
 	})
 }
 
+// ClearState clears the value of the "state" field.
+func (u *TransactionUpsertBulk) ClearState() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearState()
+	})
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (u *TransactionUpsertBulk) SetCreatedAt(v uint32) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1464,6 +2106,13 @@ func (u *TransactionUpsertBulk) AddCreatedAt(v uint32) *TransactionUpsertBulk {
 func (u *TransactionUpsertBulk) UpdateCreatedAt() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateCreatedAt()
+	})
+}
+
+// ClearCreatedAt clears the value of the "created_at" field.
+func (u *TransactionUpsertBulk) ClearCreatedAt() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearCreatedAt()
 	})
 }
 
@@ -1488,6 +2137,13 @@ func (u *TransactionUpsertBulk) UpdateUpdatedAt() *TransactionUpsertBulk {
 	})
 }
 
+// ClearUpdatedAt clears the value of the "updated_at" field.
+func (u *TransactionUpsertBulk) ClearUpdatedAt() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearUpdatedAt()
+	})
+}
+
 // SetDeletedAt sets the "deleted_at" field.
 func (u *TransactionUpsertBulk) SetDeletedAt(v uint32) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1506,6 +2162,13 @@ func (u *TransactionUpsertBulk) AddDeletedAt(v uint32) *TransactionUpsertBulk {
 func (u *TransactionUpsertBulk) UpdateDeletedAt() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *TransactionUpsertBulk) ClearDeletedAt() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearDeletedAt()
 	})
 }
 

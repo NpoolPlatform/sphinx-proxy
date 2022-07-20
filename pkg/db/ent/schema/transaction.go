@@ -7,7 +7,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
-	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
+	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	"github.com/google/uuid"
 )
 
@@ -23,51 +23,65 @@ func (Transaction) Fields() []ent.Field {
 			Default(uuid.New).
 			Unique(),
 		field.Int32("coin_type").
+			Optional().
 			Default(0),
 		field.Uint64("nonce").
+			Optional().
 			Default(0).
 			Comment("--will remove"),
 		field.JSON("utxo", []*sphinxplugin.Unspent{}).
 			Optional().
 			Default([]*sphinxplugin.Unspent{}).
 			Comment("only for btc--will remove"),
-		field.JSON("pre", &eth.PreSignInfo{}).
-			Default(&eth.PreSignInfo{}).
+		field.JSON("pre", &sphinxplugin.Unspent{}).
+			Optional().
+			Default(&sphinxplugin.Unspent{}).
 			Comment("--will remove"),
 		field.Int8("transaction_type").
+			Optional().
 			Default(0).
 			Comment("--will remove"),
 		field.String("recent_bhash").
+			Optional().
 			Default("").
 			Comment("--will remove"),
 		field.Bytes("tx_data").
+			Optional().
 			Default([]byte{}).
 			Comment("--will remove"),
 		field.String("transaction_id").
+			Optional().
 			Unique().
-			NotEmpty(),
+			Default(""),
 		field.String("cid").
+			Optional().
 			Default(""),
 		field.Int64("exit_code").
+			Optional().
 			Default(-1),
 		field.String("from").
-			NotEmpty().
+			Optional().
 			Default(""),
 		field.String("to").
-			NotEmpty().
+			Optional().
 			Default(""),
 		field.Uint64("amount").
-			Positive().
+			Optional().
 			Default(0),
 		field.Bytes("payload").
+			Optional().
 			Default([]byte{}).
 			Comment("save nonce or sign info"),
-		field.Uint8("state").Default(0),
+		field.Uint8("state").
+			Optional().
+			Default(0),
 		field.Uint32("created_at").
+			Optional().
 			DefaultFunc(func() uint32 {
 				return uint32(time.Now().Unix())
 			}),
 		field.Uint32("updated_at").
+			Optional().
 			DefaultFunc(func() uint32 {
 				return uint32(time.Now().Unix())
 			}).
@@ -75,6 +89,7 @@ func (Transaction) Fields() []ent.Field {
 				return uint32(time.Now().Unix())
 			}),
 		field.Uint32("deleted_at").
+			Optional().
 			DefaultFunc(func() uint32 {
 				return 0
 			}),
@@ -83,6 +98,10 @@ func (Transaction) Fields() []ent.Field {
 
 func (Transaction) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("created_at"),
+		index.Fields(
+			transaction.FieldState,
+			transaction.FieldCoinType,
+			transaction.FieldCreatedAt,
+		),
 	}
 }
