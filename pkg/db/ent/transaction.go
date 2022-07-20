@@ -3,10 +3,12 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
 	"github.com/google/uuid"
 )
@@ -18,6 +20,18 @@ type Transaction struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// CoinType holds the value of the "coin_type" field.
 	CoinType int32 `json:"coin_type,omitempty"`
+	// --will remove
+	Nonce uint64 `json:"nonce,omitempty"`
+	// only for btc--will remove
+	Utxo []*sphinxplugin.Unspent `json:"utxo,omitempty"`
+	// --will remove
+	Pre *sphinxplugin.Unspent `json:"pre,omitempty"`
+	// --will remove
+	TransactionType int8 `json:"transaction_type,omitempty"`
+	// --will remove
+	RecentBhash string `json:"recent_bhash,omitempty"`
+	// --will remove
+	TxData []byte `json:"tx_data,omitempty"`
 	// TransactionID holds the value of the "transaction_id" field.
 	TransactionID string `json:"transaction_id,omitempty"`
 	// Cid holds the value of the "cid" field.
@@ -47,11 +61,11 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case transaction.FieldPayload:
+		case transaction.FieldUtxo, transaction.FieldPre, transaction.FieldTxData, transaction.FieldPayload:
 			values[i] = new([]byte)
-		case transaction.FieldCoinType, transaction.FieldExitCode, transaction.FieldAmount, transaction.FieldState, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
+		case transaction.FieldCoinType, transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldExitCode, transaction.FieldAmount, transaction.FieldState, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
-		case transaction.FieldTransactionID, transaction.FieldCid, transaction.FieldFrom, transaction.FieldTo:
+		case transaction.FieldRecentBhash, transaction.FieldTransactionID, transaction.FieldCid, transaction.FieldFrom, transaction.FieldTo:
 			values[i] = new(sql.NullString)
 		case transaction.FieldID:
 			values[i] = new(uuid.UUID)
@@ -81,6 +95,46 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 				return fmt.Errorf("unexpected type %T for field coin_type", values[i])
 			} else if value.Valid {
 				t.CoinType = int32(value.Int64)
+			}
+		case transaction.FieldNonce:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field nonce", values[i])
+			} else if value.Valid {
+				t.Nonce = uint64(value.Int64)
+			}
+		case transaction.FieldUtxo:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field utxo", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &t.Utxo); err != nil {
+					return fmt.Errorf("unmarshal field utxo: %w", err)
+				}
+			}
+		case transaction.FieldPre:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field pre", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &t.Pre); err != nil {
+					return fmt.Errorf("unmarshal field pre: %w", err)
+				}
+			}
+		case transaction.FieldTransactionType:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field transaction_type", values[i])
+			} else if value.Valid {
+				t.TransactionType = int8(value.Int64)
+			}
+		case transaction.FieldRecentBhash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field recent_bhash", values[i])
+			} else if value.Valid {
+				t.RecentBhash = value.String
+			}
+		case transaction.FieldTxData:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field tx_data", values[i])
+			} else if value != nil {
+				t.TxData = *value
 			}
 		case transaction.FieldTransactionID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -178,6 +232,24 @@ func (t *Transaction) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("coin_type=")
 	builder.WriteString(fmt.Sprintf("%v", t.CoinType))
+	builder.WriteString(", ")
+	builder.WriteString("nonce=")
+	builder.WriteString(fmt.Sprintf("%v", t.Nonce))
+	builder.WriteString(", ")
+	builder.WriteString("utxo=")
+	builder.WriteString(fmt.Sprintf("%v", t.Utxo))
+	builder.WriteString(", ")
+	builder.WriteString("pre=")
+	builder.WriteString(fmt.Sprintf("%v", t.Pre))
+	builder.WriteString(", ")
+	builder.WriteString("transaction_type=")
+	builder.WriteString(fmt.Sprintf("%v", t.TransactionType))
+	builder.WriteString(", ")
+	builder.WriteString("recent_bhash=")
+	builder.WriteString(t.RecentBhash)
+	builder.WriteString(", ")
+	builder.WriteString("tx_data=")
+	builder.WriteString(fmt.Sprintf("%v", t.TxData))
 	builder.WriteString(", ")
 	builder.WriteString("transaction_id=")
 	builder.WriteString(t.TransactionID)

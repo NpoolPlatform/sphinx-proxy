@@ -80,8 +80,8 @@ github.com/NpoolPlatform/message v0.0.0-20220714124453-6fc782d1b998 h1:FEWgCAxeA
 github.com/NpoolPlatform/message v0.0.0-20220714124453-6fc782d1b998/go.mod h1:SGHcq7JPPNNWGydW/qtNyt80H/3jDEfXnW/JPT1i794=
 github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996 h1:H/IlyiBuGXPNwhvKxMLFFmeamzg+fmmdf8ZERbVZjtM=
 github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996/go.mod h1:w203lHGAaRvZqEMLxJI8wBxAoVvE3RHMU3jtwN/AdgE=
-github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220714122301-07415a8850fa h1:lpKr+Ysto8eMwhvhGvbjYb3jSWe2zDaBSYcb62p5QH4=
-github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220714122301-07415a8850fa/go.mod h1:CUiOvmhSBB+wM8/wWnN2AEU/NFuDK/yI3C7FQHQ5bI8=
+github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220720031923-0b442db4ff79 h1:cX04kGamUGldxEsAr3PS3IEWgNGFjZMkqdDL9fwmDzQ=
+github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220720031923-0b442db4ff79/go.mod h1:eziSlLhJs07gnh5rRb7wR/gy6DH2527UKZEIFglF5W8=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/Shonminh/apollo-client v0.4.0 h1:AXGp4wOahrEKjheMXehgsG9B8dEfLQHttRLHeEefvus=
