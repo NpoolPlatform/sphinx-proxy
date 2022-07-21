@@ -62,12 +62,13 @@ func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransac
 	infos := make([]*sphinxproxy.TransactionInfo, 0, len(transInfos))
 	for _, info := range transInfos {
 		infos = append(infos, &sphinxproxy.TransactionInfo{
-			TransactionID: info.TransactionID,
-			Name:          utils.TruncateCoinTypePrefix(sphinxplugin.CoinType(info.CoinType)),
-			Amount:        price.DBPriceToVisualPrice(info.Amount),
-			Payload:       info.Payload,
-			From:          info.From,
-			To:            info.To,
+			TransactionID:    info.TransactionID,
+			TransactionState: sphinxproxy.TransactionState(info.State),
+			Name:             utils.TruncateCoinTypePrefix(sphinxplugin.CoinType(info.CoinType)),
+			Amount:           price.DBPriceToVisualPrice(info.Amount),
+			Payload:          info.Payload,
+			From:             info.From,
+			To:               info.To,
 		})
 	}
 
