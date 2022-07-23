@@ -58,13 +58,13 @@ func CreateTransaction(ctx context.Context, in *npool.CreateTransactionRequest) 
 
 func GetTransaction(ctx context.Context, id string) (*npool.TransactionInfo, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.SphinxProxyClient) (cruder.Any, error) {
-		info, err := cli.GetTransaction(ctx, &npool.GetTransactionRequest{
+		resp, err := cli.GetTransaction(ctx, &npool.GetTransactionRequest{
 			TransactionID: id,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("fail get transaction: %v", err)
 		}
-		return info, nil
+		return resp.Info, nil
 	})
 	if err != nil {
 		return nil, fmt.Errorf("fail get transaction: %v", err)
