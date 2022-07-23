@@ -32,12 +32,12 @@ func GetBalance(ctx context.Context, in *npool.GetBalanceRequest) (*npool.Balanc
 	info, err := do(ctx, func(_ctx context.Context, cli npool.SphinxProxyClient) (cruder.Any, error) {
 		resp, err := cli.GetBalance(ctx, in)
 		if err != nil {
-			return nil, fmt.Errorf("fail get balances: %v", err)
+			return nil, fmt.Errorf("fail get balance: %v", err)
 		}
 		return resp.Info, nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("fail get balances: %v", err)
+		return nil, fmt.Errorf("fail get balance: %v", err)
 	}
 	return info.(*npool.BalanceInfo), nil
 }
@@ -54,4 +54,20 @@ func CreateTransaction(ctx context.Context, in *npool.CreateTransactionRequest) 
 		return fmt.Errorf("fail get balances: %v", err)
 	}
 	return nil
+}
+
+func GetTransaction(ctx context.Context, id string) (*npool.TransactionInfo, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.SphinxProxyClient) (cruder.Any, error) {
+		info, err := cli.GetTransaction(ctx, &npool.GetTransactionRequest{
+			TransactionID: id,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("fail get transaction: %v", err)
+		}
+		return info, nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("fail get transaction: %v", err)
+	}
+	return info.(*npool.TransactionInfo), nil
 }
