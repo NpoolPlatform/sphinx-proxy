@@ -41,3 +41,17 @@ func GetBalance(ctx context.Context, in *npool.GetBalanceRequest) (*npool.Balanc
 	}
 	return info.(*npool.BalanceInfo), nil
 }
+
+func CreateTransaction(ctx context.Context, in *npool.CreateTransactionRequest) error {
+	_, err := do(ctx, func(_ctx context.Context, cli npool.SphinxProxyClient) (cruder.Any, error) {
+		_, err := cli.CreateTransaction(ctx, in)
+		if err != nil {
+			return nil, fmt.Errorf("fail get balances: %v", err)
+		}
+		return nil, nil
+	})
+	if err != nil {
+		return fmt.Errorf("fail get balances: %v", err)
+	}
+	return nil
+}
