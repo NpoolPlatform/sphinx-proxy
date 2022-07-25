@@ -18,14 +18,14 @@ var runCmd = &cli.Command{
 	Name:    "run",
 	Aliases: []string{"r"},
 	Usage:   "Run Sphinx Proxy daemon",
-	After: func(c *cli.Context) error {
+	After: func(*cli.Context) error {
 		if err := grpc2.HShutdown(); err != nil {
 			logger.Sugar().Warnf("graceful shutdown http server error: %v", err)
 		}
 		grpc2.GShutdown()
 		return logger.Sync()
 	},
-	Action: func(c *cli.Context) error {
+	Action: func(*cli.Context) error {
 		podStopSig := make(chan os.Signal, 1)
 		exitChan := make(chan struct{})
 		signal.Notify(podStopSig, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
@@ -34,7 +34,6 @@ var runCmd = &cli.Command{
 			logger.Sugar().Info("received SIGTERM to clean conn resource")
 			close(exitChan)
 		}()
-		go api.Transaction(exitChan)
 		go func() {
 			if err := grpc2.RunGRPC(rpcRegister); err != nil {
 				logger.Sugar().Warnf("start grpc server error: %v", err)
@@ -45,7 +44,6 @@ var runCmd = &cli.Command{
 	},
 }
 
-// nolint
 func rpcRegister(server grpc.ServiceRegistrar) error {
 	api.Register(server)
 	return nil

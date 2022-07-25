@@ -1,36 +1,33 @@
 package api
 
 import (
-	"context"
-	"fmt"
-	"strings"
+	"encoding/json"
 	"sync"
+
+	putils "github.com/NpoolPlatform/sphinx-plugin/pkg/rpc"
+	plugin_types "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
-	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 )
 
 type mSign struct {
 	signServer sphinxproxy.SphinxProxy_ProxySignServer
-	// pod exit
-	exitChan chan struct{}
+	exitChan   chan struct{}
 	// conn error
 	connCloseChan chan struct{}
-	closeChan     chan struct{}
 	once          sync.Once
+	closeChan     chan struct{}
 	walletNew     chan *sphinxproxy.ProxySignRequest
-	sign          chan *sphinxproxy.ProxySignRequest
 }
 
 func newSignStream(stream sphinxproxy.SphinxProxy_ProxySignServer) {
 	lc := &mSign{
 		signServer:    stream,
 		exitChan:      make(chan struct{}),
-		connCloseChan: make(chan struct{}),
 		closeChan:     make(chan struct{}),
+		connCloseChan: make(chan struct{}),
 		walletNew:     make(chan *sphinxproxy.ProxySignRequest, channelBufSize),
-		sign:          make(chan *sphinxproxy.ProxySignRequest, channelBufSize),
 	}
 	slk.Lock()
 	lmSign = append(lmSign, lc)
@@ -47,7 +44,7 @@ func newSignStream(stream sphinxproxy.SphinxProxy_ProxySignServer) {
 
 func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer logger.Sugar().Warn("sphinx sign stream send exit")
+	defer func() { logger.Sugar().Warn("sphinx sign stream send exit") }()
 
 	for {
 		select {
@@ -59,14 +56,9 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 			return
 		case info := <-s.walletNew:
 			logger.Sugar().Infof("proxy->sign TransactionID: %v start", info.GetTransactionID())
-			if err := s.signServer.Send(&sphinxproxy.ProxySignRequest{
-				TransactionType: info.GetTransactionType(),
-				CoinType:        info.GetCoinType(),
-				TransactionID:   info.GetTransactionID(),
-			}); err != nil {
+			if err := s.signServer.Send(info); err != nil {
 				logger.Sugar().Errorf(
-					"proxy->sign TransactionID: %v TransactionType %v, CoinType: %v error: %v",
-					info.GetTransactionType(),
+					"proxy->sign TransactionID: %v, CoinType: %v error: %v",
 					info.GetCoinType(),
 					info.GetTransactionID(),
 					err,
@@ -74,33 +66,10 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 				if ch, ok := walletDoneChannel.Load(info.GetTransactionID()); ok {
 					ch.(chan walletDoneInfo) <- walletDoneInfo{
 						success: false,
-						message: fmt.Sprintf("proxy->sign send create wallet error: %v", err),
+						message: "create wallet error",
 					}
 				}
-				if checkCode(err) {
-					s.closeChan <- struct{}{}
-					return
-				}
-				continue
-			}
-			logger.Sugar().Infof("proxy->sign TransactionID: %v ok", info.GetTransactionID())
-		case info := <-s.sign:
-			logger.Sugar().Infof("proxy->sign TransactionID: %v start", info.GetTransactionID())
-			if err := s.signServer.Send(&sphinxproxy.ProxySignRequest{
-				TransactionType: info.GetTransactionType(),
-				CoinType:        info.GetCoinType(),
-				TransactionID:   info.GetTransactionID(),
-				Message:         info.GetMessage(),
-			}); err != nil {
-				logger.Sugar().Errorf(
-					"proxy->sign TransactionID: %v TransactionType %v, CoinType: %v Message: %v error: %v",
-					info.GetTransactionID(),
-					info.GetTransactionType(),
-					info.GetCoinType(),
-					info.GetMessage(),
-					err,
-				)
-				if checkCode(err) {
+				if putils.CheckCode(err) {
 					s.closeChan <- struct{}{}
 					return
 				}
@@ -113,7 +82,7 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 
 func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 	defer wg.Done()
-	defer logger.Sugar().Warn("sphinx sign stream recv exit")
+	defer func() { logger.Sugar().Warn("sphinx sign stream recv exit") }()
 
 	for {
 		select {
@@ -130,7 +99,7 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 					"proxy->sign error: %v",
 					err,
 				)
-				if checkCode(err) {
+				if putils.CheckCode(err) {
 					s.closeChan <- struct{}{}
 					return
 				}
@@ -161,54 +130,24 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 					continue
 				}
 
-				ch.(chan walletDoneInfo) <- walletDoneInfo{
-					success: true,
-					address: ssResponse.GetInfo().GetAddress(),
-				}
-				logger.Sugar().Infof("TransactionID: %v create wallet ok", ssResponse.GetTransactionID())
-			case sphinxproxy.TransactionType_Signature:
-				pluginProxy, err := getProxyPlugin(ssResponse.GetCoinType())
+				naResponse := &plugin_types.NewAccountResponse{}
+				err = json.Unmarshal(ssResponse.GetPayload(), naResponse)
 				if err != nil {
-					logger.Sugar().Errorf("proxy->plugin no valid connection for coin: %v transaction: %v",
-						ssResponse.GetCoinType(),
-						ssResponse.GetTransactionID(),
-					)
-					continue
-				}
-				// TODO: think how to check direct error
-				if ssResponse.GetRPCExitMessage() != "" {
-					logger.Sugar().Errorf("proxy->sign signature for coin: %v transaction: %v error: %v",
-						ssResponse.GetCoinType(),
-						ssResponse.GetTransactionID(),
-						ssResponse.GetRPCExitMessage(),
-					)
-					if strings.Contains(
-						ssResponse.GetRPCExitMessage(),
-						"amount not enough",
-					) {
-						if err := crud.UpdateTransaction(context.Background(), &crud.UpdateTransactionParams{
-							TransactionID: ssResponse.GetTransactionID(),
-							State:         sphinxproxy.TransactionState_TransactionStateFail,
-						}); err != nil {
-							logger.Sugar().Infof("proxy->sign signature TransactionID: %v error: %v", ssResponse.GetTransactionID(), err)
-							continue
-						}
+					logger.Sugar().Infof("TransactionID: %v create wallet error: %v", ssResponse.GetTransactionID(), err)
+					ch.(chan walletDoneInfo) <- walletDoneInfo{
+						success: false,
+						message: ssResponse.GetRPCExitMessage(),
 					}
 					continue
 				}
 
-				pluginProxy.mpoolPush <- &sphinxproxy.ProxyPluginRequest{
-					CoinType:        ssResponse.GetCoinType(),
-					TransactionType: sphinxproxy.TransactionType_Broadcast,
-					TransactionID:   ssResponse.GetTransactionID(),
-					// fil/sol
-					Message:   ssResponse.GetInfo().GetMessage(),
-					Signature: ssResponse.GetInfo().GetSignature(),
-					// btc
-					MsgTx: ssResponse.GetMsgTx(),
-					// eth/er20/bsc/bep20
-					SignedRawTxHex: ssResponse.GetSignedRawTxHex(),
+				ch.(chan walletDoneInfo) <- walletDoneInfo{
+					success: true,
+					address: naResponse.Address,
 				}
+				logger.Sugar().Infof("TransactionID: %v create wallet ok", ssResponse.GetTransactionID())
+			default:
+				logger.Sugar().Errorf("TransactionID: %v for TransactionType: %v not support", ssResponse.GetTransactionID(), ssResponse.GetTransactionType())
 			}
 		}
 	}
