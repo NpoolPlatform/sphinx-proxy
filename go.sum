@@ -76,12 +76,12 @@ github.com/NpoolPlatform/libent-cruder v0.0.0-20220621110548-8f3f8049ecc5/go.mod
 github.com/NpoolPlatform/message v0.0.0-20211205171224-cc5aef287e1a/go.mod h1:1sfQHL02lIkzK1ObQRbNi0UAkSZWcBw/rsK5hn9Perg=
 github.com/NpoolPlatform/message v0.0.0-20220120075427-38182760a780/go.mod h1:tnsf7zHQ5Mv2uG0ezOwCfm/bxluiRW10DeuIl4SjG4Y=
 github.com/NpoolPlatform/message v0.0.0-20220121040326-31d316062cdc/go.mod h1:tnsf7zHQ5Mv2uG0ezOwCfm/bxluiRW10DeuIl4SjG4Y=
-github.com/NpoolPlatform/message v0.0.0-20220727031757-6f03c8170baf h1:TBdpBYc8iQd3VE5/3r7m64Xgd4iVT7aPKlYbtOaJlJA=
-github.com/NpoolPlatform/message v0.0.0-20220727031757-6f03c8170baf/go.mod h1:JqJBS3hugAEodCOzhiWxsyFcjeH2STQ42dHplDZPH+M=
+github.com/NpoolPlatform/message v0.0.0-20220728103312-86afb1d947d9 h1:K+IWMI/qIoPmEk8H11JUY10kDc0JH0enR37vGAMOvPA=
+github.com/NpoolPlatform/message v0.0.0-20220728103312-86afb1d947d9/go.mod h1:JqJBS3hugAEodCOzhiWxsyFcjeH2STQ42dHplDZPH+M=
 github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996 h1:H/IlyiBuGXPNwhvKxMLFFmeamzg+fmmdf8ZERbVZjtM=
 github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996/go.mod h1:w203lHGAaRvZqEMLxJI8wBxAoVvE3RHMU3jtwN/AdgE=
-github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220728061252-f72234f0e69f h1:L+Y8Py6g83XWh0M6V1zQBFgzRmooyKiM2oBhQKu6Q/4=
-github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220728061252-f72234f0e69f/go.mod h1:mb6rJ55dMgmsaemAnsk0XeaZBfXxDf2Thsd3Rs4GFkA=
+github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220728103945-6d4a70a7042f h1:5xMT8tAuNZr7f47fv54m16MB8HQnytKyywY6S8LqSBs=
+github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220728103945-6d4a70a7042f/go.mod h1:YLSjIiNgqNxYxJNzbI81jXtl0WByfsPx0aLbMzpPTOw=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/Shonminh/apollo-client v0.4.0 h1:AXGp4wOahrEKjheMXehgsG9B8dEfLQHttRLHeEefvus=
