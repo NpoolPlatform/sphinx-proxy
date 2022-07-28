@@ -9,7 +9,7 @@ require (
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220621110548-8f3f8049ecc5
 	github.com/NpoolPlatform/message v0.0.0-20220728103312-86afb1d947d9
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996
-	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220728103945-6d4a70a7042f
+	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220728113440-f66a92ef51a3
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.8.0
 	github.com/urfave/cli/v2 v2.5.0
