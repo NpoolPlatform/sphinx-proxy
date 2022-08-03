@@ -30,7 +30,7 @@
 Transaction:
 
 | Field          | Type              | Unique | Optional | Nillable | Default | UpdateDefault | Immutable | StructTag                       | Validators |
-| :------------- | :---------------- | :----- | :------- | :------- | :------ | :------------ | :-------- | :------------------------------ | :--------- |
+|:---------------|:------------------|:-------|:---------|:---------|:--------|:--------------|:----------|:--------------------------------|:-----------|
 | id             | string            | true   | false    | false    | true    | false         | false     | json:"id,omitempty"             | 0          |
 | nonce          | uint64            | false  | false    | false    | true    | false         | false     | json:"nonce,omitempty"          | 0          |
 | coin_type      | int8              | false  | false    | false    | true    | false         | false     | json:"coin_type,omitempty"      | 0          |
@@ -43,6 +43,16 @@ Transaction:
 | update_at      | uint32            | false  | false    | false    | true    | true          | false     | json:"update_at,omitempty"      | 0          |
 | delete_at      | uint32            | false  | false    | false    | true    | false         | false     | json:"delete_at,omitempty"      | 0          |
 
+state字段说明：
+value | define                    | desc
+------|---------------------------|--------------
+0     | TransactionStateUnKnow    | 未知
+1     | TransactionStateWait      | 等待，交易创建时的初始状态
+2     | TransactionStateSign      | 签名
+20    | TransactionStateBroadcast | 广播
+3     | TransactionStateSync      | 等待上链
+4     | TransactionStateDone      | 交易成功
+5     | TransactionStateFail      | 交易失败
 ### 命令
 * make init ```初始化仓库，创建go.mod```
 * make verify ```验证开发环境与构建环境，检查code conduct```

@@ -3,59 +3,60 @@ package crud
 import (
 	"context"
 
-	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
-	"github.com/NpoolPlatform/sphinx-plugin/pkg/plugin/eth"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
+	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 // update nonce/utxo and state
 type UpdateTransactionParams struct {
 	TransactionID string
 	State         sphinxproxy.TransactionState
-	RecentBhash   string
-	Nonce         uint64
-	// TODO optimize
-	UTXO     []*sphinxplugin.Unspent
-	Pre      *eth.PreSignInfo
-	Cid      string
-	TxData   []byte
-	ExitCode int64
+	NextState     sphinxproxy.TransactionState
+	Payload       []byte
+	Cid           string
+	ExitCode      int64
 }
 
 // UpdateTransaction update transaction info
 func UpdateTransaction(ctx context.Context, t *UpdateTransactionParams) error {
+	_, span := otel.Tracer(sconst.ServiceName).Start(ctx, "UpdateTransaction")
+	defer span.End()
+
+	span.SetAttributes(
+		attribute.String("TransactionID", t.TransactionID),
+		attribute.Int64("State", int64(t.State)),
+		attribute.Int64("NextState", int64(t.NextState)),
+		attribute.String("Cid", t.Cid),
+		attribute.Int64("ExitCode", t.ExitCode),
+	)
+
 	client, err := db.Client()
 	if err != nil {
+		span.SetStatus(codes.Error, "get db client fail")
+		span.RecordError(err)
 		return err
 	}
-	stm := client.
+
+	stmt := client.
 		Transaction.
 		Update().
-		Where(transaction.TransactionIDEQ(t.TransactionID))
+		Where(
+			transaction.TransactionIDEQ(t.TransactionID),
+			transaction.StateEQ(uint8(t.State)),
+		).
+		SetPayload(t.Payload).
+		SetState(uint8(t.NextState)).
+		SetExitCode(t.ExitCode)
 
-	// TODO: 'txdata' feild of trc20 can`t be null.
-	if t.TxData == nil {
-		t.TxData = []byte{}
-	}
-	switch t.State {
-	case sphinxproxy.TransactionState_TransactionStateSign:
-		stm.SetNonce(t.Nonce)
-		stm.SetUtxo(t.UTXO)
-		stm.SetPre(t.Pre)
-		stm.SetRecentBhash(t.RecentBhash)
-		stm.SetTxData(t.TxData)
-		stm.Where(transaction.StateEQ(uint8(sphinxproxy.TransactionState_TransactionStateWait)))
-	case sphinxproxy.TransactionState_TransactionStateSync:
-		stm.SetCid(t.Cid)
-		stm.Where(transaction.StateEQ(uint8(sphinxproxy.TransactionState_TransactionStateSign)))
-	case sphinxproxy.TransactionState_TransactionStateDone,
-		sphinxproxy.TransactionState_TransactionStateFail:
-		stm.SetExitCode(t.ExitCode)
+	if t.Cid != "" {
+		stmt.
+			SetCid(t.Cid)
 	}
 
-	_, err = stm.SetState(uint8(t.State)).
-		Save(ctx)
-	return err
+	return stmt.Exec(ctx)
 }
