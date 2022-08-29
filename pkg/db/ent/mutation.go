@@ -48,6 +48,7 @@ type TransactionMutation struct {
 	cid                 *string
 	exit_code           *int64
 	addexit_code        *int64
+	name                *string
 	from                *string
 	to                  *string
 	amount              *uint64
@@ -608,22 +609,9 @@ func (m *TransactionMutation) OldTransactionID(ctx context.Context) (v string, e
 	return oldValue.TransactionID, nil
 }
 
-// ClearTransactionID clears the value of the "transaction_id" field.
-func (m *TransactionMutation) ClearTransactionID() {
-	m.transaction_id = nil
-	m.clearedFields[transaction.FieldTransactionID] = struct{}{}
-}
-
-// TransactionIDCleared returns if the "transaction_id" field was cleared in this mutation.
-func (m *TransactionMutation) TransactionIDCleared() bool {
-	_, ok := m.clearedFields[transaction.FieldTransactionID]
-	return ok
-}
-
 // ResetTransactionID resets all changes to the "transaction_id" field.
 func (m *TransactionMutation) ResetTransactionID() {
 	m.transaction_id = nil
-	delete(m.clearedFields, transaction.FieldTransactionID)
 }
 
 // SetCid sets the "cid" field.
@@ -743,6 +731,55 @@ func (m *TransactionMutation) ResetExitCode() {
 	m.exit_code = nil
 	m.addexit_code = nil
 	delete(m.clearedFields, transaction.FieldExitCode)
+}
+
+// SetName sets the "name" field.
+func (m *TransactionMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *TransactionMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *TransactionMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[transaction.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *TransactionMutation) NameCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *TransactionMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, transaction.FieldName)
 }
 
 // SetFrom sets the "from" field.
@@ -1261,7 +1298,7 @@ func (m *TransactionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TransactionMutation) Fields() []string {
-	fields := make([]string, 0, 18)
+	fields := make([]string, 0, 19)
 	if m.coin_type != nil {
 		fields = append(fields, transaction.FieldCoinType)
 	}
@@ -1291,6 +1328,9 @@ func (m *TransactionMutation) Fields() []string {
 	}
 	if m.exit_code != nil {
 		fields = append(fields, transaction.FieldExitCode)
+	}
+	if m.name != nil {
+		fields = append(fields, transaction.FieldName)
 	}
 	if m.from != nil {
 		fields = append(fields, transaction.FieldFrom)
@@ -1344,6 +1384,8 @@ func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 		return m.Cid()
 	case transaction.FieldExitCode:
 		return m.ExitCode()
+	case transaction.FieldName:
+		return m.Name()
 	case transaction.FieldFrom:
 		return m.From()
 	case transaction.FieldTo:
@@ -1389,6 +1431,8 @@ func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldCid(ctx)
 	case transaction.FieldExitCode:
 		return m.OldExitCode(ctx)
+	case transaction.FieldName:
+		return m.OldName(ctx)
 	case transaction.FieldFrom:
 		return m.OldFrom(ctx)
 	case transaction.FieldTo:
@@ -1483,6 +1527,13 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetExitCode(v)
+		return nil
+	case transaction.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
 		return nil
 	case transaction.FieldFrom:
 		v, ok := value.(string)
@@ -1702,14 +1753,14 @@ func (m *TransactionMutation) ClearedFields() []string {
 	if m.FieldCleared(transaction.FieldTxData) {
 		fields = append(fields, transaction.FieldTxData)
 	}
-	if m.FieldCleared(transaction.FieldTransactionID) {
-		fields = append(fields, transaction.FieldTransactionID)
-	}
 	if m.FieldCleared(transaction.FieldCid) {
 		fields = append(fields, transaction.FieldCid)
 	}
 	if m.FieldCleared(transaction.FieldExitCode) {
 		fields = append(fields, transaction.FieldExitCode)
+	}
+	if m.FieldCleared(transaction.FieldName) {
+		fields = append(fields, transaction.FieldName)
 	}
 	if m.FieldCleared(transaction.FieldFrom) {
 		fields = append(fields, transaction.FieldFrom)
@@ -1770,14 +1821,14 @@ func (m *TransactionMutation) ClearField(name string) error {
 	case transaction.FieldTxData:
 		m.ClearTxData()
 		return nil
-	case transaction.FieldTransactionID:
-		m.ClearTransactionID()
-		return nil
 	case transaction.FieldCid:
 		m.ClearCid()
 		return nil
 	case transaction.FieldExitCode:
 		m.ClearExitCode()
+		return nil
+	case transaction.FieldName:
+		m.ClearName()
 		return nil
 	case transaction.FieldFrom:
 		m.ClearFrom()
@@ -1840,6 +1891,9 @@ func (m *TransactionMutation) ResetField(name string) error {
 		return nil
 	case transaction.FieldExitCode:
 		m.ResetExitCode()
+		return nil
+	case transaction.FieldName:
+		m.ResetName()
 		return nil
 	case transaction.FieldFrom:
 		m.ResetFrom()

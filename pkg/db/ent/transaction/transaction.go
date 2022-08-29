@@ -32,6 +32,8 @@ const (
 	FieldCid = "cid"
 	// FieldExitCode holds the string denoting the exit_code field in the database.
 	FieldExitCode = "exit_code"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
 	// FieldFrom holds the string denoting the from field in the database.
 	FieldFrom = "from"
 	// FieldTo holds the string denoting the to field in the database.
@@ -65,6 +67,7 @@ var Columns = []string{
 	FieldTransactionID,
 	FieldCid,
 	FieldExitCode,
+	FieldName,
 	FieldFrom,
 	FieldTo,
 	FieldAmount,
@@ -104,6 +107,8 @@ var (
 	DefaultCid string
 	// DefaultExitCode holds the default value on creation for the "exit_code" field.
 	DefaultExitCode int64
+	// DefaultName holds the default value on creation for the "name" field.
+	DefaultName string
 	// DefaultFrom holds the default value on creation for the "from" field.
 	DefaultFrom string
 	// DefaultTo holds the default value on creation for the "to" field.

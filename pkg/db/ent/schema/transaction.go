@@ -50,15 +50,16 @@ func (Transaction) Fields() []ent.Field {
 			Default([]byte{}).
 			Comment("--will remove"),
 		field.String("transaction_id").
-			Optional().
-			Unique().
-			Default(""),
+			Unique(),
 		field.String("cid").
 			Optional().
 			Default(""),
 		field.Int64("exit_code").
 			Optional().
 			Default(-1),
+		field.String("name").
+			Optional().
+			Default(""),
 		field.String("from").
 			Optional().
 			Default(""),

@@ -88,6 +88,7 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 	if err := crud.CreateTransaction(ctx, crud.CreateTransactionParam{
 		CoinType:      coinType,
 		TransactionID: in.GetTransactionID(),
+		Name:          in.GetName(),
 		From:          in.GetFrom(),
 		To:            in.GetTo(),
 		Value:         in.GetAmount(),

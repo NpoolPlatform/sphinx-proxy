@@ -104,14 +104,6 @@ func (tc *TransactionCreate) SetTransactionID(s string) *TransactionCreate {
 	return tc
 }
 
-// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableTransactionID(s *string) *TransactionCreate {
-	if s != nil {
-		tc.SetTransactionID(*s)
-	}
-	return tc
-}
-
 // SetCid sets the "cid" field.
 func (tc *TransactionCreate) SetCid(s string) *TransactionCreate {
 	tc.mutation.SetCid(s)
@@ -136,6 +128,20 @@ func (tc *TransactionCreate) SetExitCode(i int64) *TransactionCreate {
 func (tc *TransactionCreate) SetNillableExitCode(i *int64) *TransactionCreate {
 	if i != nil {
 		tc.SetExitCode(*i)
+	}
+	return tc
+}
+
+// SetName sets the "name" field.
+func (tc *TransactionCreate) SetName(s string) *TransactionCreate {
+	tc.mutation.SetName(s)
+	return tc
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableName(s *string) *TransactionCreate {
+	if s != nil {
+		tc.SetName(*s)
 	}
 	return tc
 }
@@ -371,6 +377,10 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultExitCode
 		tc.mutation.SetExitCode(v)
 	}
+	if _, ok := tc.mutation.Name(); !ok {
+		v := transaction.DefaultName
+		tc.mutation.SetName(v)
+	}
 	if _, ok := tc.mutation.From(); !ok {
 		v := transaction.DefaultFrom
 		tc.mutation.SetFrom(v)
@@ -411,6 +421,9 @@ func (tc *TransactionCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TransactionCreate) check() error {
+	if _, ok := tc.mutation.TransactionID(); !ok {
+		return &ValidationError{Name: "transaction_id", err: errors.New(`ent: missing required field "Transaction.transaction_id"`)}
+	}
 	return nil
 }
 
@@ -527,6 +540,14 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Column: transaction.FieldExitCode,
 		})
 		_node.ExitCode = value
+	}
+	if value, ok := tc.mutation.Name(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldName,
+		})
+		_node.Name = value
 	}
 	if value, ok := tc.mutation.From(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -802,12 +823,6 @@ func (u *TransactionUpsert) UpdateTransactionID() *TransactionUpsert {
 	return u
 }
 
-// ClearTransactionID clears the value of the "transaction_id" field.
-func (u *TransactionUpsert) ClearTransactionID() *TransactionUpsert {
-	u.SetNull(transaction.FieldTransactionID)
-	return u
-}
-
 // SetCid sets the "cid" field.
 func (u *TransactionUpsert) SetCid(v string) *TransactionUpsert {
 	u.Set(transaction.FieldCid, v)
@@ -847,6 +862,24 @@ func (u *TransactionUpsert) AddExitCode(v int64) *TransactionUpsert {
 // ClearExitCode clears the value of the "exit_code" field.
 func (u *TransactionUpsert) ClearExitCode() *TransactionUpsert {
 	u.SetNull(transaction.FieldExitCode)
+	return u
+}
+
+// SetName sets the "name" field.
+func (u *TransactionUpsert) SetName(v string) *TransactionUpsert {
+	u.Set(transaction.FieldName, v)
+	return u
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateName() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldName)
+	return u
+}
+
+// ClearName clears the value of the "name" field.
+func (u *TransactionUpsert) ClearName() *TransactionUpsert {
+	u.SetNull(transaction.FieldName)
 	return u
 }
 
@@ -1256,13 +1289,6 @@ func (u *TransactionUpsertOne) UpdateTransactionID() *TransactionUpsertOne {
 	})
 }
 
-// ClearTransactionID clears the value of the "transaction_id" field.
-func (u *TransactionUpsertOne) ClearTransactionID() *TransactionUpsertOne {
-	return u.Update(func(s *TransactionUpsert) {
-		s.ClearTransactionID()
-	})
-}
-
 // SetCid sets the "cid" field.
 func (u *TransactionUpsertOne) SetCid(v string) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1309,6 +1335,27 @@ func (u *TransactionUpsertOne) UpdateExitCode() *TransactionUpsertOne {
 func (u *TransactionUpsertOne) ClearExitCode() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.ClearExitCode()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *TransactionUpsertOne) SetName(v string) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateName() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateName()
+	})
+}
+
+// ClearName clears the value of the "name" field.
+func (u *TransactionUpsertOne) ClearName() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearName()
 	})
 }
 
@@ -1913,13 +1960,6 @@ func (u *TransactionUpsertBulk) UpdateTransactionID() *TransactionUpsertBulk {
 	})
 }
 
-// ClearTransactionID clears the value of the "transaction_id" field.
-func (u *TransactionUpsertBulk) ClearTransactionID() *TransactionUpsertBulk {
-	return u.Update(func(s *TransactionUpsert) {
-		s.ClearTransactionID()
-	})
-}
-
 // SetCid sets the "cid" field.
 func (u *TransactionUpsertBulk) SetCid(v string) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1966,6 +2006,27 @@ func (u *TransactionUpsertBulk) UpdateExitCode() *TransactionUpsertBulk {
 func (u *TransactionUpsertBulk) ClearExitCode() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.ClearExitCode()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *TransactionUpsertBulk) SetName(v string) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateName() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateName()
+	})
+}
+
+// ClearName clears the value of the "name" field.
+func (u *TransactionUpsertBulk) ClearName() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearName()
 	})
 }
 

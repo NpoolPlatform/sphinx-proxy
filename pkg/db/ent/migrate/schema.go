@@ -18,9 +18,10 @@ var (
 		{Name: "transaction_type", Type: field.TypeInt8, Nullable: true, Default: 0},
 		{Name: "recent_bhash", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "tx_data", Type: field.TypeBytes, Nullable: true},
-		{Name: "transaction_id", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "transaction_id", Type: field.TypeString, Unique: true},
 		{Name: "cid", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "exit_code", Type: field.TypeInt64, Nullable: true, Default: -1},
+		{Name: "name", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "from", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "to", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "amount", Type: field.TypeUint64, Nullable: true, Default: 0},
@@ -39,7 +40,7 @@ var (
 			{
 				Name:    "transaction_state_coin_type_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[15], TransactionsColumns[1], TransactionsColumns[16]},
+				Columns: []*schema.Column{TransactionsColumns[16], TransactionsColumns[1], TransactionsColumns[17]},
 			},
 		},
 	}

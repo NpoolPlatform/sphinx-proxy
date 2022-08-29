@@ -135,6 +135,13 @@ func ExitCode(v int64) predicate.Transaction {
 	})
 }
 
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldName), v))
+	})
+}
+
 // From applies equality check predicate on the "from" field. It's identical to FromEQ.
 func From(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -212,12 +219,6 @@ func CoinTypeIn(vs ...int32) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldCoinType), v...))
 	})
 }
@@ -229,12 +230,6 @@ func CoinTypeNotIn(vs ...int32) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldCoinType), v...))
 	})
 }
@@ -302,12 +297,6 @@ func NonceIn(vs ...uint64) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldNonce), v...))
 	})
 }
@@ -319,12 +308,6 @@ func NonceNotIn(vs ...uint64) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldNonce), v...))
 	})
 }
@@ -420,12 +403,6 @@ func TransactionTypeIn(vs ...int8) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldTransactionType), v...))
 	})
 }
@@ -437,12 +414,6 @@ func TransactionTypeNotIn(vs ...int8) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldTransactionType), v...))
 	})
 }
@@ -510,12 +481,6 @@ func RecentBhashIn(vs ...string) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldRecentBhash), v...))
 	})
 }
@@ -527,12 +492,6 @@ func RecentBhashNotIn(vs ...string) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldRecentBhash), v...))
 	})
 }
@@ -635,12 +594,6 @@ func TxDataIn(vs ...[]byte) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldTxData), v...))
 	})
 }
@@ -652,12 +605,6 @@ func TxDataNotIn(vs ...[]byte) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldTxData), v...))
 	})
 }
@@ -725,12 +672,6 @@ func TransactionIDIn(vs ...string) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldTransactionID), v...))
 	})
 }
@@ -742,12 +683,6 @@ func TransactionIDNotIn(vs ...string) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldTransactionID), v...))
 	})
 }
@@ -801,20 +736,6 @@ func TransactionIDHasSuffix(v string) predicate.Transaction {
 	})
 }
 
-// TransactionIDIsNil applies the IsNil predicate on the "transaction_id" field.
-func TransactionIDIsNil() predicate.Transaction {
-	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldTransactionID)))
-	})
-}
-
-// TransactionIDNotNil applies the NotNil predicate on the "transaction_id" field.
-func TransactionIDNotNil() predicate.Transaction {
-	return predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldTransactionID)))
-	})
-}
-
 // TransactionIDEqualFold applies the EqualFold predicate on the "transaction_id" field.
 func TransactionIDEqualFold(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -850,12 +771,6 @@ func CidIn(vs ...string) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldCid), v...))
 	})
 }
@@ -867,12 +782,6 @@ func CidNotIn(vs ...string) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldCid), v...))
 	})
 }
@@ -975,12 +884,6 @@ func ExitCodeIn(vs ...int64) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldExitCode), v...))
 	})
 }
@@ -992,12 +895,6 @@ func ExitCodeNotIn(vs ...int64) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldExitCode), v...))
 	})
 }
@@ -1044,6 +941,119 @@ func ExitCodeNotNil() predicate.Transaction {
 	})
 }
 
+// NameEQ applies the EQ predicate on the "name" field.
+func NameEQ(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldName), v))
+	})
+}
+
+// NameNEQ applies the NEQ predicate on the "name" field.
+func NameNEQ(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldName), v))
+	})
+}
+
+// NameIn applies the In predicate on the "name" field.
+func NameIn(vs ...string) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldName), v...))
+	})
+}
+
+// NameNotIn applies the NotIn predicate on the "name" field.
+func NameNotIn(vs ...string) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldName), v...))
+	})
+}
+
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldName), v))
+	})
+}
+
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldName), v))
+	})
+}
+
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldName), v))
+	})
+}
+
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldName), v))
+	})
+}
+
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldName), v))
+	})
+}
+
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldName), v))
+	})
+}
+
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldName), v))
+	})
+}
+
+// NameIsNil applies the IsNil predicate on the "name" field.
+func NameIsNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldName)))
+	})
+}
+
+// NameNotNil applies the NotNil predicate on the "name" field.
+func NameNotNil() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldName)))
+	})
+}
+
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldName), v))
+	})
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldName), v))
+	})
+}
+
 // FromEQ applies the EQ predicate on the "from" field.
 func FromEQ(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -1065,12 +1075,6 @@ func FromIn(vs ...string) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldFrom), v...))
 	})
 }
@@ -1082,12 +1086,6 @@ func FromNotIn(vs ...string) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldFrom), v...))
 	})
 }
@@ -1190,12 +1188,6 @@ func ToIn(vs ...string) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldTo), v...))
 	})
 }
@@ -1207,12 +1199,6 @@ func ToNotIn(vs ...string) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldTo), v...))
 	})
 }
@@ -1315,12 +1301,6 @@ func AmountIn(vs ...uint64) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldAmount), v...))
 	})
 }
@@ -1332,12 +1312,6 @@ func AmountNotIn(vs ...uint64) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldAmount), v...))
 	})
 }
@@ -1405,12 +1379,6 @@ func PayloadIn(vs ...[]byte) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldPayload), v...))
 	})
 }
@@ -1422,12 +1390,6 @@ func PayloadNotIn(vs ...[]byte) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldPayload), v...))
 	})
 }
@@ -1495,12 +1457,6 @@ func StateIn(vs ...uint8) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldState), v...))
 	})
 }
@@ -1512,12 +1468,6 @@ func StateNotIn(vs ...uint8) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldState), v...))
 	})
 }
@@ -1585,12 +1535,6 @@ func CreatedAtIn(vs ...uint32) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldCreatedAt), v...))
 	})
 }
@@ -1602,12 +1546,6 @@ func CreatedAtNotIn(vs ...uint32) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
 	})
 }
@@ -1675,12 +1613,6 @@ func UpdatedAtIn(vs ...uint32) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUpdatedAt), v...))
 	})
 }
@@ -1692,12 +1624,6 @@ func UpdatedAtNotIn(vs ...uint32) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUpdatedAt), v...))
 	})
 }
@@ -1765,12 +1691,6 @@ func DeletedAtIn(vs ...uint32) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldDeletedAt), v...))
 	})
 }
@@ -1782,12 +1702,6 @@ func DeletedAtNotIn(vs ...uint32) predicate.Transaction {
 		v[i] = vs[i]
 	}
 	return predicate.Transaction(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldDeletedAt), v...))
 	})
 }

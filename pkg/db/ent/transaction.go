@@ -38,6 +38,8 @@ type Transaction struct {
 	Cid string `json:"cid,omitempty"`
 	// ExitCode holds the value of the "exit_code" field.
 	ExitCode int64 `json:"exit_code,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
 	// From holds the value of the "from" field.
 	From string `json:"from,omitempty"`
 	// To holds the value of the "to" field.
@@ -65,7 +67,7 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new([]byte)
 		case transaction.FieldCoinType, transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldExitCode, transaction.FieldAmount, transaction.FieldState, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
-		case transaction.FieldRecentBhash, transaction.FieldTransactionID, transaction.FieldCid, transaction.FieldFrom, transaction.FieldTo:
+		case transaction.FieldRecentBhash, transaction.FieldTransactionID, transaction.FieldCid, transaction.FieldName, transaction.FieldFrom, transaction.FieldTo:
 			values[i] = new(sql.NullString)
 		case transaction.FieldID:
 			values[i] = new(uuid.UUID)
@@ -153,6 +155,12 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 				return fmt.Errorf("unexpected type %T for field exit_code", values[i])
 			} else if value.Valid {
 				t.ExitCode = value.Int64
+			}
+		case transaction.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				t.Name = value.String
 			}
 		case transaction.FieldFrom:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -259,6 +267,9 @@ func (t *Transaction) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("exit_code=")
 	builder.WriteString(fmt.Sprintf("%v", t.ExitCode))
+	builder.WriteString(", ")
+	builder.WriteString("name=")
+	builder.WriteString(t.Name)
 	builder.WriteString(", ")
 	builder.WriteString("from=")
 	builder.WriteString(t.From)
