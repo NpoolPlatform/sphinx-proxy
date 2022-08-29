@@ -11,8 +11,8 @@ import (
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	cconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
+	"github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
 	ct "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
-	putils "github.com/NpoolPlatform/sphinx-plugin/pkg/utils"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
@@ -51,8 +51,8 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		return out, status.Error(codes.InvalidArgument, "Name empty")
 	}
 
-	coinType, err := putils.ToCoinType(in.GetName())
-	if err != nil {
+	tokenInfo := getter.GetTokenInfo(in.Name)
+	if tokenInfo == nil {
 		logger.Sugar().Errorf("CreateWallet Name: %v invalid", in.GetName())
 		return out, status.Error(codes.InvalidArgument, "Name Invalid")
 	}
@@ -109,7 +109,8 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 	)
 	walletDoneChannel.Store(uid, done)
 	signProxy.walletNew <- &sphinxproxy.ProxySignRequest{
-		CoinType:        coinType,
+		Name:            in.Name,
+		CoinType:        tokenInfo.CoinType,
 		TransactionType: sphinxproxy.TransactionType_WalletNew,
 		TransactionID:   uid,
 		Payload:         payload,
