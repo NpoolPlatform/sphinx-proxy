@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"sync"
 	"time"
 
@@ -34,7 +33,6 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 	}
 
 	tokenInfo := coins_getter.GetTokenInfo(in.GetName())
-	fmt.Println(tokenInfo)
 	if tokenInfo == nil {
 		logger.Sugar().Errorf("GetBalance Name: %v invalid", in.GetName())
 		return out, status.Error(codes.InvalidArgument, "Name Invalid")

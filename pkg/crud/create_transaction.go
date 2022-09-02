@@ -23,7 +23,7 @@ type CreateTransactionParam struct {
 	Value         float64
 }
 
-func CreateTransaction(ctx context.Context, t CreateTransactionParam) error {
+func CreateTransaction(ctx context.Context, t *CreateTransactionParam) error {
 	_, span := otel.Tracer(sconst.ServiceName).Start(ctx, "CreateTransaction")
 	defer span.End()
 

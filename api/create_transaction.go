@@ -5,7 +5,7 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
-	putils "github.com/NpoolPlatform/sphinx-plugin/pkg/utils"
+	coins_getter "github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"go.opentelemetry.io/otel"
@@ -42,8 +42,8 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		return out, status.Error(codes.InvalidArgument, "Name empty")
 	}
 
-	coinType, err := putils.ToCoinType(in.GetName())
-	if err != nil {
+	tokenInfo := coins_getter.GetTokenInfo(in.GetName())
+	if tokenInfo == nil {
 		logger.Sugar().Errorf("CreateTransaction Name: %v invalid", in.GetName())
 		return out, status.Error(codes.InvalidArgument, "Name Invalid")
 	}
@@ -85,8 +85,8 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 
 	// store to db
 	span.AddEvent("call db CreateTransaction")
-	if err := crud.CreateTransaction(ctx, crud.CreateTransactionParam{
-		CoinType:      coinType,
+	if err := crud.CreateTransaction(ctx, &crud.CreateTransactionParam{
+		CoinType:      tokenInfo.CoinType,
 		TransactionID: in.GetTransactionID(),
 		Name:          in.GetName(),
 		From:          in.GetFrom(),
