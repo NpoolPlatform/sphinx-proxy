@@ -54,6 +54,9 @@ func rpcGatewayRegister(mux *runtime.ServeMux, endpoint string, opts []grpc.Dial
 	if err != nil {
 		return err
 	}
-	apimgrcli.Register(mux)
+	err = apimgrcli.Register(mux)
+	if err != nil {
+		logger.Sugar().Warnf("apimanager register faild: %v", err)
+	}
 	return nil
 }
