@@ -222,7 +222,6 @@ require (
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-<<<<<<< HEAD
 	github.com/spf13/viper v1.12.0 // indirect
 	github.com/subosito/gotenv v1.3.0 // indirect
 	github.com/temoto/robotstxt v1.1.2 // indirect
@@ -238,10 +237,6 @@ require (
 	github.com/whyrusleeping/bencher v0.0.0-20190829221104-bb6607aa8bba // indirect
 	github.com/whyrusleeping/cbor-gen v0.0.0-20220302191723-37c43cae8e14 // indirect
 	github.com/whyrusleeping/timecache v0.0.0-20160911033111-cfcb2f1abfee // indirect
-=======
-	github.com/spf13/viper v1.11.0 // indirect
-	github.com/subosito/gotenv v1.2.0 // indirect
->>>>>>> master
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
@@ -268,8 +263,5 @@ require (
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-<<<<<<< HEAD
 	lukechampine.com/blake3 v1.1.7 // indirect
-=======
->>>>>>> master
 )
