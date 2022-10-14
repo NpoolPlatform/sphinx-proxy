@@ -7,9 +7,9 @@ require (
 	github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220818105452-9457611ae070
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220801075201-cab5db8b6290
-	github.com/NpoolPlatform/message v0.0.0-20220907092247-3f77de01ec70
+	github.com/NpoolPlatform/message v0.0.0-20221014030109-1ed77bb1aaa3
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20211206035652-888de6e20996
-	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20220908064719-3c7b03ae2497
+	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20221014033318-590e16af6f3a
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.0
 	github.com/urfave/cli/v2 v2.11.1
@@ -25,7 +25,7 @@ require (
 	github.com/Geapefurit/gotron-sdk v0.0.0-20220724074720-3d7ea3cbd771 // indirect
 	github.com/GeertJohan/go.incremental v1.0.0 // indirect
 	github.com/GeertJohan/go.rice v1.0.2 // indirect
-	github.com/NpoolPlatform/build-chain v0.0.0-20220908041358-cb8ef5251948 // indirect
+	github.com/NpoolPlatform/build-chain v0.0.0-20221014030951-6ce93f59d5ec // indirect
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
 	github.com/Shonminh/apollo-client v0.4.0 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
@@ -59,7 +59,7 @@ require (
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/dfuse-io/logging v0.0.0-20210109005628-b97a57253f70 // indirect
-	github.com/ethereum/go-ethereum v1.10.21 // indirect
+	github.com/ethereum/go-ethereum v1.10.23 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/filecoin-project/go-address v0.0.6 // indirect
 	github.com/filecoin-project/go-amt-ipld/v2 v2.1.0 // indirect
