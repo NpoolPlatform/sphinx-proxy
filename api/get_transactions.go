@@ -11,7 +11,6 @@ import (
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
-	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -64,7 +63,7 @@ func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransac
 		infos = append(infos, &sphinxproxy.TransactionInfo{
 			TransactionID:    info.TransactionID,
 			TransactionState: sphinxproxy.TransactionState(info.State),
-			Name:             utils.TruncateCoinTypePrefix(sphinxplugin.CoinType(info.CoinType)),
+			Name:             info.Name,
 			Amount:           price.DBPriceToVisualPrice(info.Amount),
 			Payload:          info.Payload,
 			From:             info.From,

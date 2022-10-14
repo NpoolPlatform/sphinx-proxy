@@ -17,18 +17,20 @@ import (
 type CreateTransactionParam struct {
 	CoinType      sphinxplugin.CoinType
 	TransactionID string
+	Name          string
 	From          string
 	To            string
 	Value         float64
 }
 
-func CreateTransaction(ctx context.Context, t CreateTransactionParam) error {
+func CreateTransaction(ctx context.Context, t *CreateTransactionParam) error {
 	_, span := otel.Tracer(sconst.ServiceName).Start(ctx, "CreateTransaction")
 	defer span.End()
 
 	span.SetAttributes(
 		attribute.String("CoinType", utils.TruncateCoinTypePrefix(t.CoinType)),
 		attribute.String("TransactionID", t.TransactionID),
+		attribute.String("Name", t.Name),
 		attribute.String("From", t.From),
 		attribute.String("To", t.To),
 		attribute.Float64("Value", t.Value),
@@ -43,6 +45,7 @@ func CreateTransaction(ctx context.Context, t CreateTransactionParam) error {
 	_, err = client.Transaction.Create().
 		SetCoinType(int32(t.CoinType)).
 		SetTransactionID(t.TransactionID).
+		SetName(t.Name).
 		SetFrom(t.From).
 		SetTo(t.To).
 		SetAmount(price.VisualPriceToDBPrice(t.Value)).

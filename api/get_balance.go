@@ -8,8 +8,9 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
+	coins_getter "github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
+
 	ct "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
-	putils "github.com/NpoolPlatform/sphinx-plugin/pkg/utils"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
@@ -31,8 +32,8 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 		return out, status.Error(codes.InvalidArgument, "Name empty")
 	}
 
-	coinType, err := putils.ToCoinType(in.GetName())
-	if err != nil {
+	tokenInfo := coins_getter.GetTokenInfo(in.GetName())
+	if tokenInfo == nil {
 		logger.Sugar().Errorf("GetBalance Name: %v invalid", in.GetName())
 		return out, status.Error(codes.InvalidArgument, "Name Invalid")
 	}
@@ -42,9 +43,9 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 		return out, status.Error(codes.InvalidArgument, "Address Invalid")
 	}
 
-	pluginProxy, err := getProxyPlugin(coinType)
+	pluginProxy, err := getProxyPlugin(tokenInfo.CoinType)
 	if err != nil {
-		logger.Sugar().Errorf("Get PluginProxy client not found for coinType: %v", coinType)
+		logger.Sugar().Errorf("Get PluginProxy client not found for coinType: %v", tokenInfo.CoinType)
 		return out, status.Error(codes.Internal, "internal server error")
 	}
 
@@ -54,6 +55,7 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 	)
 
 	payload, err := json.Marshal(ct.WalletBalanceRequest{
+		Name:    in.GetName(),
 		Address: in.GetAddress(),
 	})
 	if err != nil {
@@ -64,7 +66,8 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 	now := time.Now()
 	balanceDoneChannel.Store(uid, done)
 	pluginProxy.balance <- &sphinxproxy.ProxyPluginRequest{
-		CoinType:        coinType,
+		Name:            in.Name,
+		CoinType:        tokenInfo.CoinType,
 		TransactionType: sphinxproxy.TransactionType_Balance,
 		TransactionID:   uid,
 		Payload:         payload,

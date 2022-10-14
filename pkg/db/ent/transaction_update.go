@@ -171,20 +171,6 @@ func (tu *TransactionUpdate) SetTransactionID(s string) *TransactionUpdate {
 	return tu
 }
 
-// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableTransactionID(s *string) *TransactionUpdate {
-	if s != nil {
-		tu.SetTransactionID(*s)
-	}
-	return tu
-}
-
-// ClearTransactionID clears the value of the "transaction_id" field.
-func (tu *TransactionUpdate) ClearTransactionID() *TransactionUpdate {
-	tu.mutation.ClearTransactionID()
-	return tu
-}
-
 // SetCid sets the "cid" field.
 func (tu *TransactionUpdate) SetCid(s string) *TransactionUpdate {
 	tu.mutation.SetCid(s)
@@ -229,6 +215,26 @@ func (tu *TransactionUpdate) AddExitCode(i int64) *TransactionUpdate {
 // ClearExitCode clears the value of the "exit_code" field.
 func (tu *TransactionUpdate) ClearExitCode() *TransactionUpdate {
 	tu.mutation.ClearExitCode()
+	return tu
+}
+
+// SetName sets the "name" field.
+func (tu *TransactionUpdate) SetName(s string) *TransactionUpdate {
+	tu.mutation.SetName(s)
+	return tu
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableName(s *string) *TransactionUpdate {
+	if s != nil {
+		tu.SetName(*s)
+	}
+	return tu
+}
+
+// ClearName clears the value of the "name" field.
+func (tu *TransactionUpdate) ClearName() *TransactionUpdate {
+	tu.mutation.ClearName()
 	return tu
 }
 
@@ -616,12 +622,6 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: transaction.FieldTransactionID,
 		})
 	}
-	if tu.mutation.TransactionIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: transaction.FieldTransactionID,
-		})
-	}
 	if value, ok := tu.mutation.Cid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -653,6 +653,19 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Column: transaction.FieldExitCode,
+		})
+	}
+	if value, ok := tu.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldName,
+		})
+	}
+	if tu.mutation.NameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: transaction.FieldName,
 		})
 	}
 	if value, ok := tu.mutation.From(); ok {
@@ -956,20 +969,6 @@ func (tuo *TransactionUpdateOne) SetTransactionID(s string) *TransactionUpdateOn
 	return tuo
 }
 
-// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableTransactionID(s *string) *TransactionUpdateOne {
-	if s != nil {
-		tuo.SetTransactionID(*s)
-	}
-	return tuo
-}
-
-// ClearTransactionID clears the value of the "transaction_id" field.
-func (tuo *TransactionUpdateOne) ClearTransactionID() *TransactionUpdateOne {
-	tuo.mutation.ClearTransactionID()
-	return tuo
-}
-
 // SetCid sets the "cid" field.
 func (tuo *TransactionUpdateOne) SetCid(s string) *TransactionUpdateOne {
 	tuo.mutation.SetCid(s)
@@ -1014,6 +1013,26 @@ func (tuo *TransactionUpdateOne) AddExitCode(i int64) *TransactionUpdateOne {
 // ClearExitCode clears the value of the "exit_code" field.
 func (tuo *TransactionUpdateOne) ClearExitCode() *TransactionUpdateOne {
 	tuo.mutation.ClearExitCode()
+	return tuo
+}
+
+// SetName sets the "name" field.
+func (tuo *TransactionUpdateOne) SetName(s string) *TransactionUpdateOne {
+	tuo.mutation.SetName(s)
+	return tuo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableName(s *string) *TransactionUpdateOne {
+	if s != nil {
+		tuo.SetName(*s)
+	}
+	return tuo
+}
+
+// ClearName clears the value of the "name" field.
+func (tuo *TransactionUpdateOne) ClearName() *TransactionUpdateOne {
+	tuo.mutation.ClearName()
 	return tuo
 }
 
@@ -1431,12 +1450,6 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Column: transaction.FieldTransactionID,
 		})
 	}
-	if tuo.mutation.TransactionIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: transaction.FieldTransactionID,
-		})
-	}
 	if value, ok := tuo.mutation.Cid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -1468,6 +1481,19 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
 			Column: transaction.FieldExitCode,
+		})
+	}
+	if value, ok := tuo.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldName,
+		})
+	}
+	if tuo.mutation.NameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: transaction.FieldName,
 		})
 	}
 	if value, ok := tuo.mutation.From(); ok {

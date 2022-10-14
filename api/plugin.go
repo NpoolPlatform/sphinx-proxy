@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"sync"
 
-	putils "github.com/NpoolPlatform/sphinx-plugin/pkg/rpc"
-
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/coininfo"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
-	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
+	putils "github.com/NpoolPlatform/sphinx-plugin/pkg/rpc"
 )
 
 type mPlugin struct {
@@ -88,7 +86,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 				logger.Sugar().Errorf(
 					"proxy->plugin %v %v, TransactionID: %v , error: %v",
 					p.pluginInfo,
-					info.GetCoinType(),
+					info.GetName(),
 					info.GetTransactionID(),
 					err,
 				)
@@ -97,7 +95,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 					logger.Sugar().Warnf(
 						"%v %v: TransactionID: %v, Addr: %v get balance maybe timeout",
 						p.pluginInfo,
-						info.GetCoinType(),
+						info.GetName(),
 						info.GetTransactionID(),
 						info.GetAddress(),
 					)
@@ -116,7 +114,7 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 			logger.Sugar().Infof(
 				"proxy->plugin %v %v: TransactionID: %v ,Addr: %v ok",
 				p.pluginInfo,
-				info.GetCoinType(),
+				info.GetName(),
 				info.GetTransactionID(),
 				info.GetAddress(),
 			)
@@ -155,24 +153,24 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 				pluginInfo := fmt.Sprintf("%v-%v", psResponse.PluginPosition, psResponse.PluginWanIP)
 				lmPlugin.append(psResponse.GetCoinType(), pluginInfo, p)
 
-				if ok, err := haveCoin(utils.TruncateCoinTypePrefix(psResponse.GetCoinType())); ok && err == nil {
+				if ok, err := haveCoin(psResponse.GetName()); ok && err == nil {
 					continue
 				}
 
 				if err := registerCoin(&coininfo.CreateCoinInfoRequest{
-					Name: utils.TruncateCoinTypePrefix(psResponse.GetCoinType()),
+					Name: psResponse.GetName(),
 					ENV:  psResponse.GetENV(),
 					Unit: psResponse.GetUnit(),
 				}); err != nil {
 					logger.Sugar().Infof(
 						"plugin %v: register new coin: %v, error: %v",
 						pluginInfo,
-						psResponse.GetCoinType(),
+						psResponse.GetName(),
 						err,
 					)
 					continue
 				}
-				logger.Sugar().Infof("plugin: %v ,register new coin: %v ok,", pluginInfo, psResponse.GetCoinType())
+				logger.Sugar().Infof("plugin: %v ,register new coin: %v ok,", pluginInfo, psResponse.GetName())
 			case sphinxproxy.TransactionType_Balance:
 				ch, ok := balanceDoneChannel.Load(psResponse.GetTransactionID())
 				if !ok {

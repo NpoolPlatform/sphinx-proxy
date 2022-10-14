@@ -35,6 +35,7 @@ func GetTransaction(ctx context.Context, transactionID string) (*ent.Transaction
 		Select(
 			transaction.FieldTransactionID,
 			transaction.FieldCoinType,
+			transaction.FieldName,
 			transaction.FieldFrom,
 			transaction.FieldTo,
 			transaction.FieldAmount,
