@@ -6,11 +6,11 @@ import (
 	"sync"
 	"time"
 
-	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	"github.com/NpoolPlatform/message/npool"
+
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
-	cconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
 	ct "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
@@ -21,6 +21,9 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	coincli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
+	coinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
 )
 
 type walletDoneInfo struct {
@@ -64,23 +67,12 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		return out, status.Error(codes.Internal, "internal server error")
 	}
 
-	// query current coin net
-	span.AddEvent("call GetGRPCConn")
-	conn, err := grpc2.GetGRPCConn(cconst.ServiceName, grpc2.GRPCTAG)
-	if err != nil {
-		logger.Sugar().Errorf("GetGRPCConn not get valid conn: %v", err)
-		return out, status.Error(codes.Internal, "internal server error")
-	}
-	defer conn.Close()
-
-	cli := coininfopb.NewSphinxCoinInfoClient(conn)
-
-	ctx, cancel := context.WithTimeout(ctx, sconst.GrpcTimeout)
-	defer cancel()
-
 	span.AddEvent("call grpc GetCoinInfo")
-	coinInfo, err := cli.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
-		Name: in.GetName(),
+	coinInfo, err := coincli.GetCoinOnly(ctx, &coinpb.Conds{
+		Name: &npool.StringVal{
+			Op:    cruder.EQ,
+			Value: in.GetName(),
+		},
 	})
 	if err != nil {
 		logger.Sugar().Errorf("GetCoinInfo Name: %v error: %v", in.GetName(), err)
@@ -88,7 +80,7 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 	}
 
 	payload, err := json.Marshal(ct.NewAccountRequest{
-		ENV: coinInfo.GetInfo().GetENV(),
+		ENV: coinInfo.GetENV(),
 	})
 	if err != nil {
 		logger.Sugar().Errorf("Marshal balance request Addr: %v error %v", "", err)

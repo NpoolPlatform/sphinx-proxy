@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	"github.com/NpoolPlatform/message/npool/coininfo"
+	coinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	putils "github.com/NpoolPlatform/sphinx-plugin/pkg/rpc"
@@ -157,10 +157,10 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					continue
 				}
 
-				if err := registerCoin(&coininfo.CreateCoinInfoRequest{
-					Name: psResponse.GetName(),
-					ENV:  psResponse.GetENV(),
-					Unit: psResponse.GetUnit(),
+				if err := registerCoin(&coinpb.CoinReq{
+					Name: &psResponse.Name,
+					Unit: &psResponse.Unit,
+					ENV:  &psResponse.ENV,
 				}); err != nil {
 					logger.Sugar().Infof(
 						"plugin %v: register new coin: %v, error: %v",
