@@ -8,7 +8,6 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/config"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	mysqlconst "github.com/NpoolPlatform/go-service-framework/pkg/mysql/const"
-	coinconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/servicename"
 	cli "github.com/urfave/cli/v2"
@@ -31,7 +30,6 @@ func main() {
 		"./",
 		nil,
 		commands,
-		config.ServiceNameToNamespace(coinconst.ServiceName),
 		config.ServiceNameToNamespace(mysqlconst.MysqlServiceName),
 	)
 	if err != nil {
