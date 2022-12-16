@@ -106,9 +106,9 @@ github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0 h1:yIEwS
 github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0/go.mod h1:+Xj8fVgWZWGakBtqZbFn/zY0qd47AywCjLPOGdTqJDU=
 github.com/NpoolPlatform/build-chain v0.0.0-20221014030951-6ce93f59d5ec h1:Ii9gfYCeXTU+1fv3OzdzkK/Uec9SuvgN+BIYftShnJg=
 github.com/NpoolPlatform/build-chain v0.0.0-20221014030951-6ce93f59d5ec/go.mod h1:Buq4b25aA7LbtsAmx07DAC551nVYmIq+kzCuGs0XgMQ=
-github.com/NpoolPlatform/chain-manager v0.0.0-20221204052658-ed5e4546be8a h1:8FeuQZTayALj41zQhd97Pc7VxdqTa681l/OmfFzgo2I=
-github.com/NpoolPlatform/chain-middleware v0.0.0-20221205074217-351547a974de h1:EahN/jb5UokoGCDaH32u7UCP4FkAfEwTsnxp4EP3aiY=
-github.com/NpoolPlatform/chain-middleware v0.0.0-20221205074217-351547a974de/go.mod h1:XE2qRILywM7zChyZqITLSpe22xPcc8nTFjIYn0h62go=
+github.com/NpoolPlatform/chain-manager v0.0.0-20221214080455-07f7e511376f h1:lcqQpwbs7ktY9vjmDFD0X1DFdeXm78X3R5ry4gAelPI=
+github.com/NpoolPlatform/chain-middleware v0.0.0-20221216021206-c73dbc7ea1ce h1:lJ6jB8mUNoou/5a96pxwg6UxJP4/0ZKSta9mJqGn0GU=
+github.com/NpoolPlatform/chain-middleware v0.0.0-20221216021206-c73dbc7ea1ce/go.mod h1:ZTSnIdltJKyf+THfvHVCkoEmaJWESxDgpF35kJu/n78=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20220818105452-9457611ae070/go.mod h1:QPI3Fu/AU5iUOUnf9EictZP1lqPQdPcVLqveIB2HovI=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20220927113434-7c153f087a8c h1:VRcs8tOeXU9ryZ/rB656qCYzxx7TXNXbTsW2GSNOpXQ=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20220927113434-7c153f087a8c/go.mod h1:/sor3E0i0XR8BaKInJwWC85aXLmbMFRNLdIuw+ed+ig=
@@ -117,8 +117,8 @@ github.com/NpoolPlatform/libent-cruder v0.0.0-20221109023947-366125b690fb h1:IAQ
 github.com/NpoolPlatform/libent-cruder v0.0.0-20221109023947-366125b690fb/go.mod h1:zvvqlRwbOdTUauPQ9dFDhDuxa91ILV0CQfVdPBZj+eA=
 github.com/NpoolPlatform/message v0.0.0-20220501030927-34f296682c0c/go.mod h1:i/F/sQWjQk44RGvfgEB0zH0oAK/0qLvgJ1AsJDZQDkk=
 github.com/NpoolPlatform/message v0.0.0-20220819134247-1dc75c85fe43/go.mod h1:8YXp4MghMHLZ9bBdQQyfjcRtLI2RbEHAQoNCejT2nZU=
-github.com/NpoolPlatform/message v0.0.0-20221205064305-6a5aa1b954c5 h1:8xTBaOXzjM4eAktzMu+OkfKOK2JKfBLciEySLqRQWH0=
-github.com/NpoolPlatform/message v0.0.0-20221205064305-6a5aa1b954c5/go.mod h1:G4b3QmQYYHn2okxu8KfD6INUALqno3369SLciqevhtQ=
+github.com/NpoolPlatform/message v0.0.0-20221214082043-bb29954483b5 h1:a0mm5R3cE30YJ7fr8LDGyjZuYq5zXXl/uKyyTuWBngE=
+github.com/NpoolPlatform/message v0.0.0-20221214082043-bb29954483b5/go.mod h1:G4b3QmQYYHn2okxu8KfD6INUALqno3369SLciqevhtQ=
 github.com/NpoolPlatform/sphinx-plugin v0.0.0-20221014033318-590e16af6f3a h1:JVR35dIxbdauhrt9q1XGjj8e5UFJIsy4qURtQGl1NFA=
 github.com/NpoolPlatform/sphinx-plugin v0.0.0-20221014033318-590e16af6f3a/go.mod h1:pmVMA2r2eUPX7blRu/Fbd30tn/eJ1wrGeqPQp8E1xRA=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
@@ -1907,8 +1907,8 @@ github.com/rjeczalik/notify v0.9.2/go.mod h1:aErll2f0sUX9PXZnVNyeiObbmTlk5jnMoCa
 github.com/rogpeppe/fastuuid v0.0.0-20150106093220-6724a57986af/go.mod h1:XWv6SoW27p1b0cqNHllgS5HIMJraePCO15w5zCzIWYg=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
-github.com/rogpeppe/go-internal v1.6.1 h1:/FiVV8dS/e+YqF2JvO3yXRFbBLTIuSDkuC7aBOAvL+k=
 github.com/rogpeppe/go-internal v1.6.1/go.mod h1:xXDCJY+GAPziupqXw64V24skbSoqbTEfhy4qGm1nDQc=
+github.com/rogpeppe/go-internal v1.8.1 h1:geMPLpDpQOgVyCg5z5GoRwLHepNdb71NXb67XFkP+Eg=
 github.com/rs/cors v1.7.0 h1:+88SsELBHx5r+hZ8TCkggzSstaWNbDvThkVK8H6f9ik=
 github.com/rs/cors v1.7.0/go.mod h1:gFx+x8UowdsKA9AchylcLynDq+nNFfI8FkUZdN/jGCU=
 github.com/rs/xid v1.2.1/go.mod h1:+uKXf+4Djp6Md1KODXJxgGQPKngRmWyn10oCKFzNHOQ=
