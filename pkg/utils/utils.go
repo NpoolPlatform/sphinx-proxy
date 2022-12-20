@@ -26,6 +26,11 @@ func TruncateCoinTypePrefix(ct sphinxplugin.CoinType) string {
 	return strings.TrimPrefix(ct.String(), coinTypePrefix)
 }
 
+// CoinName2Type ..
+func CoinName2Type(cn string) sphinxplugin.CoinType {
+	return sphinxplugin.CoinType(sphinxplugin.CoinType_value[cn])
+}
+
 // TruncateTransactionStatePrefix ..
 func TruncateTransactionStatePrefix(ct sphinxproxy.TransactionState) string {
 	return strings.TrimPrefix(ct.String(), transactionStatePrefix)

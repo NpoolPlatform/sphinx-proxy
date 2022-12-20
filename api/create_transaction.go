@@ -3,11 +3,14 @@ package api
 import (
 	"context"
 
+	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
-	coins_getter "github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
+	cconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
+	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	ocodes "go.opentelemetry.io/otel/codes"
@@ -42,10 +45,25 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		return out, status.Error(codes.InvalidArgument, "Name empty")
 	}
 
-	tokenInfo := coins_getter.GetTokenInfo(in.GetName())
-	if tokenInfo == nil {
-		logger.Sugar().Errorf("CreateTransaction Name: %v invalid", in.GetName())
-		return out, status.Error(codes.InvalidArgument, "Name Invalid")
+	// query coininfo
+	conn, err := grpc2.GetGRPCConn(cconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		logger.Sugar().Errorf("GetGRPCConn not get valid conn: %v", err)
+		return out, status.Error(codes.Internal, "internal server error")
+	}
+	defer conn.Close()
+
+	cli := coininfopb.NewSphinxCoinInfoClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, sconst.GrpcTimeout)
+	defer cancel()
+
+	coinInfo, err := cli.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
+		Name: in.GetName(),
+	})
+	if err != nil {
+		logger.Sugar().Errorf("GetCoinInfo Name: %v error: %v", in.GetName(), err)
+		return out, status.Error(codes.Internal, "internal server error")
 	}
 
 	if in.GetTransactionID() == "" {
@@ -68,9 +86,6 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		return out, status.Error(codes.InvalidArgument, "Amount Invalid")
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, sconst.GrpcTimeout)
-	defer cancel()
-
 	span.AddEvent("call db GetTransactionExist")
 	exist, err := crud.GetTransactionExist(ctx, crud.GetTransactionExistParam{TransactionID: in.GetTransactionID()})
 	if err != nil {
@@ -86,7 +101,7 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 	// store to db
 	span.AddEvent("call db CreateTransaction")
 	if err := crud.CreateTransaction(ctx, &crud.CreateTransactionParam{
-		CoinType:      tokenInfo.CoinType,
+		CoinType:      utils.CoinName2Type(coinInfo.GetInfo().GetName()),
 		TransactionID: in.GetTransactionID(),
 		Name:          in.GetName(),
 		From:          in.GetFrom(),

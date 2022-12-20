@@ -11,9 +11,9 @@ import (
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	cconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
-	"github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
 	ct "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
+	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -51,21 +51,7 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		return out, status.Error(codes.InvalidArgument, "Name empty")
 	}
 
-	tokenInfo := getter.GetTokenInfo(in.Name)
-	if tokenInfo == nil {
-		logger.Sugar().Errorf("CreateWallet Name: %v invalid", in.GetName())
-		return out, status.Error(codes.InvalidArgument, "Name Invalid")
-	}
-
-	span.AddEvent("call getProxySign")
-	signProxy, err := getProxySign()
-	if err != nil {
-		logger.Sugar().Errorf("Get ProxySign client not found")
-		return out, status.Error(codes.Internal, "internal server error")
-	}
-
-	// query current coin net
-	span.AddEvent("call GetGRPCConn")
+	// query coininfo
 	conn, err := grpc2.GetGRPCConn(cconst.ServiceName, grpc2.GRPCTAG)
 	if err != nil {
 		logger.Sugar().Errorf("GetGRPCConn not get valid conn: %v", err)
@@ -78,12 +64,18 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 	ctx, cancel := context.WithTimeout(ctx, sconst.GrpcTimeout)
 	defer cancel()
 
-	span.AddEvent("call grpc GetCoinInfo")
 	coinInfo, err := cli.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
 		Name: in.GetName(),
 	})
 	if err != nil {
 		logger.Sugar().Errorf("GetCoinInfo Name: %v error: %v", in.GetName(), err)
+		return out, status.Error(codes.Internal, "internal server error")
+	}
+
+	span.AddEvent("call getProxySign")
+	signProxy, err := getProxySign()
+	if err != nil {
+		logger.Sugar().Errorf("Get ProxySign client not found")
 		return out, status.Error(codes.Internal, "internal server error")
 	}
 
@@ -110,7 +102,7 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 	walletDoneChannel.Store(uid, done)
 	signProxy.walletNew <- &sphinxproxy.ProxySignRequest{
 		Name:            in.Name,
-		CoinType:        tokenInfo.CoinType,
+		CoinType:        utils.CoinName2Type(coinInfo.GetInfo().GetName()),
 		TransactionType: sphinxproxy.TransactionType_WalletNew,
 		TransactionID:   uid,
 		Payload:         payload,

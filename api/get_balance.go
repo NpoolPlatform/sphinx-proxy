@@ -6,12 +6,15 @@ import (
 	"sync"
 	"time"
 
+	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
-	coins_getter "github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
+	cconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
 
 	ct "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
+	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -32,20 +35,36 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 		return out, status.Error(codes.InvalidArgument, "Name empty")
 	}
 
-	tokenInfo := coins_getter.GetTokenInfo(in.GetName())
-	if tokenInfo == nil {
-		logger.Sugar().Errorf("GetBalance Name: %v invalid", in.GetName())
-		return out, status.Error(codes.InvalidArgument, "Name Invalid")
+	// query coininfo
+	conn, err := grpc2.GetGRPCConn(cconst.ServiceName, grpc2.GRPCTAG)
+	if err != nil {
+		logger.Sugar().Errorf("GetGRPCConn not get valid conn: %v", err)
+		return out, status.Error(codes.Internal, "internal server error")
 	}
+	defer conn.Close()
+
+	cli := coininfopb.NewSphinxCoinInfoClient(conn)
+
+	ctx, cancel := context.WithTimeout(ctx, sconst.GrpcTimeout)
+	defer cancel()
+
+	coinInfo, err := cli.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
+		Name: in.GetName(),
+	})
+	if err != nil {
+		logger.Sugar().Errorf("GetCoinInfo Name: %v error: %v", in.GetName(), err)
+		return out, status.Error(codes.Internal, "internal server error")
+	}
+	coinType := utils.CoinName2Type(coinInfo.GetInfo().GetName())
 
 	if in.GetAddress() == "" {
 		logger.Sugar().Errorf("GetBalance Address: %v invalid", in.GetAddress())
 		return out, status.Error(codes.InvalidArgument, "Address Invalid")
 	}
 
-	pluginProxy, err := getProxyPlugin(tokenInfo.CoinType)
+	pluginProxy, err := getProxyPlugin(coinType)
 	if err != nil {
-		logger.Sugar().Errorf("Get PluginProxy client not found for coinType: %v", tokenInfo.CoinType)
+		logger.Sugar().Errorf("Get PluginProxy client not found for coinType: %v", coinType)
 		return out, status.Error(codes.Internal, "internal server error")
 	}
 
@@ -67,7 +86,7 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 	balanceDoneChannel.Store(uid, done)
 	pluginProxy.balance <- &sphinxproxy.ProxyPluginRequest{
 		Name:            in.Name,
-		CoinType:        tokenInfo.CoinType,
+		CoinType:        coinType,
 		TransactionType: sphinxproxy.TransactionType_Balance,
 		TransactionID:   uid,
 		Payload:         payload,
