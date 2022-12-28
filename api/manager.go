@@ -7,12 +7,14 @@ import (
 	"sync"
 	"time"
 
-	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	"github.com/NpoolPlatform/message/npool"
+
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	"github.com/NpoolPlatform/message/npool/coininfo"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
-	scconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
-	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
+
+	coincli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
+	coinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
 )
 
 /*
@@ -61,42 +63,21 @@ func getProxyPlugin(coinType sphinxplugin.CoinType) (*mPlugin, error) {
 }
 
 func haveCoin(name string) (bool, error) {
-	ackConn, err := grpc2.GetGRPCConn(scconst.ServiceName, grpc2.GRPCTAG)
+	_, total, err := coincli.GetCoins(context.Background(), &coinpb.Conds{
+		Name: &npool.StringVal{
+			Op:    cruder.EQ,
+			Value: name,
+		},
+	}, 0, 1)
 	if err != nil {
 		return false, err
-	}
-	defer ackConn.Close()
-
-	client := coininfo.NewSphinxCoinInfoClient(ackConn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), constant.GrpcTimeout)
-	defer cancel()
-
-	// define in plugin
-	ret, err := client.GetCoinInfos(ctx, &coininfo.GetCoinInfosRequest{
-		Name: name,
-	})
-	if err != nil {
-		return false, err
-	} else if ret.Total > 0 {
+	} else if total > 0 {
 		return true, nil
 	}
 	return false, nil
 }
 
-func registerCoin(coinInfo *coininfo.CreateCoinInfoRequest) error {
-	ackConn, err := grpc2.GetGRPCConn(scconst.ServiceName, grpc2.GRPCTAG)
-	if err != nil {
-		return err
-	}
-	defer ackConn.Close()
-
-	client := coininfo.NewSphinxCoinInfoClient(ackConn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), constant.GrpcTimeout)
-	defer cancel()
-
-	// define in plugin
-	_, err = client.CreateCoinInfo(ctx, coinInfo)
+func registerCoin(coinInfo *coinpb.CoinReq) error {
+	_, err := coincli.CreateCoin(context.Background(), coinInfo)
 	return err
 }

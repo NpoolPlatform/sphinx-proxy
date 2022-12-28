@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	npool "github.com/NpoolPlatform/message/npool/sphinxproxy"
-	"github.com/NpoolPlatform/sphinx-proxy/pkg/test-init" //nolint
+	testinit "github.com/NpoolPlatform/sphinx-proxy/pkg/test-init" //nolint
 )
 
 func init() {
