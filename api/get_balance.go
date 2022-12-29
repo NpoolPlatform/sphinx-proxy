@@ -6,12 +6,13 @@ import (
 	"sync"
 	"time"
 
-	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	"github.com/NpoolPlatform/message/npool"
+	coinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
-	cconst "github.com/NpoolPlatform/sphinx-coininfo/pkg/message/const"
 
+	coincli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	ct "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
@@ -36,26 +37,18 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 	}
 
 	// query coininfo
-	conn, err := grpc2.GetGRPCConn(cconst.ServiceName, grpc2.GRPCTAG)
-	if err != nil {
-		logger.Sugar().Errorf("GetGRPCConn not get valid conn: %v", err)
-		return out, status.Error(codes.Internal, "internal server error")
-	}
-	defer conn.Close()
-
-	cli := coininfopb.NewSphinxCoinInfoClient(conn)
-
-	ctx, cancel := context.WithTimeout(ctx, sconst.GrpcTimeout)
-	defer cancel()
-
-	coinInfo, err := cli.GetCoinInfo(ctx, &coininfopb.GetCoinInfoRequest{
-		Name: in.GetName(),
+	_, err = coincli.GetCoinOnly(ctx, &coinpb.Conds{
+		Name: &npool.StringVal{
+			Op:    cruder.EQ,
+			Value: in.GetName(),
+		},
 	})
 	if err != nil {
-		logger.Sugar().Errorf("GetCoinInfo Name: %v error: %v", in.GetName(), err)
+		logger.Sugar().Errorf("check coin info %v error %v", in.GetName(), err)
 		return out, status.Error(codes.Internal, "internal server error")
 	}
-	coinType := utils.CoinName2Type(coinInfo.GetInfo().GetName())
+
+	coinType := utils.CoinName2Type(in.GetName())
 
 	if in.GetAddress() == "" {
 		logger.Sugar().Errorf("GetBalance Address: %v invalid", in.GetAddress())
