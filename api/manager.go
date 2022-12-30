@@ -42,13 +42,23 @@ var (
 	channelBufSize = 100
 )
 
-func getProxySign() (*mSign, error) {
+func getProxySign(name ...string) (*mSign, error) {
 	slk.RLock()
 	defer slk.RUnlock()
 	logger.Sugar().Infof("get proxy sign length: %v", len(lmSign))
 	if len(lmSign) == 0 {
 		return nil, ErrNoSignServiceFound
 	}
+
+	// TODO: optimize
+	if len(name) > 0 {
+		for _, s := range lmSign {
+			if s.ctype == name[0] {
+				return s, nil
+			}
+		}
+	}
+
 	return lmSign[rnd.Intn(len(lmSign))], nil
 }
 

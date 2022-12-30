@@ -19,15 +19,20 @@ type mSign struct {
 	once          sync.Once
 	closeChan     chan struct{}
 	walletNew     chan *sphinxproxy.ProxySignRequest
+
+	// aleo
+	ctype string
 }
 
-func newSignStream(stream sphinxproxy.SphinxProxy_ProxySignServer) {
+func newSignStream(name string, stream sphinxproxy.SphinxProxy_ProxySignServer) {
 	lc := &mSign{
 		signServer:    stream,
 		exitChan:      make(chan struct{}),
 		closeChan:     make(chan struct{}),
 		connCloseChan: make(chan struct{}),
 		walletNew:     make(chan *sphinxproxy.ProxySignRequest, channelBufSize),
+
+		ctype: name,
 	}
 	slk.Lock()
 	lmSign = append(lmSign, lc)
