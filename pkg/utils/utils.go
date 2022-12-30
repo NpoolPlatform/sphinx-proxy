@@ -28,7 +28,7 @@ func TruncateCoinTypePrefix(ct sphinxplugin.CoinType) string {
 
 // CoinName2Type ..
 func CoinName2Type(cn string) sphinxplugin.CoinType {
-	return sphinxplugin.CoinType(sphinxplugin.CoinType_value[cn])
+	return sphinxplugin.CoinType(sphinxplugin.CoinType_value[coinTypePrefix+cn])
 }
 
 // TruncateTransactionStatePrefix ..
