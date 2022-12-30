@@ -53,7 +53,7 @@ func getProxySign(name ...string) (*mSign, error) {
 	// TODO: optimize
 	if len(name) > 0 {
 		for _, s := range lmSign {
-			if s.ctype == name[0] {
+			if s.ctype == name[0][1:] {
 				return s, nil
 			}
 		}
