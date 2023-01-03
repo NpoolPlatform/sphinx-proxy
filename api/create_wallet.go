@@ -69,6 +69,8 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		return out, status.Error(codes.Internal, "internal server error")
 	}
 
+	logger.Sugar().Errorf("GetCoinOnly %v", coinInfo)
+
 	coinType := utils.CoinName2Type(in.GetName())
 	pcoinInfo := getter.GetTokenInfo(in.GetName())
 	if pcoinInfo != nil || coinType == sphinxplugin.CoinType_CoinTypeUnKnow {
