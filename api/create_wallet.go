@@ -10,6 +10,7 @@ import (
 	"github.com/NpoolPlatform/message/npool"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	ct "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
@@ -24,6 +25,8 @@ import (
 
 	coincli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	coinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
+
+	"github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
 )
 
 type walletDoneInfo struct {
@@ -66,6 +69,12 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		return out, status.Error(codes.Internal, "internal server error")
 	}
 
+	coinType := utils.CoinName2Type(in.GetName())
+	pcoinInfo := getter.GetTokenInfo(in.GetName())
+	if pcoinInfo != nil || coinType == sphinxplugin.CoinType_CoinTypeUnKnow {
+		coinType = pcoinInfo.CoinType
+	}
+
 	span.AddEvent("call getProxySign")
 	signProxy, err := getProxySign(in.GetName())
 	if err != nil {
@@ -97,7 +106,7 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 	walletDoneChannel.Store(uid, done)
 	signProxy.walletNew <- &sphinxproxy.ProxySignRequest{
 		Name:            in.GetName(),
-		CoinType:        utils.CoinName2Type(in.GetName()),
+		CoinType:        coinType,
 		TransactionType: sphinxproxy.TransactionType_WalletNew,
 		TransactionID:   uid,
 		Payload:         payload,

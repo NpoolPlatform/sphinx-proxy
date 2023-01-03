@@ -8,7 +8,9 @@ import (
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	"github.com/NpoolPlatform/message/npool"
 	coinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
+	"github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
@@ -90,10 +92,16 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		return out, status.Errorf(codes.AlreadyExists, "TransactionID: %v already exist", in.GetTransactionID())
 	}
 
+	coinType := utils.CoinName2Type(in.GetName())
+	pcoinInfo := getter.GetTokenInfo(in.GetName())
+	if pcoinInfo != nil || coinType == sphinxplugin.CoinType_CoinTypeUnKnow {
+		coinType = pcoinInfo.CoinType
+	}
+
 	// store to db
 	span.AddEvent("call db CreateTransaction")
 	if err := crud.CreateTransaction(ctx, &crud.CreateTransactionParam{
-		CoinType:      utils.CoinName2Type(in.GetName()),
+		CoinType:      coinType,
 		TransactionID: in.GetTransactionID(),
 		Name:          in.GetName(),
 		From:          in.GetFrom(),

@@ -10,9 +10,11 @@ import (
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	"github.com/NpoolPlatform/message/npool"
 	coinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 
 	coincli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
+	"github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
 	ct "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
@@ -48,11 +50,15 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 		return out, status.Error(codes.Internal, "internal server error")
 	}
 
-	coinType := utils.CoinName2Type(in.GetName())
-
 	if in.GetAddress() == "" {
 		logger.Sugar().Errorf("GetBalance Address: %v invalid", in.GetAddress())
 		return out, status.Error(codes.InvalidArgument, "Address Invalid")
+	}
+
+	coinType := utils.CoinName2Type(in.GetName())
+	pcoinInfo := getter.GetTokenInfo(in.GetName())
+	if pcoinInfo != nil || coinType == sphinxplugin.CoinType_CoinTypeUnKnow {
+		coinType = pcoinInfo.CoinType
 	}
 
 	pluginProxy, err := getProxyPlugin(coinType)
