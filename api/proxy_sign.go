@@ -9,9 +9,8 @@ func (s *Server) ProxySign(stream sphinxproxy.SphinxProxy_ProxySignServer) error
 	md, ok := metadata.FromIncomingContext(stream.Context())
 	name := ""
 	if ok {
-		names := md.Get("name")
-		if len(names) > 0 {
-			name = names[0]
+		for _, _name := range md.Get("name") {
+			name = _name
 		}
 	}
 	newSignStream(name, stream)
