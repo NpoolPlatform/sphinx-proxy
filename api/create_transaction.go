@@ -49,7 +49,7 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 	}
 
 	// query coininfo
-	_, err = coincli.GetCoinOnly(ctx, &coinpb.Conds{
+	coinExist, err := coincli.GetCoinOnly(ctx, &coinpb.Conds{
 		Name: &npool.StringVal{
 			Op:    cruder.EQ,
 			Value: in.GetName(),
@@ -58,6 +58,11 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 	if err != nil {
 		logger.Sugar().Errorf("check coin info %v error %v", in.GetName(), err)
 		return out, status.Error(codes.Internal, "internal server error")
+	}
+
+	if coinExist == nil {
+		logger.Sugar().Errorf("check coin info %v not exist", in.GetName())
+		return out, status.Errorf(codes.NotFound, "coin %v not found", in.GetName())
 	}
 
 	if in.GetTransactionID() == "" {

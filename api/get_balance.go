@@ -33,13 +33,18 @@ var balanceDoneChannel = sync.Map{}
 
 func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceRequest) (out *sphinxproxy.GetBalanceResponse, err error) {
 	logger.Sugar().Infof("get balance info coinType: %v address: %v", in.GetName(), in.GetAddress())
+	if in.GetAddress() == "" {
+		logger.Sugar().Errorf("GetBalance Address: %v invalid", in.GetAddress())
+		return out, status.Error(codes.InvalidArgument, "Address Invalid")
+	}
+
 	if in.GetName() == "" {
 		logger.Sugar().Errorf("GetBalance Name: %v empty", in.GetName())
 		return out, status.Error(codes.InvalidArgument, "Name empty")
 	}
 
 	// query coininfo
-	_, err = coincli.GetCoinOnly(ctx, &coinpb.Conds{
+	coinExist, err := coincli.GetCoinOnly(ctx, &coinpb.Conds{
 		Name: &npool.StringVal{
 			Op:    cruder.EQ,
 			Value: in.GetName(),
@@ -50,9 +55,9 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 		return out, status.Error(codes.Internal, "internal server error")
 	}
 
-	if in.GetAddress() == "" {
-		logger.Sugar().Errorf("GetBalance Address: %v invalid", in.GetAddress())
-		return out, status.Error(codes.InvalidArgument, "Address Invalid")
+	if coinExist == nil {
+		logger.Sugar().Errorf("check coin info %v not exist", in.GetName())
+		return out, status.Errorf(codes.NotFound, "coin %v not found", in.GetName())
 	}
 
 	coinType := utils.CoinName2Type(in.GetName())
