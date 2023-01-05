@@ -103,15 +103,20 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		coinType = pcoinInfo.CoinType
 	}
 
+	tstate := sphinxproxy.TransactionState_TransactionStateWait
+	if coinType == sphinxplugin.CoinType_CoinTypealeo || coinType == sphinxplugin.CoinType_CoinTypetaleo {
+		tstate = sphinxproxy.TransactionState_TransactionStateRetrievePrivateInfo
+	}
 	// store to db
 	span.AddEvent("call db CreateTransaction")
 	if err := crud.CreateTransaction(ctx, &crud.CreateTransactionParam{
-		CoinType:      coinType,
-		TransactionID: in.GetTransactionID(),
-		Name:          in.GetName(),
-		From:          in.GetFrom(),
-		To:            in.GetTo(),
-		Value:         in.GetAmount(),
+		CoinType:         coinType,
+		TransactionState: tstate,
+		TransactionID:    in.GetTransactionID(),
+		Name:             in.GetName(),
+		From:             in.GetFrom(),
+		To:               in.GetTo(),
+		Value:            in.GetAmount(),
 	}); err != nil {
 		logger.Sugar().Errorf("CreateTransaction save to db error: %v,TransactionInfo:%v", err, in)
 		return out, status.Error(codes.Internal, "internal server error")
