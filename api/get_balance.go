@@ -93,7 +93,7 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 		coinType == sphinxplugin.CoinType_CoinTypetaleo {
 		balanceDoneChannel.Store(puid, pdone)
 
-		signProxy, err := getProxySign(in.GetName())
+		signProxy, err := getProxySign("aleo")
 		if err != nil {
 			logger.Sugar().Errorf("Get ProxySign client not found")
 			return out, status.Error(codes.Internal, "internal server error")
