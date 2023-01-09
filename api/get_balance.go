@@ -82,12 +82,6 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 
 	now := time.Now()
 
-	logger.Sugar().Errorf("??????????????????????????? %v/%v/%v",
-		coinType,
-		coinType == sphinxplugin.CoinType_CoinTypealeo,
-		coinType == sphinxplugin.CoinType_CoinTypetaleo,
-	)
-
 	// fetch private info
 	if coinType == sphinxplugin.CoinType_CoinTypealeo ||
 		coinType == sphinxplugin.CoinType_CoinTypetaleo {
