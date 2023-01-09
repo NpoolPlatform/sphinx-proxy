@@ -70,7 +70,9 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 					err,
 				)
 				if ch, ok := balanceDoneChannel.Load(info.GetTransactionID()); ok {
-					ch.(chan []byte) <- nil
+					ch.(chan balanceDoneInfo) <- balanceDoneInfo{
+						success: false,
+					}
 				}
 				if putils.CheckCode(err) {
 					s.closeChan <- struct{}{}
@@ -145,7 +147,18 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 					logger.Sugar().Warnf("TransactionID: %v create wallet maybe timeout", ssResponse.GetTransactionID())
 					continue
 				}
-				ch.(chan []byte) <- ssResponse.Payload
+				if ssResponse.GetRPCExitMessage() != "" {
+					logger.Sugar().Infof("TransactionID: %v pre balance error: %v", ssResponse.GetTransactionID(), ssResponse.GetRPCExitMessage())
+					ch.(chan balanceDoneInfo) <- balanceDoneInfo{
+						success: false,
+						message: ssResponse.GetRPCExitMessage(),
+					}
+					continue
+				}
+				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
+					success: true,
+					payload: ssResponse.Payload,
+				}
 			case sphinxproxy.TransactionType_WalletNew:
 				ch, ok := walletDoneChannel.Load(ssResponse.GetTransactionID())
 				if !ok {

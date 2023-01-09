@@ -76,7 +76,7 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 		uid     = uuid.NewString()
 		done    = make(chan balanceDoneInfo)
 		puid    = uuid.NewString()
-		pdone   = make(chan []byte)
+		pdone   = make(chan balanceDoneInfo)
 		payload = make([]byte, 0)
 	)
 
@@ -98,6 +98,9 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 			logger.Sugar().Errorf("Marshal pre balance request Addr: %v error %v", in.GetAddress(), err)
 			return out, status.Error(codes.Internal, "internal server error")
 		}
+
+		logger.Sugar().Errorf("??????????????????????????? %v", string(fromByte))
+
 		signProxy.preBalance <- &sphinxproxy.ProxySignRequest{
 			Name:            in.GetName(),
 			CoinType:        coinType,
@@ -112,7 +115,11 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 			return out, status.Error(codes.Internal, "internal server error")
 		case info := <-pdone:
 			balanceDoneChannel.Delete(puid)
-			payload = info
+			if !info.success {
+				logger.Sugar().Errorf("wait get wallet:%v pre balance done error: %v", in.GetAddress(), info.message)
+				return out, status.Error(codes.Internal, "internal server error")
+			}
+			payload = info.payload
 		}
 	} else {
 		payload, err = json.Marshal(ct.WalletBalanceRequest{
