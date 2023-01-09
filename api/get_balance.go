@@ -99,8 +99,6 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 			return out, status.Error(codes.Internal, "internal server error")
 		}
 
-		logger.Sugar().Errorf("??????????????????????????? %v", string(fromByte))
-
 		signProxy.preBalance <- &sphinxproxy.ProxySignRequest{
 			Name:            in.GetName(),
 			CoinType:        coinType,
@@ -121,6 +119,8 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 			}
 			payload = info.payload
 		}
+
+		logger.Sugar().Errorf("??????????????????????????? %v/%v", string(fromByte), string(payload))
 	} else {
 		payload, err = json.Marshal(ct.WalletBalanceRequest{
 			Name:    in.GetName(),
