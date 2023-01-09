@@ -26,7 +26,6 @@ type mSign struct {
 }
 
 func newSignStream(name string, stream sphinxproxy.SphinxProxy_ProxySignServer) {
-	logger.Sugar().Errorf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! %v", name)
 	lc := &mSign{
 		signServer:    stream,
 		exitChan:      make(chan struct{}),

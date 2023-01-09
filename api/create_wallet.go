@@ -80,8 +80,14 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		coinType = pcoinInfo.CoinType
 	}
 
+	name := in.GetName()
 	span.AddEvent("call getProxySign")
-	signProxy, err := getProxySign(in.GetName())
+	if coinType == sphinxplugin.CoinType_CoinTypealeo ||
+		coinType == sphinxplugin.CoinType_CoinTypetaleo {
+		name = "aleo"
+	}
+
+	signProxy, err := getProxySign(name)
 	if err != nil {
 		logger.Sugar().Errorf("Get ProxySign client not found")
 		return out, status.Error(codes.Internal, "internal server error")
