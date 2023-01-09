@@ -73,23 +73,61 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 	}
 
 	var (
-		uid  = uuid.NewString()
-		done = make(chan balanceDoneInfo)
+		uid     = uuid.NewString()
+		done    = make(chan balanceDoneInfo)
+		puid    = uuid.NewString()
+		pdone   = make(chan []byte)
+		payload = make([]byte, 0)
 	)
 
-	payload, err := json.Marshal(ct.WalletBalanceRequest{
-		Name:    in.GetName(),
-		Address: in.GetAddress(),
-	})
-	if err != nil {
-		logger.Sugar().Errorf("Marshal balance request Addr: %v error %v", in.GetAddress(), err)
-		return out, status.Error(codes.Internal, "internal server error")
+	now := time.Now()
+
+	// fetch private info
+	if coinType == sphinxplugin.CoinType_CoinTypealeo ||
+		coinType == sphinxplugin.CoinType_CoinTypetaleo {
+		balanceDoneChannel.Store(puid, pdone)
+
+		signProxy, err := getProxySign(in.GetName())
+		if err != nil {
+			logger.Sugar().Errorf("Get ProxySign client not found")
+			return out, status.Error(codes.Internal, "internal server error")
+		}
+
+		fromByte, err := json.Marshal(struct{ From string }{From: in.GetAddress()})
+		if err != nil {
+			logger.Sugar().Errorf("Marshal pre balance request Addr: %v error %v", in.GetAddress(), err)
+			return out, status.Error(codes.Internal, "internal server error")
+		}
+		signProxy.preBalance <- &sphinxproxy.ProxySignRequest{
+			Name:            in.GetName(),
+			CoinType:        coinType,
+			TransactionType: sphinxproxy.TransactionType_PreBalance,
+			TransactionID:   puid,
+			Payload:         fromByte,
+		}
+
+		select {
+		case <-time.After(sconst.GrpcTimeout * 6):
+			balanceDoneChannel.Delete(puid)
+			return out, status.Error(codes.Internal, "internal server error")
+		case info := <-pdone:
+			balanceDoneChannel.Delete(puid)
+			payload = info
+		}
+	} else {
+		payload, err = json.Marshal(ct.WalletBalanceRequest{
+			Name:    in.GetName(),
+			Address: in.GetAddress(),
+		})
+		if err != nil {
+			logger.Sugar().Errorf("Marshal balance request Addr: %v error %v", in.GetAddress(), err)
+			return out, status.Error(codes.Internal, "internal server error")
+		}
 	}
 
-	now := time.Now()
 	balanceDoneChannel.Store(uid, done)
 	pluginProxy.balance <- &sphinxproxy.ProxyPluginRequest{
-		Name:            in.Name,
+		Name:            in.GetName(),
 		CoinType:        coinType,
 		TransactionType: sphinxproxy.TransactionType_Balance,
 		TransactionID:   uid,
