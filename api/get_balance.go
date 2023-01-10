@@ -93,7 +93,9 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 			return out, status.Error(codes.Internal, "internal server error")
 		}
 
-		fromByte, err := json.Marshal(struct{ From string }{From: in.GetAddress()})
+		fromByte, err := json.Marshal(struct {
+			From string `json:"from"`
+		}{From: in.GetAddress()})
 		if err != nil {
 			logger.Sugar().Errorf("Marshal pre balance request Addr: %v error %v", in.GetAddress(), err)
 			return out, status.Error(codes.Internal, "internal server error")
@@ -119,8 +121,6 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 			}
 			payload = info.payload
 		}
-
-		logger.Sugar().Errorf("??????????????????????????? %v/%v", string(fromByte), string(payload))
 	} else {
 		payload, err = json.Marshal(ct.WalletBalanceRequest{
 			Name:    in.GetName(),
