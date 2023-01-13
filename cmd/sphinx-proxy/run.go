@@ -5,7 +5,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	apimgrcli "github.com/NpoolPlatform/api-manager/pkg/client"
+	apicli "github.com/NpoolPlatform/basal-middleware/pkg/client/api"
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/sphinx-proxy/api"
@@ -54,9 +54,9 @@ func rpcGatewayRegister(mux *runtime.ServeMux, endpoint string, opts []grpc.Dial
 	if err != nil {
 		return err
 	}
-	err = apimgrcli.Register(mux)
+	err = apicli.Register(mux)
 	if err != nil {
-		logger.Sugar().Warnf("apimanager register faild: %v", err)
+		logger.Sugar().Warnf("basal middleware register faild: %v", err)
 	}
 	return nil
 }
