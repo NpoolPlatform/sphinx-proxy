@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 
@@ -42,7 +43,7 @@ var (
 	channelBufSize = 100
 )
 
-func getProxySign(name ...string) (*mSign, error) {
+func getProxySign(name string) (*mSign, error) {
 	slk.RLock()
 	defer slk.RUnlock()
 
@@ -58,7 +59,7 @@ func getProxySign(name ...string) (*mSign, error) {
 
 	if len(name) > 0 {
 		for _, s := range lmSign {
-			if s.ctype == name[0][1:] {
+			if strings.EqualFold(s.ctype, name) {
 				return s, nil
 			}
 		}
