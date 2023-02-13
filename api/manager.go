@@ -52,9 +52,9 @@ func getProxySign(name ...string) (*mSign, error) {
 
 	signs := lmSign[0].ctype
 	for _, s := range lmSign[1:] {
-		signs += " " + s.ctype
+		signs += " | " + s.ctype
 	}
-	logger.Sugar().Infof("signs: %v", signs)
+	logger.Sugar().Infof("signs: %v | %v", signs, len(lmSign))
 
 	if len(name) > 0 {
 		for _, s := range lmSign {
