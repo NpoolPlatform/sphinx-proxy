@@ -67,7 +67,14 @@ func getProxySign(name ...string) (*mSign, error) {
 
 	lSigns := make([]*mSign, 0)
 	for _, s := range lmSign {
+		if s.ctype != "" {
+			continue
+		}
 		lSigns = append(lSigns, s)
+	}
+
+	if len(lSigns) == 0 {
+		return nil, ErrNoSignServiceFound
 	}
 
 	return lSigns[rnd.Intn(len(lSigns))], nil
