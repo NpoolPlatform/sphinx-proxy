@@ -65,7 +65,12 @@ func getProxySign(name ...string) (*mSign, error) {
 		logger.Sugar().Infof("fallback: %v", name)
 	}
 
-	return lmSign[rnd.Intn(len(lmSign))], nil
+	lSigns := make([]*mSign, 0)
+	for _, s := range lmSign {
+		lSigns = append(lSigns, s)
+	}
+
+	return lSigns[rnd.Intn(len(lSigns))], nil
 }
 
 func getProxyPlugin(coinType sphinxplugin.CoinType) (*mPlugin, error) {
