@@ -45,18 +45,24 @@ var (
 func getProxySign(name ...string) (*mSign, error) {
 	slk.RLock()
 	defer slk.RUnlock()
-	logger.Sugar().Infof("get proxy sign length: %v", len(lmSign))
+
 	if len(lmSign) == 0 {
 		return nil, ErrNoSignServiceFound
 	}
 
-	// TODO: optimize
+	signs := ""
+	for _, s := range lmSign {
+		signs += s.ctype + " "
+	}
+	logger.Sugar().Infof("signs: %v", signs)
+
 	if len(name) > 0 {
 		for _, s := range lmSign {
 			if s.ctype == name[0][1:] {
 				return s, nil
 			}
 		}
+		logger.Sugar().Infof("fallback: %v", name)
 	}
 
 	return lmSign[rnd.Intn(len(lmSign))], nil
