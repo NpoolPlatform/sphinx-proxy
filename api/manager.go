@@ -50,9 +50,9 @@ func getProxySign(name ...string) (*mSign, error) {
 		return nil, ErrNoSignServiceFound
 	}
 
-	signs := ""
-	for _, s := range lmSign {
-		signs += s.ctype + " "
+	signs := lmSign[0].ctype
+	for _, s := range lmSign[1:] {
+		signs += " " + s.ctype
 	}
 	logger.Sugar().Infof("signs: %v", signs)
 
