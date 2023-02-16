@@ -216,7 +216,7 @@ func (p *mPlugin) watch(wg *sync.WaitGroup) {
 		nlmPlugin := make([]*mPlugin, 0, len(lmPlugin[p.coinType]))
 		for _, plugin := range lmPlugin[p.coinType] {
 			if plugin.pluginServer == p.pluginServer {
-				logger.Sugar().Info("some plugin %v client closed, proxy remove it", p.pluginInfo)
+				logger.Sugar().Infof("some plugin %v client closed, proxy remove it", p.pluginInfo)
 				continue
 			}
 			nlmPlugin = append(nlmPlugin, plugin)

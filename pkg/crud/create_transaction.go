@@ -15,12 +15,13 @@ import (
 )
 
 type CreateTransactionParam struct {
-	CoinType      sphinxplugin.CoinType
-	TransactionID string
-	Name          string
-	From          string
-	To            string
-	Value         float64
+	CoinType         sphinxplugin.CoinType
+	TransactionState sphinxproxy.TransactionState
+	TransactionID    string
+	Name             string
+	From             string
+	To               string
+	Value            float64
 }
 
 func CreateTransaction(ctx context.Context, t *CreateTransactionParam) error {
@@ -49,7 +50,7 @@ func CreateTransaction(ctx context.Context, t *CreateTransactionParam) error {
 		SetFrom(t.From).
 		SetTo(t.To).
 		SetAmount(price.VisualPriceToDBPrice(t.Value)).
-		SetState(uint8(sphinxproxy.TransactionState_TransactionStateWait)).
+		SetState(uint8(t.TransactionState)).
 		Save(ctx)
 	return err
 }

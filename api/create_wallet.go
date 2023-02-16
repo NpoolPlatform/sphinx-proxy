@@ -10,10 +10,11 @@ import (
 	"github.com/NpoolPlatform/message/npool"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
-	"github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
 	ct "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
+	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -24,6 +25,8 @@ import (
 
 	coincli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	coinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
+
+	"github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
 )
 
 type walletDoneInfo struct {
@@ -54,20 +57,7 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		return out, status.Error(codes.InvalidArgument, "Name empty")
 	}
 
-	tokenInfo := getter.GetTokenInfo(in.Name)
-	if tokenInfo == nil {
-		logger.Sugar().Errorf("CreateWallet Name: %v invalid", in.GetName())
-		return out, status.Error(codes.InvalidArgument, "Name Invalid")
-	}
-
-	span.AddEvent("call getProxySign")
-	signProxy, err := getProxySign()
-	if err != nil {
-		logger.Sugar().Errorf("Get ProxySign client not found")
-		return out, status.Error(codes.Internal, "internal server error")
-	}
-
-	span.AddEvent("call grpc GetCoinInfo")
+	// query coininfo
 	coinInfo, err := coincli.GetCoinOnly(ctx, &coinpb.Conds{
 		Name: &npool.StringVal{
 			Op:    cruder.EQ,
@@ -75,7 +65,31 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		},
 	})
 	if err != nil {
-		logger.Sugar().Errorf("GetCoinInfo Name: %v error: %v", in.GetName(), err)
+		logger.Sugar().Errorf("check coin info %v error %v", in.GetName(), err)
+		return out, status.Error(codes.Internal, "internal server error")
+	}
+
+	if coinInfo == nil {
+		logger.Sugar().Errorf("check coin info %v not exist", in.GetName())
+		return out, status.Errorf(codes.NotFound, "coin %v not found", in.GetName())
+	}
+
+	coinType := utils.CoinName2Type(in.GetName())
+	pcoinInfo := getter.GetTokenInfo(in.GetName())
+	if pcoinInfo != nil || coinType == sphinxplugin.CoinType_CoinTypeUnKnow {
+		coinType = pcoinInfo.CoinType
+	}
+
+	name := in.GetName()
+	span.AddEvent("call getProxySign")
+	if coinType == sphinxplugin.CoinType_CoinTypealeo ||
+		coinType == sphinxplugin.CoinType_CoinTypetaleo {
+		name = "aleo"
+	}
+
+	signProxy, err := getProxySign(name)
+	if err != nil {
+		logger.Sugar().Errorf("Get ProxySign client not found")
 		return out, status.Error(codes.Internal, "internal server error")
 	}
 
@@ -99,10 +113,11 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 			attribute.String("TransactionID", uid),
 		),
 	)
+
 	walletDoneChannel.Store(uid, done)
 	signProxy.walletNew <- &sphinxproxy.ProxySignRequest{
-		Name:            in.Name,
-		CoinType:        tokenInfo.CoinType,
+		Name:            in.GetName(),
+		CoinType:        coinType,
 		TransactionType: sphinxproxy.TransactionType_WalletNew,
 		TransactionID:   uid,
 		Payload:         payload,

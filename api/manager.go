@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 
@@ -42,14 +43,42 @@ var (
 	channelBufSize = 100
 )
 
-func getProxySign() (*mSign, error) {
+func getProxySign(name string) (*mSign, error) {
 	slk.RLock()
 	defer slk.RUnlock()
-	logger.Sugar().Infof("get proxy sign length: %v", len(lmSign))
+
 	if len(lmSign) == 0 {
 		return nil, ErrNoSignServiceFound
 	}
-	return lmSign[rnd.Intn(len(lmSign))], nil
+
+	signs := lmSign[0].ctype
+	for _, s := range lmSign[1:] {
+		signs += " | " + s.ctype
+	}
+	logger.Sugar().Infof("signs: %v | %v", signs, len(lmSign))
+
+	if len(name) > 0 {
+		for _, s := range lmSign {
+			if strings.EqualFold(s.ctype, name) {
+				return s, nil
+			}
+		}
+		logger.Sugar().Infof("fallback: %v", name)
+	}
+
+	lSigns := make([]*mSign, 0)
+	for _, s := range lmSign {
+		if s.ctype != "" {
+			continue
+		}
+		lSigns = append(lSigns, s)
+	}
+
+	if len(lSigns) == 0 {
+		return nil, ErrNoSignServiceFound
+	}
+
+	return lSigns[rnd.Intn(len(lSigns))], nil
 }
 
 func getProxyPlugin(coinType sphinxplugin.CoinType) (*mPlugin, error) {

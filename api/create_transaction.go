@@ -3,11 +3,17 @@ package api
 import (
 	"context"
 
+	coincli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	"github.com/NpoolPlatform/message/npool"
+	coinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
+	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
-	coins_getter "github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
+	"github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
+	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	ocodes "go.opentelemetry.io/otel/codes"
@@ -42,10 +48,21 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		return out, status.Error(codes.InvalidArgument, "Name empty")
 	}
 
-	tokenInfo := coins_getter.GetTokenInfo(in.GetName())
-	if tokenInfo == nil {
-		logger.Sugar().Errorf("CreateTransaction Name: %v invalid", in.GetName())
-		return out, status.Error(codes.InvalidArgument, "Name Invalid")
+	// query coininfo
+	coinExist, err := coincli.GetCoinOnly(ctx, &coinpb.Conds{
+		Name: &npool.StringVal{
+			Op:    cruder.EQ,
+			Value: in.GetName(),
+		},
+	})
+	if err != nil {
+		logger.Sugar().Errorf("check coin info %v error %v", in.GetName(), err)
+		return out, status.Error(codes.Internal, "internal server error")
+	}
+
+	if coinExist == nil {
+		logger.Sugar().Errorf("check coin info %v not exist", in.GetName())
+		return out, status.Errorf(codes.NotFound, "coin %v not found", in.GetName())
 	}
 
 	if in.GetTransactionID() == "" {
@@ -68,9 +85,6 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		return out, status.Error(codes.InvalidArgument, "Amount Invalid")
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, sconst.GrpcTimeout)
-	defer cancel()
-
 	span.AddEvent("call db GetTransactionExist")
 	exist, err := crud.GetTransactionExist(ctx, crud.GetTransactionExistParam{TransactionID: in.GetTransactionID()})
 	if err != nil {
@@ -83,15 +97,26 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		return out, status.Errorf(codes.AlreadyExists, "TransactionID: %v already exist", in.GetTransactionID())
 	}
 
+	coinType := utils.CoinName2Type(in.GetName())
+	pcoinInfo := getter.GetTokenInfo(in.GetName())
+	if pcoinInfo != nil || coinType == sphinxplugin.CoinType_CoinTypeUnKnow {
+		coinType = pcoinInfo.CoinType
+	}
+
+	tstate := sphinxproxy.TransactionState_TransactionStateWait
+	if coinType == sphinxplugin.CoinType_CoinTypealeo || coinType == sphinxplugin.CoinType_CoinTypetaleo {
+		tstate = sphinxproxy.TransactionState_TransactionStateRetrievePrivateInfo
+	}
 	// store to db
 	span.AddEvent("call db CreateTransaction")
 	if err := crud.CreateTransaction(ctx, &crud.CreateTransactionParam{
-		CoinType:      tokenInfo.CoinType,
-		TransactionID: in.GetTransactionID(),
-		Name:          in.GetName(),
-		From:          in.GetFrom(),
-		To:            in.GetTo(),
-		Value:         in.GetAmount(),
+		CoinType:         coinType,
+		TransactionState: tstate,
+		TransactionID:    in.GetTransactionID(),
+		Name:             in.GetName(),
+		From:             in.GetFrom(),
+		To:               in.GetTo(),
+		Value:            in.GetAmount(),
 	}); err != nil {
 		logger.Sugar().Errorf("CreateTransaction save to db error: %v,TransactionInfo:%v", err, in)
 		return out, status.Error(codes.Internal, "internal server error")

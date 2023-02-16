@@ -19,15 +19,21 @@ type mSign struct {
 	once          sync.Once
 	closeChan     chan struct{}
 	walletNew     chan *sphinxproxy.ProxySignRequest
+	preBalance    chan *sphinxproxy.ProxySignRequest
+
+	// aleo
+	ctype string
 }
 
-func newSignStream(stream sphinxproxy.SphinxProxy_ProxySignServer) {
+func newSignStream(name string, stream sphinxproxy.SphinxProxy_ProxySignServer) {
 	lc := &mSign{
 		signServer:    stream,
 		exitChan:      make(chan struct{}),
 		closeChan:     make(chan struct{}),
 		connCloseChan: make(chan struct{}),
 		walletNew:     make(chan *sphinxproxy.ProxySignRequest, channelBufSize),
+		preBalance:    make(chan *sphinxproxy.ProxySignRequest, channelBufSize),
+		ctype:         name,
 	}
 	slk.Lock()
 	lmSign = append(lmSign, lc)
@@ -54,6 +60,27 @@ func (s *mSign) signStreamSend(wg *sync.WaitGroup) {
 		case <-s.connCloseChan:
 			logger.Sugar().Info("sign send chan close")
 			return
+		case info := <-s.preBalance:
+			logger.Sugar().Infof("proxy->sign TransactionID: %v start", info.GetTransactionID())
+			if err := s.signServer.Send(info); err != nil {
+				logger.Sugar().Errorf(
+					"proxy->sign TransactionID: %v, CoinType: %v error: %v",
+					info.GetCoinType(),
+					info.GetTransactionID(),
+					err,
+				)
+				if ch, ok := balanceDoneChannel.Load(info.GetTransactionID()); ok {
+					ch.(chan balanceDoneInfo) <- balanceDoneInfo{
+						success: false,
+					}
+				}
+				if putils.CheckCode(err) {
+					s.closeChan <- struct{}{}
+					return
+				}
+				continue
+			}
+			logger.Sugar().Infof("proxy->sign TransactionID: %v ok", info.GetTransactionID())
 		case info := <-s.walletNew:
 			logger.Sugar().Infof("proxy->sign TransactionID: %v start", info.GetTransactionID())
 			if err := s.signServer.Send(info); err != nil {
@@ -114,6 +141,24 @@ func (s *mSign) signStreamRecv(wg *sync.WaitGroup) {
 			)
 
 			switch ssResponse.GetTransactionType() {
+			case sphinxproxy.TransactionType_PreBalance:
+				ch, ok := balanceDoneChannel.Load(ssResponse.GetTransactionID())
+				if !ok {
+					logger.Sugar().Warnf("TransactionID: %v create wallet maybe timeout", ssResponse.GetTransactionID())
+					continue
+				}
+				if ssResponse.GetRPCExitMessage() != "" {
+					logger.Sugar().Infof("TransactionID: %v pre balance error: %v", ssResponse.GetTransactionID(), ssResponse.GetRPCExitMessage())
+					ch.(chan balanceDoneInfo) <- balanceDoneInfo{
+						success: false,
+						message: ssResponse.GetRPCExitMessage(),
+					}
+					continue
+				}
+				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
+					success: true,
+					payload: ssResponse.Payload,
+				}
 			case sphinxproxy.TransactionType_WalletNew:
 				ch, ok := walletDoneChannel.Load(ssResponse.GetTransactionID())
 				if !ok {
