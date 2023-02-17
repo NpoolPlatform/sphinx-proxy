@@ -118,7 +118,9 @@ pipeline {
                 patch=$(( $patch + $patch % 2 + 1 ))
                 ;;
               production)
-                patch=$(( $patch + 1 ))
+                if [ ! $patch % 2 eq 0 ]; then
+                  patch=$(( $patch + 1 ))
+		fi
                 git reset --hard
                 git checkout $tag
                 ;;
