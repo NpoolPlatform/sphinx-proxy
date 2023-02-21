@@ -103,35 +103,42 @@ pipeline {
         expression { TAG_PATCH == 'true' }
       }
       steps {
-        sh(returnStdout: true, script: '''
-          set +e
-          revlist=`git rev-list --tags --max-count=1`
-          rc=$?
-          set -e
-          if [ 0 -eq $rc ]; then
-            tag=`git describe --tags $revlist`
-            major=`echo $tag | awk -F '.' '{ print $1 }'`
-            minor=`echo $tag | awk -F '.' '{ print $2 }'`
-            patch=`echo $tag | awk -F '.' '{ print $3 }'`
-            case $TAG_FOR in
-              testing)
-                patch=$(( $patch + $patch % 2 + 1 ))
-                ;;
-              production)
-                patch=$(( $patch + 1 ))
-                git reset --hard
-                git checkout $tag
-                ;;
-            esac
-            tag=$major.$minor.$patch
-          else
-            tag=0.1.1
-          fi
-          git tag -a $tag -m "Bump version to $tag"
-        '''.stripIndent())
-
         withCredentials([gitUsernamePassword(credentialsId: 'KK-github-key', gitToolName: 'git-tool')]) {
-          sh 'git push --tag'
+          sh(returnStdout: true, script: '''
+            set +e
+            revlist=`git rev-list --tags --max-count=1`
+            rc=$?
+            set -e
+            tagchanged=0
+            if [ 0 -eq $rc ]; then
+              tag=`git describe --tags $revlist`
+              major=`echo $tag | awk -F '.' '{ print $1 }'`
+              minor=`echo $tag | awk -F '.' '{ print $2 }'`
+              patch=`echo $tag | awk -F '.' '{ print $3 }'`
+              case $TAG_FOR in
+                testing)
+                  patch=$(( $patch + $patch % 2 + 1 ))
+                  tagchanged=1
+                  ;;
+                production)
+                  rem=$(( $patch % 2 ))
+                  if [ $rem -eq 1 ]; then
+                    patch=$(( $patch + 1 ))
+                    tagchanged=1
+	  	  fi
+                  git reset --hard
+                  git checkout $tag
+                  ;;
+              esac
+              tag=$major.$minor.$patch
+            else
+              tag=0.1.1
+            fi
+            if [ $tagchanged -eq 1 ]; then
+              git tag -a $tag -m "Bump version to $tag"
+              git push --tag
+            fi
+          '''.stripIndent())
         }
       }
     }
