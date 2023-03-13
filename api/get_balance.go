@@ -31,6 +31,7 @@ type balanceDoneInfo struct {
 
 var balanceDoneChannel = sync.Map{}
 
+//nolint:gocognit
 func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceRequest) (out *sphinxproxy.GetBalanceResponse, err error) {
 	logger.Sugar().Infof("get balance info coinType: %v address: %v", in.GetName(), in.GetAddress())
 	if in.GetAddress() == "" {
@@ -132,15 +133,6 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 			if !info.success {
 				logger.Sugar().Errorf("wait get wallet:%v pre balance done error: %v", in.GetAddress(), info.message)
 				return out, status.Error(codes.Internal, "internal server error")
-			}
-
-			type ViewAccount struct {
-				Version     int    `json:"version"`
-				Name        string `json:"name"`
-				PublicKey   string `json:"publicKey"`
-				ViewKey     string `json:"viewKey"`
-				OutgoingKey string `json:"outgoingKey"`
-				IncomingKey string `json:"incomingKey"`
 			}
 
 			payload = info.payload
