@@ -84,10 +84,24 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 
 	// fetch private info
 	if coinType == sphinxplugin.CoinType_CoinTypealeo ||
-		coinType == sphinxplugin.CoinType_CoinTypetaleo {
+		coinType == sphinxplugin.CoinType_CoinTypetaleo ||
+		coinType == sphinxplugin.CoinType_CoinTypeironfish ||
+		coinType == sphinxplugin.CoinType_CoinTypetironfish {
+		name := ""
+		if coinType == sphinxplugin.CoinType_CoinTypealeo ||
+			coinType == sphinxplugin.CoinType_CoinTypetaleo {
+			name = "aleo"
+		}
+
+		// SUDO: less elegant,will change
+		if coinType == sphinxplugin.CoinType_CoinTypeironfish ||
+			coinType == sphinxplugin.CoinType_CoinTypetironfish {
+			name = "ironfish"
+		}
+
 		balanceDoneChannel.Store(puid, pdone)
 
-		signProxy, err := getProxySign("aleo")
+		signProxy, err := getProxySign(name)
 		if err != nil {
 			logger.Sugar().Errorf("Get ProxySign client not found")
 			return out, status.Error(codes.Internal, "internal server error")
@@ -119,6 +133,16 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 				logger.Sugar().Errorf("wait get wallet:%v pre balance done error: %v", in.GetAddress(), info.message)
 				return out, status.Error(codes.Internal, "internal server error")
 			}
+
+			type ViewAccount struct {
+				Version     int    `json:"version"`
+				Name        string `json:"name"`
+				PublicKey   string `json:"publicKey"`
+				ViewKey     string `json:"viewKey"`
+				OutgoingKey string `json:"outgoingKey"`
+				IncomingKey string `json:"incomingKey"`
+			}
+
 			payload = info.payload
 		}
 	} else {

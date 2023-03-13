@@ -87,6 +87,12 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		name = "aleo"
 	}
 
+	// SUDO: less elegant,will change
+	if coinType == sphinxplugin.CoinType_CoinTypeironfish ||
+		coinType == sphinxplugin.CoinType_CoinTypetironfish {
+		name = "ironfish"
+	}
+
 	signProxy, err := getProxySign(name)
 	if err != nil {
 		logger.Sugar().Errorf("Get ProxySign client not found")
