@@ -31,7 +31,6 @@ type balanceDoneInfo struct {
 
 var balanceDoneChannel = sync.Map{}
 
-//nolint:gocognit
 func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceRequest) (out *sphinxproxy.GetBalanceResponse, err error) {
 	logger.Sugar().Infof("get balance info coinType: %v address: %v", in.GetName(), in.GetAddress())
 	if in.GetAddress() == "" {
@@ -82,24 +81,21 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 	)
 
 	now := time.Now()
+	name := ""
+	withPreBalance := false
 
-	// fetch private info
-	if coinType == sphinxplugin.CoinType_CoinTypealeo ||
-		coinType == sphinxplugin.CoinType_CoinTypetaleo ||
-		coinType == sphinxplugin.CoinType_CoinTypeironfish ||
-		coinType == sphinxplugin.CoinType_CoinTypetironfish {
-		name := ""
-		if coinType == sphinxplugin.CoinType_CoinTypealeo ||
-			coinType == sphinxplugin.CoinType_CoinTypetaleo {
-			name = "aleo"
-		}
+	switch coinType {
+	case sphinxplugin.CoinType_CoinTypealeo, sphinxplugin.CoinType_CoinTypetaleo:
+		name = "aleo"
+		withPreBalance = true
+	case sphinxplugin.CoinType_CoinTypeironfish, sphinxplugin.CoinType_CoinTypetironfish:
+		name = "ironfish"
+		withPreBalance = true
+	default:
+		withPreBalance = false
+	}
 
-		// SUDO: less elegant,will change
-		if coinType == sphinxplugin.CoinType_CoinTypeironfish ||
-			coinType == sphinxplugin.CoinType_CoinTypetironfish {
-			name = "ironfish"
-		}
-
+	if withPreBalance {
 		balanceDoneChannel.Store(puid, pdone)
 
 		signProxy, err := getProxySign(name)
