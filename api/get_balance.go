@@ -81,13 +81,24 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 	)
 
 	now := time.Now()
+	name := ""
+	withPreBalance := false
 
-	// fetch private info
-	if coinType == sphinxplugin.CoinType_CoinTypealeo ||
-		coinType == sphinxplugin.CoinType_CoinTypetaleo {
+	switch coinType {
+	case sphinxplugin.CoinType_CoinTypealeo, sphinxplugin.CoinType_CoinTypetaleo:
+		name = "aleo"
+		withPreBalance = true
+	case sphinxplugin.CoinType_CoinTypeironfish, sphinxplugin.CoinType_CoinTypetironfish:
+		name = "ironfish"
+		withPreBalance = true
+	default:
+		withPreBalance = false
+	}
+
+	if withPreBalance {
 		balanceDoneChannel.Store(puid, pdone)
 
-		signProxy, err := getProxySign("aleo")
+		signProxy, err := getProxySign(name)
 		if err != nil {
 			logger.Sugar().Errorf("Get ProxySign client not found")
 			return out, status.Error(codes.Internal, "internal server error")
@@ -119,6 +130,7 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 				logger.Sugar().Errorf("wait get wallet:%v pre balance done error: %v", in.GetAddress(), info.message)
 				return out, status.Error(codes.Internal, "internal server error")
 			}
+
 			payload = info.payload
 		}
 	} else {

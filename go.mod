@@ -8,7 +8,7 @@ require (
 	github.com/NpoolPlatform/chain-middleware v0.0.0-20230221100129-05c4e67a81db
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20221102072657-7fcc5e6f1012
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20221109023947-366125b690fb
-	github.com/NpoolPlatform/message v0.0.0-20230221074244-b2bf82fffce8
+	github.com/NpoolPlatform/message v0.0.0-20230329013506-e2dd3c875e19
 	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20230216062713-b204540d5873
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.0

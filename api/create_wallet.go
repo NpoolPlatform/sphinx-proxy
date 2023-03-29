@@ -80,11 +80,16 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		coinType = pcoinInfo.CoinType
 	}
 
-	name := in.GetName()
 	span.AddEvent("call getProxySign")
-	if coinType == sphinxplugin.CoinType_CoinTypealeo ||
-		coinType == sphinxplugin.CoinType_CoinTypetaleo {
+	name := ""
+
+	switch coinType {
+	case sphinxplugin.CoinType_CoinTypealeo, sphinxplugin.CoinType_CoinTypetaleo:
 		name = "aleo"
+	case sphinxplugin.CoinType_CoinTypeironfish, sphinxplugin.CoinType_CoinTypetironfish:
+		name = "ironfish"
+	default:
+		name = in.GetName()
 	}
 
 	signProxy, err := getProxySign(name)
