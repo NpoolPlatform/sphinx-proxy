@@ -1,9 +1,9 @@
 # Npool go service app template
 
-[![Test](https://github.com/NpoolPlatform/go-service-app-template/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/NpoolPlatform/go-service-app-template/actions/workflows/main.yml)
+[![Test](https://github.com/NpoolPlatform/sphinx-proxy/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/NpoolPlatform/sphinx-proxy/actions/workflows/main.yml)
 
 [目录](#目录)
-- [Npool go service app template](#npool-go-service-app-template)
+- [Npool go service app template](#npool-sphinx-proxy)
     - [功能](#功能)
       - [sync](#sync)
       - [async](#async)
