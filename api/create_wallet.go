@@ -76,7 +76,7 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 
 	coinType := utils.CoinName2Type(in.GetName())
 	pcoinInfo := getter.GetTokenInfo(in.GetName())
-	if pcoinInfo != nil || coinType == sphinxplugin.CoinType_CoinTypeUnKnow {
+	if pcoinInfo != nil && coinType == sphinxplugin.CoinType_CoinTypeUnKnow {
 		coinType = pcoinInfo.CoinType
 	}
 
