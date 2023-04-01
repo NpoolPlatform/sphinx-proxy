@@ -38,6 +38,7 @@ func (s *Server) GetTransaction(ctx context.Context, in *sphinxproxy.GetTransact
 			TransactionID: transInfo.TransactionID,
 			Name:          transInfo.Name,
 			Amount:        price.DBPriceToVisualPrice(transInfo.Amount),
+			Payload:       transInfo.Payload,
 			From:          transInfo.From,
 			To:            transInfo.To,
 
