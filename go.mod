@@ -9,7 +9,7 @@ require (
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20221102072657-7fcc5e6f1012
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20221109023947-366125b690fb
 	github.com/NpoolPlatform/message v0.0.0-20230331105746-d35da1f1c402
-	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20230401102005-7e76ee33f35e
+	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20230401105354-94a0d4d94d57
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.0
 	github.com/urfave/cli/v2 v2.11.1
