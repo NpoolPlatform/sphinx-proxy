@@ -88,6 +88,8 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		name = "aleo"
 	case sphinxplugin.CoinType_CoinTypeironfish, sphinxplugin.CoinType_CoinTypetironfish:
 		name = "ironfish"
+	case sphinxplugin.CoinType_CoinTypespacemesh, sphinxplugin.CoinType_CoinTypetspacemesh:
+		name = "spacemesh"
 	default:
 		name = in.GetName()
 	}
