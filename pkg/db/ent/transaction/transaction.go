@@ -38,6 +38,8 @@ const (
 	FieldFrom = "from"
 	// FieldTo holds the string denoting the to field in the database.
 	FieldTo = "to"
+	// FieldMemo holds the string denoting the memo field in the database.
+	FieldMemo = "memo"
 	// FieldAmount holds the string denoting the amount field in the database.
 	FieldAmount = "amount"
 	// FieldPayload holds the string denoting the payload field in the database.
@@ -70,6 +72,7 @@ var Columns = []string{
 	FieldName,
 	FieldFrom,
 	FieldTo,
+	FieldMemo,
 	FieldAmount,
 	FieldPayload,
 	FieldState,
@@ -113,6 +116,8 @@ var (
 	DefaultFrom string
 	// DefaultTo holds the default value on creation for the "to" field.
 	DefaultTo string
+	// DefaultMemo holds the default value on creation for the "memo" field.
+	DefaultMemo string
 	// DefaultAmount holds the default value on creation for the "amount" field.
 	DefaultAmount uint64
 	// DefaultPayload holds the default value on creation for the "payload" field.

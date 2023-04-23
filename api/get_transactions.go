@@ -68,6 +68,7 @@ func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransac
 			Payload:          info.Payload,
 			From:             info.From,
 			To:               info.To,
+			Memo:             info.Memo,
 		})
 	}
 

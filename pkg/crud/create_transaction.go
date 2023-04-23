@@ -22,6 +22,7 @@ type CreateTransactionParam struct {
 	From             string
 	To               string
 	Value            float64
+	Memo             string
 }
 
 func CreateTransaction(ctx context.Context, t *CreateTransactionParam) error {
@@ -35,6 +36,7 @@ func CreateTransaction(ctx context.Context, t *CreateTransactionParam) error {
 		attribute.String("From", t.From),
 		attribute.String("To", t.To),
 		attribute.Float64("Value", t.Value),
+		attribute.String("Memo", t.Memo),
 	)
 
 	client, err := db.Client()
@@ -49,6 +51,7 @@ func CreateTransaction(ctx context.Context, t *CreateTransactionParam) error {
 		SetName(t.Name).
 		SetFrom(t.From).
 		SetTo(t.To).
+		SetMemo(t.Memo).
 		SetAmount(price.VisualPriceToDBPrice(t.Value)).
 		SetState(uint8(t.TransactionState)).
 		Save(ctx)

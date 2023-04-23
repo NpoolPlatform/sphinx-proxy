@@ -40,6 +40,7 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		attribute.Float64("Amount", in.GetAmount()),
 		attribute.String("From", in.GetFrom()),
 		attribute.String("To", in.GetTo()),
+		attribute.String("Memo", in.GetMemo()),
 	)
 
 	// args check
@@ -117,6 +118,7 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		From:             in.GetFrom(),
 		To:               in.GetTo(),
 		Value:            in.GetAmount(),
+		Memo:             in.GetMemo(),
 	}); err != nil {
 		logger.Sugar().Errorf("CreateTransaction save to db error: %v,TransactionInfo:%v", err, in)
 		return out, status.Error(codes.Internal, "internal server error")

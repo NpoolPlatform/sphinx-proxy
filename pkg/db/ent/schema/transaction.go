@@ -66,6 +66,9 @@ func (Transaction) Fields() []ent.Field {
 		field.String("to").
 			Optional().
 			Default(""),
+		field.String("memo").
+			Optional().
+			Default(""),
 		field.Uint64("amount").
 			Optional().
 			Default(0),
