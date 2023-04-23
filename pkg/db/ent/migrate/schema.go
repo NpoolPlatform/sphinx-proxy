@@ -24,6 +24,7 @@ var (
 		{Name: "name", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "from", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "to", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "memo", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "amount", Type: field.TypeUint64, Nullable: true, Default: 0},
 		{Name: "payload", Type: field.TypeBytes, Nullable: true},
 		{Name: "state", Type: field.TypeUint8, Nullable: true, Default: 0},
@@ -40,7 +41,7 @@ var (
 			{
 				Name:    "transaction_state_coin_type_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[16], TransactionsColumns[1], TransactionsColumns[17]},
+				Columns: []*schema.Column{TransactionsColumns[17], TransactionsColumns[1], TransactionsColumns[18]},
 			},
 		},
 	}

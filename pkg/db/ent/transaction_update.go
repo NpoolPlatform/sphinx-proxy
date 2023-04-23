@@ -278,6 +278,26 @@ func (tu *TransactionUpdate) ClearTo() *TransactionUpdate {
 	return tu
 }
 
+// SetMemo sets the "memo" field.
+func (tu *TransactionUpdate) SetMemo(s string) *TransactionUpdate {
+	tu.mutation.SetMemo(s)
+	return tu
+}
+
+// SetNillableMemo sets the "memo" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableMemo(s *string) *TransactionUpdate {
+	if s != nil {
+		tu.SetMemo(*s)
+	}
+	return tu
+}
+
+// ClearMemo clears the value of the "memo" field.
+func (tu *TransactionUpdate) ClearMemo() *TransactionUpdate {
+	tu.mutation.ClearMemo()
+	return tu
+}
+
 // SetAmount sets the "amount" field.
 func (tu *TransactionUpdate) SetAmount(u uint64) *TransactionUpdate {
 	tu.mutation.ResetAmount()
@@ -694,6 +714,19 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: transaction.FieldTo,
 		})
 	}
+	if value, ok := tu.mutation.Memo(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldMemo,
+		})
+	}
+	if tu.mutation.MemoCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: transaction.FieldMemo,
+		})
+	}
 	if value, ok := tu.mutation.Amount(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint64,
@@ -1073,6 +1106,26 @@ func (tuo *TransactionUpdateOne) SetNillableTo(s *string) *TransactionUpdateOne 
 // ClearTo clears the value of the "to" field.
 func (tuo *TransactionUpdateOne) ClearTo() *TransactionUpdateOne {
 	tuo.mutation.ClearTo()
+	return tuo
+}
+
+// SetMemo sets the "memo" field.
+func (tuo *TransactionUpdateOne) SetMemo(s string) *TransactionUpdateOne {
+	tuo.mutation.SetMemo(s)
+	return tuo
+}
+
+// SetNillableMemo sets the "memo" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableMemo(s *string) *TransactionUpdateOne {
+	if s != nil {
+		tuo.SetMemo(*s)
+	}
+	return tuo
+}
+
+// ClearMemo clears the value of the "memo" field.
+func (tuo *TransactionUpdateOne) ClearMemo() *TransactionUpdateOne {
+	tuo.mutation.ClearMemo()
 	return tuo
 }
 
@@ -1520,6 +1573,19 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: transaction.FieldTo,
+		})
+	}
+	if value, ok := tuo.mutation.Memo(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldMemo,
+		})
+	}
+	if tuo.mutation.MemoCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: transaction.FieldMemo,
 		})
 	}
 	if value, ok := tuo.mutation.Amount(); ok {

@@ -174,6 +174,20 @@ func (tc *TransactionCreate) SetNillableTo(s *string) *TransactionCreate {
 	return tc
 }
 
+// SetMemo sets the "memo" field.
+func (tc *TransactionCreate) SetMemo(s string) *TransactionCreate {
+	tc.mutation.SetMemo(s)
+	return tc
+}
+
+// SetNillableMemo sets the "memo" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableMemo(s *string) *TransactionCreate {
+	if s != nil {
+		tc.SetMemo(*s)
+	}
+	return tc
+}
+
 // SetAmount sets the "amount" field.
 func (tc *TransactionCreate) SetAmount(u uint64) *TransactionCreate {
 	tc.mutation.SetAmount(u)
@@ -389,6 +403,10 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultTo
 		tc.mutation.SetTo(v)
 	}
+	if _, ok := tc.mutation.Memo(); !ok {
+		v := transaction.DefaultMemo
+		tc.mutation.SetMemo(v)
+	}
 	if _, ok := tc.mutation.Amount(); !ok {
 		v := transaction.DefaultAmount
 		tc.mutation.SetAmount(v)
@@ -564,6 +582,14 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Column: transaction.FieldTo,
 		})
 		_node.To = value
+	}
+	if value, ok := tc.mutation.Memo(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldMemo,
+		})
+		_node.Memo = value
 	}
 	if value, ok := tc.mutation.Amount(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -916,6 +942,24 @@ func (u *TransactionUpsert) UpdateTo() *TransactionUpsert {
 // ClearTo clears the value of the "to" field.
 func (u *TransactionUpsert) ClearTo() *TransactionUpsert {
 	u.SetNull(transaction.FieldTo)
+	return u
+}
+
+// SetMemo sets the "memo" field.
+func (u *TransactionUpsert) SetMemo(v string) *TransactionUpsert {
+	u.Set(transaction.FieldMemo, v)
+	return u
+}
+
+// UpdateMemo sets the "memo" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateMemo() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldMemo)
+	return u
+}
+
+// ClearMemo clears the value of the "memo" field.
+func (u *TransactionUpsert) ClearMemo() *TransactionUpsert {
+	u.SetNull(transaction.FieldMemo)
 	return u
 }
 
@@ -1398,6 +1442,27 @@ func (u *TransactionUpsertOne) UpdateTo() *TransactionUpsertOne {
 func (u *TransactionUpsertOne) ClearTo() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.ClearTo()
+	})
+}
+
+// SetMemo sets the "memo" field.
+func (u *TransactionUpsertOne) SetMemo(v string) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetMemo(v)
+	})
+}
+
+// UpdateMemo sets the "memo" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateMemo() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateMemo()
+	})
+}
+
+// ClearMemo clears the value of the "memo" field.
+func (u *TransactionUpsertOne) ClearMemo() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearMemo()
 	})
 }
 
@@ -2069,6 +2134,27 @@ func (u *TransactionUpsertBulk) UpdateTo() *TransactionUpsertBulk {
 func (u *TransactionUpsertBulk) ClearTo() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.ClearTo()
+	})
+}
+
+// SetMemo sets the "memo" field.
+func (u *TransactionUpsertBulk) SetMemo(v string) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetMemo(v)
+	})
+}
+
+// UpdateMemo sets the "memo" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateMemo() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateMemo()
+	})
+}
+
+// ClearMemo clears the value of the "memo" field.
+func (u *TransactionUpsertBulk) ClearMemo() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearMemo()
 	})
 }
 

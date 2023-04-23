@@ -41,6 +41,7 @@ func (s *Server) GetTransaction(ctx context.Context, in *sphinxproxy.GetTransact
 			Payload:       transInfo.Payload,
 			From:          transInfo.From,
 			To:            transInfo.To,
+			Memo:          transInfo.Memo,
 
 			ExitCode:         transInfo.ExitCode,
 			CID:              transInfo.Cid,

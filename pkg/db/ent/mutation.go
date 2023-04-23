@@ -51,6 +51,7 @@ type TransactionMutation struct {
 	name                *string
 	from                *string
 	to                  *string
+	memo                *string
 	amount              *uint64
 	addamount           *int64
 	payload             *[]byte
@@ -880,6 +881,55 @@ func (m *TransactionMutation) ResetTo() {
 	delete(m.clearedFields, transaction.FieldTo)
 }
 
+// SetMemo sets the "memo" field.
+func (m *TransactionMutation) SetMemo(s string) {
+	m.memo = &s
+}
+
+// Memo returns the value of the "memo" field in the mutation.
+func (m *TransactionMutation) Memo() (r string, exists bool) {
+	v := m.memo
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMemo returns the old "memo" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldMemo(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMemo is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMemo requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMemo: %w", err)
+	}
+	return oldValue.Memo, nil
+}
+
+// ClearMemo clears the value of the "memo" field.
+func (m *TransactionMutation) ClearMemo() {
+	m.memo = nil
+	m.clearedFields[transaction.FieldMemo] = struct{}{}
+}
+
+// MemoCleared returns if the "memo" field was cleared in this mutation.
+func (m *TransactionMutation) MemoCleared() bool {
+	_, ok := m.clearedFields[transaction.FieldMemo]
+	return ok
+}
+
+// ResetMemo resets all changes to the "memo" field.
+func (m *TransactionMutation) ResetMemo() {
+	m.memo = nil
+	delete(m.clearedFields, transaction.FieldMemo)
+}
+
 // SetAmount sets the "amount" field.
 func (m *TransactionMutation) SetAmount(u uint64) {
 	m.amount = &u
@@ -1298,7 +1348,7 @@ func (m *TransactionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TransactionMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 20)
 	if m.coin_type != nil {
 		fields = append(fields, transaction.FieldCoinType)
 	}
@@ -1337,6 +1387,9 @@ func (m *TransactionMutation) Fields() []string {
 	}
 	if m.to != nil {
 		fields = append(fields, transaction.FieldTo)
+	}
+	if m.memo != nil {
+		fields = append(fields, transaction.FieldMemo)
 	}
 	if m.amount != nil {
 		fields = append(fields, transaction.FieldAmount)
@@ -1390,6 +1443,8 @@ func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 		return m.From()
 	case transaction.FieldTo:
 		return m.To()
+	case transaction.FieldMemo:
+		return m.Memo()
 	case transaction.FieldAmount:
 		return m.Amount()
 	case transaction.FieldPayload:
@@ -1437,6 +1492,8 @@ func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldFrom(ctx)
 	case transaction.FieldTo:
 		return m.OldTo(ctx)
+	case transaction.FieldMemo:
+		return m.OldMemo(ctx)
 	case transaction.FieldAmount:
 		return m.OldAmount(ctx)
 	case transaction.FieldPayload:
@@ -1548,6 +1605,13 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTo(v)
+		return nil
+	case transaction.FieldMemo:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMemo(v)
 		return nil
 	case transaction.FieldAmount:
 		v, ok := value.(uint64)
@@ -1768,6 +1832,9 @@ func (m *TransactionMutation) ClearedFields() []string {
 	if m.FieldCleared(transaction.FieldTo) {
 		fields = append(fields, transaction.FieldTo)
 	}
+	if m.FieldCleared(transaction.FieldMemo) {
+		fields = append(fields, transaction.FieldMemo)
+	}
 	if m.FieldCleared(transaction.FieldAmount) {
 		fields = append(fields, transaction.FieldAmount)
 	}
@@ -1836,6 +1903,9 @@ func (m *TransactionMutation) ClearField(name string) error {
 	case transaction.FieldTo:
 		m.ClearTo()
 		return nil
+	case transaction.FieldMemo:
+		m.ClearMemo()
+		return nil
 	case transaction.FieldAmount:
 		m.ClearAmount()
 		return nil
@@ -1900,6 +1970,9 @@ func (m *TransactionMutation) ResetField(name string) error {
 		return nil
 	case transaction.FieldTo:
 		m.ResetTo()
+		return nil
+	case transaction.FieldMemo:
+		m.ResetMemo()
 		return nil
 	case transaction.FieldAmount:
 		m.ResetAmount()
