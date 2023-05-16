@@ -84,6 +84,7 @@ func (s *Server) GetEstimateGas(ctx context.Context, in *sphinxproxy.GetEstimate
 	esGasDoneChannel.Store(uid, done)
 	pluginProxy.pluginReq <- &sphinxproxy.ProxyPluginRequest{
 		Name:            in.GetName(),
+		CoinType:        coinType,
 		TransactionType: sphinxproxy.TransactionType_EstimateGas,
 		TransactionID:   uid,
 		Payload:         payload,

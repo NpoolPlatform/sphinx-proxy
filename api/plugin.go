@@ -91,20 +91,40 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 					info.GetTransactionID(),
 					err,
 				)
-				ch, ok := balanceDoneChannel.Load(info.GetTransactionID())
-				if !ok {
-					logger.Sugar().Warnf(
-						"%v %v: TransactionType: %v, TransactionID: %v, req maybe timeout",
-						p.pluginInfo,
-						info.GetName(),
-						info.GetTransactionType(),
-						info.GetTransactionID(),
-					)
-				}
 
-				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
-					success: false,
-					message: "send request to plugin error",
+				switch info.GetTransactionType() {
+				case sphinxproxy.TransactionType_Balance:
+					ch, ok := balanceDoneChannel.Load(info.GetTransactionID())
+					if !ok {
+						logger.Sugar().Warnf(
+							"%v %v: TransactionType: %v, TransactionID: %v, req maybe timeout",
+							p.pluginInfo,
+							info.GetName(),
+							info.GetTransactionType(),
+							info.GetTransactionID(),
+						)
+					}
+
+					ch.(chan balanceDoneInfo) <- balanceDoneInfo{
+						success: false,
+						message: "send request to plugin error",
+					}
+				case sphinxproxy.TransactionType_EstimateGas:
+					ch, ok := esGasDoneChannel.Load(info.GetTransactionID())
+					if !ok {
+						logger.Sugar().Warnf(
+							"%v %v: TransactionType: %v, TransactionID: %v, req maybe timeout",
+							p.pluginInfo,
+							info.GetName(),
+							info.GetTransactionType(),
+							info.GetTransactionID(),
+						)
+					}
+
+					ch.(chan esGasDoneInfo) <- esGasDoneInfo{
+						success: false,
+						message: "send request to plugin error",
+					}
 				}
 
 				if putils.CheckCode(err) {
