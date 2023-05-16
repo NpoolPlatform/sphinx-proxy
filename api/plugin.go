@@ -19,7 +19,7 @@ type mPlugin struct {
 	connCloseChan chan struct{}
 	once          sync.Once
 	closeChan     chan struct{}
-	balance       chan *sphinxproxy.ProxyPluginRequest
+	pluginReq     chan *sphinxproxy.ProxyPluginRequest
 	registerCoin  chan *sphinxproxy.ProxyPluginResponse
 }
 
@@ -29,7 +29,7 @@ func newPluginStream(stream sphinxproxy.SphinxProxy_ProxyPluginServer) {
 		exitChan:      make(chan struct{}),
 		connCloseChan: make(chan struct{}),
 		closeChan:     make(chan struct{}),
-		balance:       make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
+		pluginReq:     make(chan *sphinxproxy.ProxyPluginRequest, channelBufSize),
 		registerCoin:  make(chan *sphinxproxy.ProxyPluginResponse),
 	}
 	wg := &sync.WaitGroup{}
@@ -81,29 +81,30 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 		case <-p.connCloseChan:
 			logger.Sugar().Info("plugin send chan close")
 			return
-		case info := <-p.balance:
+		case info := <-p.pluginReq:
 			if err := p.pluginServer.Send(info); err != nil {
 				logger.Sugar().Errorf(
-					"proxy->plugin %v %v, TransactionID: %v , error: %v",
+					"proxy->plugin %v %v, TransactionType: %v, TransactionID: %v , error: %v",
 					p.pluginInfo,
 					info.GetName(),
+					info.GetTransactionType(),
 					info.GetTransactionID(),
 					err,
 				)
 				ch, ok := balanceDoneChannel.Load(info.GetTransactionID())
 				if !ok {
 					logger.Sugar().Warnf(
-						"%v %v: TransactionID: %v, Addr: %v get balance maybe timeout",
+						"%v %v: TransactionType: %v, TransactionID: %v, req maybe timeout",
 						p.pluginInfo,
 						info.GetName(),
+						info.GetTransactionType(),
 						info.GetTransactionID(),
-						info.GetAddress(),
 					)
 				}
 
 				ch.(chan balanceDoneInfo) <- balanceDoneInfo{
 					success: false,
-					message: "send get wallet balance error",
+					message: "send request to plugin error",
 				}
 
 				if putils.CheckCode(err) {
@@ -112,11 +113,11 @@ func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
 				}
 			}
 			logger.Sugar().Infof(
-				"proxy->plugin %v %v: TransactionID: %v ,Addr: %v ok",
+				"proxy->plugin %v %v: TransactionType: %v, TransactionID: %v",
 				p.pluginInfo,
 				info.GetName(),
+				info.GetTransactionType(),
 				info.GetTransactionID(),
-				info.GetAddress(),
 			)
 			continue
 		}
@@ -197,6 +198,33 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					payload: psResponse.GetPayload(),
 				}
 				logger.Sugar().Infof("%v %v : TransactionID: %v get balance ok", p.pluginInfo, psResponse.GetCoinType(), psResponse.GetTransactionID())
+
+			case sphinxproxy.TransactionType_EstimateGas:
+				ch, ok := esGasDoneChannel.Load(psResponse.GetTransactionID())
+				if !ok {
+					logger.Sugar().Warnf("%v %v :TransactionID: %v estimate gas maybe timeout", p.pluginInfo, psResponse.GetCoinType(), psResponse.GetTransactionID())
+					continue
+				}
+
+				if psResponse.GetRPCExitMessage() != "" {
+					logger.Sugar().Infof(
+						"%v: TransactionID: %v, estimate gas error: %v",
+						p.pluginInfo,
+						psResponse.GetTransactionID(),
+						psResponse.GetRPCExitMessage(),
+					)
+					ch.(chan esGasDoneInfo) <- esGasDoneInfo{
+						success: false,
+						message: psResponse.GetRPCExitMessage(),
+					}
+					continue
+				}
+
+				ch.(chan esGasDoneInfo) <- esGasDoneInfo{
+					success: true,
+					payload: psResponse.GetPayload(),
+				}
+				logger.Sugar().Infof("%v %v : TransactionID: %v estimate gas ok", p.pluginInfo, psResponse.GetCoinType(), psResponse.GetTransactionID())
 			}
 		}
 	}
