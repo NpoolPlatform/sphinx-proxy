@@ -145,7 +145,7 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 	}
 
 	balanceDoneChannel.Store(uid, done)
-	pluginProxy.balance <- &sphinxproxy.ProxyPluginRequest{
+	pluginProxy.pluginReq <- &sphinxproxy.ProxyPluginRequest{
 		Name:            in.GetName(),
 		CoinType:        coinType,
 		TransactionType: sphinxproxy.TransactionType_Balance,
