@@ -450,12 +450,18 @@ func (tu *TransactionUpdate) Save(ctx context.Context) (int, error) {
 	)
 	tu.defaults()
 	if len(tu.hooks) == 0 {
+		if err = tu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = tu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*TransactionMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = tu.check(); err != nil {
+				return 0, err
 			}
 			tu.mutation = mutation
 			affected, err = tu.sqlSave(ctx)
@@ -503,6 +509,16 @@ func (tu *TransactionUpdate) defaults() {
 		v := transaction.UpdateDefaultUpdatedAt()
 		tu.mutation.SetUpdatedAt(v)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (tu *TransactionUpdate) check() error {
+	if v, ok := tu.mutation.Payload(); ok {
+		if err := transaction.PayloadValidator(v); err != nil {
+			return &ValidationError{Name: "payload", err: fmt.Errorf(`ent: validator failed for field "Transaction.payload": %w`, err)}
+		}
+	}
+	return nil
 }
 
 func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -1288,12 +1304,18 @@ func (tuo *TransactionUpdateOne) Save(ctx context.Context) (*Transaction, error)
 	)
 	tuo.defaults()
 	if len(tuo.hooks) == 0 {
+		if err = tuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = tuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*TransactionMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = tuo.check(); err != nil {
+				return nil, err
 			}
 			tuo.mutation = mutation
 			node, err = tuo.sqlSave(ctx)
@@ -1347,6 +1369,16 @@ func (tuo *TransactionUpdateOne) defaults() {
 		v := transaction.UpdateDefaultUpdatedAt()
 		tuo.mutation.SetUpdatedAt(v)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (tuo *TransactionUpdateOne) check() error {
+	if v, ok := tuo.mutation.Payload(); ok {
+		if err := transaction.PayloadValidator(v); err != nil {
+			return &ValidationError{Name: "payload", err: fmt.Errorf(`ent: validator failed for field "Transaction.payload": %w`, err)}
+		}
+	}
+	return nil
 }
 
 func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transaction, err error) {

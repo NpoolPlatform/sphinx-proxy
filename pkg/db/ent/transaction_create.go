@@ -442,6 +442,11 @@ func (tc *TransactionCreate) check() error {
 	if _, ok := tc.mutation.TransactionID(); !ok {
 		return &ValidationError{Name: "transaction_id", err: errors.New(`ent: missing required field "Transaction.transaction_id"`)}
 	}
+	if v, ok := tc.mutation.Payload(); ok {
+		if err := transaction.PayloadValidator(v); err != nil {
+			return &ValidationError{Name: "payload", err: fmt.Errorf(`ent: validator failed for field "Transaction.payload": %w`, err)}
+		}
+	}
 	return nil
 }
 

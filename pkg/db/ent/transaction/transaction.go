@@ -122,6 +122,8 @@ var (
 	DefaultAmount uint64
 	// DefaultPayload holds the default value on creation for the "payload" field.
 	DefaultPayload []byte
+	// PayloadValidator is a validator for the "payload" field. It is called by the builders before save.
+	PayloadValidator func([]byte) error
 	// DefaultState holds the default value on creation for the "state" field.
 	DefaultState uint8
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
