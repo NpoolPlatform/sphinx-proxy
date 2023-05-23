@@ -23,7 +23,10 @@ func (s *Server) UpdateTransaction(ctx context.Context, in *sphinxproxy.UpdateTr
 
 	if in.GetTransactionState() == sphinxproxy.TransactionState_TransactionStateUnKnow ||
 		in.GetNextTransactionState() == sphinxproxy.TransactionState_TransactionStateUnKnow {
-		logger.Sugar().Info("GetTransactions no wait transaction")
+		logger.Sugar().Errorw(
+			"GetTransactions no wait transaction",
+			"TransactionID", in.GetTransactionID(),
+		)
 		return &sphinxproxy.UpdateTransactionResponse{},
 			status.Error(codes.InvalidArgument, "TransactionState|NextTransactionState empty")
 	}
@@ -33,6 +36,11 @@ func (s *Server) UpdateTransaction(ctx context.Context, in *sphinxproxy.UpdateTr
 		TransactionState: in.GetTransactionState(),
 	})
 	if err != nil {
+		logger.Sugar().Errorw(
+			"GetTransactionExist",
+			"TransactionID", in.GetTransactionID(),
+			"Error", err,
+		)
 		return &sphinxproxy.UpdateTransactionResponse{},
 			status.Error(codes.Internal, "internal server error")
 	}
