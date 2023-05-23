@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"math"
 	"time"
 
 	"entgo.io/ent"
@@ -74,6 +75,7 @@ func (Transaction) Fields() []ent.Field {
 			Default(0),
 		field.Bytes("payload").
 			Optional().
+			MaxLen(math.MaxUint32).
 			Default([]byte{}).
 			Comment("save nonce or sign info"),
 		field.Uint8("state").
