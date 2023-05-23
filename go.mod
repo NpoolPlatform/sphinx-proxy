@@ -19,7 +19,7 @@ require (
 	google.golang.org/protobuf v1.30.0
 )
 
-replace github.com/NpoolPlatform/message => github.com/NpoolPlatform/message v0.0.0-20230516032540-efff17d6e808
+replace github.com/NpoolPlatform/message => github.com/NpoolPlatform/message v0.0.0-20230516071441-055b7bd6fc71
 
 require (
 	ariga.io/atlas v0.10.0 // indirect
