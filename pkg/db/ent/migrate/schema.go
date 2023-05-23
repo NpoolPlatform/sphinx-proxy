@@ -26,7 +26,7 @@ var (
 		{Name: "to", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "memo", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "amount", Type: field.TypeUint64, Nullable: true, Default: 0},
-		{Name: "payload", Type: field.TypeBytes, Nullable: true},
+		{Name: "payload", Type: field.TypeBytes, Nullable: true, Size: 4294967295},
 		{Name: "state", Type: field.TypeUint8, Nullable: true, Default: 0},
 		{Name: "created_at", Type: field.TypeUint32, Nullable: true},
 		{Name: "updated_at", Type: field.TypeUint32, Nullable: true},

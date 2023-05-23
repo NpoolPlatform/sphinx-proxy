@@ -75,6 +75,8 @@ func init() {
 	transactionDescPayload := transactionFields[16].Descriptor()
 	// transaction.DefaultPayload holds the default value on creation for the payload field.
 	transaction.DefaultPayload = transactionDescPayload.Default.([]byte)
+	// transaction.PayloadValidator is a validator for the "payload" field. It is called by the builders before save.
+	transaction.PayloadValidator = transactionDescPayload.Validators[0].(func([]byte) error)
 	// transactionDescState is the schema descriptor for state field.
 	transactionDescState := transactionFields[17].Descriptor()
 	// transaction.DefaultState holds the default value on creation for the state field.
