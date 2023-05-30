@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/go-service-framework/pkg/price"
@@ -61,12 +60,11 @@ func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransac
 
 	infos := make([]*sphinxproxy.TransactionInfo, 0, len(transInfos))
 	for _, info := range transInfos {
-		amount := fmt.Sprintf("%f", price.DBPriceToVisualPrice(info.Amount))
 		infos = append(infos, &sphinxproxy.TransactionInfo{
 			TransactionID:    info.TransactionID,
 			TransactionState: sphinxproxy.TransactionState(info.State),
 			Name:             info.Name,
-			Amount:           amount,
+			Amount:           price.DBPriceToVisualPrice(info.Amount),
 			Payload:          info.Payload,
 			From:             info.From,
 			To:               info.To,

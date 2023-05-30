@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/go-service-framework/pkg/price"
@@ -33,12 +32,12 @@ func (s *Server) GetTransaction(ctx context.Context, in *sphinxproxy.GetTransact
 		logger.Sugar().Errorf("GetTransaction call GetTransaction error: %v", err)
 		return &sphinxproxy.GetTransactionResponse{}, status.Error(codes.Internal, "internal server error")
 	}
-	amount := fmt.Sprintf("%f", price.DBPriceToVisualPrice(transInfo.Amount))
+
 	return &sphinxproxy.GetTransactionResponse{
 		Info: &sphinxproxy.TransactionInfo{
 			TransactionID: transInfo.TransactionID,
 			Name:          transInfo.Name,
-			Amount:        amount,
+			Amount:        price.DBPriceToVisualPrice(transInfo.Amount),
 			Payload:       transInfo.Payload,
 			From:          transInfo.From,
 			To:            transInfo.To,

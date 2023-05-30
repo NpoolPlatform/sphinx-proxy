@@ -94,6 +94,8 @@ github.com/NpoolPlatform/message v0.0.0-20230530075625-16260cb71c6a h1:a+rdHQdv2
 github.com/NpoolPlatform/message v0.0.0-20230530075625-16260cb71c6a/go.mod h1:PxJpF0vSSOke+NJskbRBRQ2fK2K3SRe8zaEja+GxSHk=
 github.com/NpoolPlatform/message v0.0.0-20230530080220-d6992bf94635 h1:p+Fssu7t3fa5vFZKGBnzT4O29xVD2WxQNOt9R6NmRFM=
 github.com/NpoolPlatform/message v0.0.0-20230530080220-d6992bf94635/go.mod h1:PxJpF0vSSOke+NJskbRBRQ2fK2K3SRe8zaEja+GxSHk=
+github.com/NpoolPlatform/message v0.0.0-20230530084451-544dbcd25a5a h1:NuQwFXuy2J/xuODIBwihrPWNTLAz98N83XaP+HxjlhI=
+github.com/NpoolPlatform/message v0.0.0-20230530084451-544dbcd25a5a/go.mod h1:PxJpF0vSSOke+NJskbRBRQ2fK2K3SRe8zaEja+GxSHk=
 github.com/NpoolPlatform/sphinx-plugin v0.0.0-20230407104706-016e0172f58b h1:f+brV8hzf/KIIdZT4OByj9yIlCLaKFf5j6iABgUomwM=
 github.com/NpoolPlatform/sphinx-plugin v0.0.0-20230407104706-016e0172f58b/go.mod h1:810PHAFQctWdVvU8QCuSe6CZPl/Nr82RhATv+mNgm4Q=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=

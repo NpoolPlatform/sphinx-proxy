@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"strconv"
 
 	coincli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
@@ -34,15 +33,11 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 			span.RecordError(err)
 		}
 	}()
-	bitSize := 64
-	amount, err := strconv.ParseFloat(in.Amount, bitSize)
-	if err != nil {
-		return out, status.Error(codes.InvalidArgument, err.Error())
-	}
+
 	span.SetAttributes(
 		attribute.String("Name", in.GetName()),
 		attribute.String("TransactionID", in.GetTransactionID()),
-		attribute.Float64("Amount", amount),
+		attribute.Float64("Amount", in.GetAmount()),
 		attribute.String("From", in.GetFrom()),
 		attribute.String("To", in.GetTo()),
 		attribute.String("Memo", in.GetMemo()),
@@ -86,7 +81,7 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		return out, status.Error(codes.InvalidArgument, "To Invalid")
 	}
 
-	if amount <= 0 {
+	if in.GetAmount() <= 0 {
 		logger.Sugar().Errorf("CreateTransaction Amount: %v invalid", in.GetAmount())
 		return out, status.Error(codes.InvalidArgument, "Amount Invalid")
 	}
@@ -122,7 +117,7 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		Name:             in.GetName(),
 		From:             in.GetFrom(),
 		To:               in.GetTo(),
-		Value:            amount,
+		Value:            in.GetAmount(),
 		Memo:             in.GetMemo(),
 	}); err != nil {
 		logger.Sugar().Errorf("CreateTransaction save to db error: %v,TransactionInfo:%v", err, in)
