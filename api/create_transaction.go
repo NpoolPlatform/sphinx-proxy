@@ -2,11 +2,12 @@ package api
 
 import (
 	"context"
+	"strconv"
 
 	coincli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	"github.com/NpoolPlatform/message/npool"
+	v1 "github.com/NpoolPlatform/message/npool/basetypes/v1"
 	coinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
@@ -33,11 +34,15 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 			span.RecordError(err)
 		}
 	}()
-
+	bitSize := 64
+	amount, err := strconv.ParseFloat(in.Amount, bitSize)
+	if err != nil {
+		return out, status.Error(codes.InvalidArgument, err.Error())
+	}
 	span.SetAttributes(
 		attribute.String("Name", in.GetName()),
 		attribute.String("TransactionID", in.GetTransactionID()),
-		attribute.Float64("Amount", in.GetAmount()),
+		attribute.Float64("Amount", amount),
 		attribute.String("From", in.GetFrom()),
 		attribute.String("To", in.GetTo()),
 		attribute.String("Memo", in.GetMemo()),
@@ -51,7 +56,7 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 
 	// query coininfo
 	coinExist, err := coincli.GetCoinOnly(ctx, &coinpb.Conds{
-		Name: &npool.StringVal{
+		Name: &v1.StringVal{
 			Op:    cruder.EQ,
 			Value: in.GetName(),
 		},
@@ -81,7 +86,7 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		return out, status.Error(codes.InvalidArgument, "To Invalid")
 	}
 
-	if in.GetAmount() <= 0 {
+	if amount <= 0 {
 		logger.Sugar().Errorf("CreateTransaction Amount: %v invalid", in.GetAmount())
 		return out, status.Error(codes.InvalidArgument, "Amount Invalid")
 	}
@@ -117,7 +122,7 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		Name:             in.GetName(),
 		From:             in.GetFrom(),
 		To:               in.GetTo(),
-		Value:            in.GetAmount(),
+		Value:            amount,
 		Memo:             in.GetMemo(),
 	}); err != nil {
 		logger.Sugar().Errorf("CreateTransaction save to db error: %v,TransactionInfo:%v", err, in)

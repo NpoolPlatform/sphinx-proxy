@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	"github.com/NpoolPlatform/message/npool"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	v1 "github.com/NpoolPlatform/message/npool/basetypes/v1"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 
 	coincli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
@@ -93,7 +93,7 @@ func getProxyPlugin(coinType sphinxplugin.CoinType) (*mPlugin, error) {
 
 func haveCoin(name string) (bool, error) {
 	_, total, err := coincli.GetCoins(context.Background(), &coinpb.Conds{
-		Name: &npool.StringVal{
+		Name: &v1.StringVal{
 			Op:    cruder.EQ,
 			Value: name,
 		},
