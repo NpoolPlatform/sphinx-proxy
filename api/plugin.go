@@ -178,10 +178,15 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					continue
 				}
 
+				chainType := psResponse.ChainType.String()
 				if err := registerCoin(&coinpb.CoinReq{
-					Name: &psResponse.Name,
-					Unit: &psResponse.Unit,
-					ENV:  &psResponse.ENV,
+					Name:            &psResponse.Name,
+					Unit:            &psResponse.Unit,
+					ENV:             &psResponse.ENV,
+					ChainType:       &chainType,
+					ChainNativeUnit: &psResponse.ChainNativeUnit,
+					ChainUnitExt:    &psResponse.ChainUnitExp,
+					GasType:         &psResponse.GasType,
 				}); err != nil {
 					logger.Sugar().Infof(
 						"plugin %v: register new coin: %v, error: %v",
