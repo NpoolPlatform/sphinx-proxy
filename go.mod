@@ -8,7 +8,7 @@ require (
 	github.com/NpoolPlatform/chain-middleware v0.0.0-20230530072050-67a5e627ade4
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20230509081417-267df92cab6d
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20221109023947-366125b690fb
-	github.com/NpoolPlatform/message v0.0.0-20230530084451-544dbcd25a5a
+	github.com/NpoolPlatform/message v0.0.0-20230531012618-cc3bdbdd7f4e
 	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20230407104706-016e0172f58b
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
@@ -21,7 +21,7 @@ require (
 
 replace github.com/NpoolPlatform/chain-middleware => github.com/NpoolPlatform/chain-middleware v0.0.0-20230530072050-67a5e627ade4
 
-replace github.com/NpoolPlatform/message => github.com/NpoolPlatform/message v0.0.0-20230530084451-544dbcd25a5a
+replace github.com/NpoolPlatform/message => github.com/NpoolPlatform/message v0.0.0-20230531012618-cc3bdbdd7f4e
 
 require (
 	ariga.io/atlas v0.10.0 // indirect
