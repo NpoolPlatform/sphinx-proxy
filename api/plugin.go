@@ -42,31 +42,21 @@ func newPluginStream(stream sphinxproxy.SphinxProxy_ProxyPluginServer) {
 }
 
 // add new coin type
-func (lp lmPluginType) append(coinType sphinxplugin.CoinType, pluginInfo string, lmp *mPlugin) {
+func (lp lmPluginType) append(coinType sphinxplugin.CoinType, pluginInfo string, lmp *mPlugin) (exist bool) {
 	plk.Lock()
 	defer plk.Unlock()
 	lmp.coinType = coinType
 	lmp.pluginInfo = pluginInfo
-	if _, ok := lp[coinType]; !ok {
-		goto appendCoinType
-	} else {
-		exist := false
+	if _, ok := lp[coinType]; ok {
 		for _, info := range lp[coinType] {
 			if info.pluginServer == lmp.pluginServer {
-				exist = true
-				break
+				return true
 			}
 		}
-		if !exist {
-			goto appendCoinType
-		}
 	}
-	return
-appendCoinType:
-	{
-		lp[coinType] = append(lp[coinType], lmp)
-		logger.Sugar().Infof("plugin %v %v is registered", pluginInfo, coinType)
-	}
+	lp[coinType] = append(lp[coinType], lmp)
+	logger.Sugar().Infof("plugin %v %v is registered", pluginInfo, coinType)
+	return false
 }
 
 func (p *mPlugin) pluginStreamSend(wg *sync.WaitGroup) {
@@ -172,9 +162,9 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			switch psResponse.GetTransactionType() {
 			case sphinxproxy.TransactionType_RegisterCoin:
 				pluginInfo := fmt.Sprintf("%v-%v", psResponse.PluginPosition, psResponse.PluginWanIP)
-				lmPlugin.append(psResponse.GetCoinType(), pluginInfo, p)
-
-				if ok, err := haveCoin(psResponse.GetName()); ok && err == nil {
+				exist := lmPlugin.append(psResponse.GetCoinType(), pluginInfo, p)
+				registed, err := haveCoin(psResponse.Name)
+				if exist && registed && err != nil {
 					continue
 				}
 
