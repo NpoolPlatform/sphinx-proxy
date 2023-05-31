@@ -185,7 +185,9 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					ENV:             &psResponse.ENV,
 					ChainType:       &chainType,
 					ChainNativeUnit: &psResponse.ChainNativeUnit,
-					ChainUnitExt:    &psResponse.ChainUnitExp,
+					ChainUnitExp:    &psResponse.ChainUnitExp,
+					ChainID:         &psResponse.ChainID,
+					ChainNickName:   &psResponse.ChainNickName,
 					GasType:         &psResponse.GasType,
 				}); err != nil {
 					logger.Sugar().Infof(
