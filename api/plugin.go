@@ -163,8 +163,9 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 			case sphinxproxy.TransactionType_RegisterCoin:
 				pluginInfo := fmt.Sprintf("%v-%v", psResponse.PluginPosition, psResponse.PluginWanIP)
 				exist := lmPlugin.append(psResponse.GetCoinType(), pluginInfo, p)
-				registed, err := haveCoin(psResponse.Name)
-				if exist && registed && err != nil {
+				registered, err := haveCoin(psResponse.Name)
+
+				if exist && registered && err == nil {
 					continue
 				}
 
@@ -177,7 +178,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					ChainNativeUnit: &psResponse.ChainNativeUnit,
 					ChainUnitExp:    &psResponse.ChainUnitExp,
 					ChainID:         &psResponse.ChainID,
-					ChainNickName:   &psResponse.ChainNickName,
+					ChainNickname:   &psResponse.ChainNickname,
 					GasType:         &psResponse.GasType,
 				}); err != nil {
 					logger.Sugar().Infof(
