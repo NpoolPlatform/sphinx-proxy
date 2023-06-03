@@ -663,7 +663,6 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 //			SetCoinType(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (tc *TransactionCreate) OnConflict(opts ...sql.ConflictOption) *TransactionUpsertOne {
 	tc.conflict = opts
 	return &TransactionUpsertOne{
@@ -677,7 +676,6 @@ func (tc *TransactionCreate) OnConflict(opts ...sql.ConflictOption) *Transaction
 //	client.Transaction.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (tc *TransactionCreate) OnConflictColumns(columns ...string) *TransactionUpsertOne {
 	tc.conflict = append(tc.conflict, sql.ConflictColumns(columns...))
 	return &TransactionUpsertOne{
@@ -1117,7 +1115,6 @@ func (u *TransactionUpsert) ClearDeletedAt() *TransactionUpsert {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *TransactionUpsertOne) UpdateNewValues() *TransactionUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -1131,10 +1128,9 @@ func (u *TransactionUpsertOne) UpdateNewValues() *TransactionUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Transaction.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Transaction.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *TransactionUpsertOne) Ignore() *TransactionUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -1767,7 +1763,6 @@ func (tcb *TransactionCreateBulk) ExecX(ctx context.Context) {
 //			SetCoinType(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (tcb *TransactionCreateBulk) OnConflict(opts ...sql.ConflictOption) *TransactionUpsertBulk {
 	tcb.conflict = opts
 	return &TransactionUpsertBulk{
@@ -1781,7 +1776,6 @@ func (tcb *TransactionCreateBulk) OnConflict(opts ...sql.ConflictOption) *Transa
 //	client.Transaction.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (tcb *TransactionCreateBulk) OnConflictColumns(columns ...string) *TransactionUpsertBulk {
 	tcb.conflict = append(tcb.conflict, sql.ConflictColumns(columns...))
 	return &TransactionUpsertBulk{
@@ -1806,7 +1800,6 @@ type TransactionUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *TransactionUpsertBulk) UpdateNewValues() *TransactionUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -1826,7 +1819,6 @@ func (u *TransactionUpsertBulk) UpdateNewValues() *TransactionUpsertBulk {
 //	client.Transaction.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *TransactionUpsertBulk) Ignore() *TransactionUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
