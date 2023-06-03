@@ -176,6 +176,7 @@ func (p *mPlugin) pluginStreamRecv(wg *sync.WaitGroup) {
 					ENV:             &psResponse.ENV,
 					ChainType:       &chainType,
 					ChainNativeUnit: &psResponse.ChainNativeUnit,
+					ChainAtomicUnit: &psResponse.ChainAtomicUnit,
 					ChainUnitExp:    &psResponse.ChainUnitExp,
 					ChainID:         &psResponse.ChainID,
 					ChainNickname:   &psResponse.ChainNickname,
