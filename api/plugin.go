@@ -55,7 +55,7 @@ func (lp lmPluginType) append(coinType sphinxplugin.CoinType, pluginInfo string,
 		}
 	}
 	lp[coinType] = append(lp[coinType], lmp)
-	logger.Sugar().Infof("plugin %v %v is registered", pluginInfo, coinType)
+	logger.Sugar().Infof("plugin %v %v is added", pluginInfo, coinType)
 	return false
 }
 
