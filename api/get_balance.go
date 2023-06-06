@@ -8,7 +8,7 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	v1 "github.com/NpoolPlatform/message/npool/basetypes/v1"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 	coinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
@@ -45,7 +45,7 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 
 	// query coininfo
 	coinExist, err := coincli.GetCoinOnly(ctx, &coinpb.Conds{
-		Name: &v1.StringVal{
+		Name: &basetypes.StringVal{
 			Op:    cruder.EQ,
 			Value: in.GetName(),
 		},
