@@ -92,8 +92,8 @@ github.com/NpoolPlatform/libent-cruder v0.0.0-20221109023947-366125b690fb h1:IAQ
 github.com/NpoolPlatform/libent-cruder v0.0.0-20221109023947-366125b690fb/go.mod h1:zvvqlRwbOdTUauPQ9dFDhDuxa91ILV0CQfVdPBZj+eA=
 github.com/NpoolPlatform/message v0.0.0-20230605075344-03a09d2c34b8 h1:kLdPyKgd5xU8Oa6EJk4zFn5MMtRFuEogQOv1URXGxBE=
 github.com/NpoolPlatform/message v0.0.0-20230605075344-03a09d2c34b8/go.mod h1:PxJpF0vSSOke+NJskbRBRQ2fK2K3SRe8zaEja+GxSHk=
-github.com/NpoolPlatform/sphinx-plugin v0.0.0-20230606020627-c0f21d5e1a76 h1:2v65frozDIfOOVLFr6FYn8248QvfJ64TYerNnmablbA=
-github.com/NpoolPlatform/sphinx-plugin v0.0.0-20230606020627-c0f21d5e1a76/go.mod h1:lvuLgc+vPk+gkb7masSLDm0s6RLixM2cnOV6ntslymk=
+github.com/NpoolPlatform/sphinx-plugin v0.0.0-20230606070649-73cfcd48a8cf h1:bHH2XqlRGDFC7uo6msU3crHrA9Qc3hBwHO0NS26ccK4=
+github.com/NpoolPlatform/sphinx-plugin v0.0.0-20230606070649-73cfcd48a8cf/go.mod h1:ApKyuuABqd2Y2ZU9NVCUMb7bBAkYolp/ickyWGuSw30=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/PuerkitoBio/goquery v1.8.0 h1:PJTF7AmFCFKk1N6V6jmKfrNH9tV5pNE6lZMkG0gta/U=
