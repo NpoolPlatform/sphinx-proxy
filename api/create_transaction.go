@@ -6,7 +6,7 @@ import (
 	coincli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	"github.com/NpoolPlatform/message/npool"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 	coinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
@@ -51,7 +51,7 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 
 	// query coininfo
 	coinExist, err := coincli.GetCoinOnly(ctx, &coinpb.Conds{
-		Name: &npool.StringVal{
+		Name: &basetypes.StringVal{
 			Op:    cruder.EQ,
 			Value: in.GetName(),
 		},

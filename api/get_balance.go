@@ -8,7 +8,7 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	"github.com/NpoolPlatform/message/npool"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 	coinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
@@ -45,7 +45,7 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 
 	// query coininfo
 	coinExist, err := coincli.GetCoinOnly(ctx, &coinpb.Conds{
-		Name: &npool.StringVal{
+		Name: &basetypes.StringVal{
 			Op:    cruder.EQ,
 			Value: in.GetName(),
 		},
@@ -62,7 +62,7 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 
 	coinType := utils.CoinName2Type(in.GetName())
 	pcoinInfo := getter.GetTokenInfo(in.GetName())
-	if pcoinInfo != nil || coinType == sphinxplugin.CoinType_CoinTypeUnKnow {
+	if pcoinInfo != nil && coinType == sphinxplugin.CoinType_CoinTypeUnKnow {
 		coinType = pcoinInfo.CoinType
 	}
 
@@ -145,7 +145,7 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 	}
 
 	balanceDoneChannel.Store(uid, done)
-	pluginProxy.balance <- &sphinxproxy.ProxyPluginRequest{
+	pluginProxy.pluginReq <- &sphinxproxy.ProxyPluginRequest{
 		Name:            in.GetName(),
 		CoinType:        coinType,
 		TransactionType: sphinxproxy.TransactionType_Balance,

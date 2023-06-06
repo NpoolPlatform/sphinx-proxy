@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	"github.com/NpoolPlatform/message/npool"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	ct "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
@@ -59,7 +59,7 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 
 	// query coininfo
 	coinInfo, err := coincli.GetCoinOnly(ctx, &coinpb.Conds{
-		Name: &npool.StringVal{
+		Name: &basetypes.StringVal{
 			Op:    cruder.EQ,
 			Value: in.GetName(),
 		},
