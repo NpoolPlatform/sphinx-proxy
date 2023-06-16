@@ -59,10 +59,11 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 		logger.Sugar().Errorf("check coin info %v not exist", in.GetName())
 		return out, status.Errorf(codes.NotFound, "coin %v not found", in.GetName())
 	}
-
+	// old parse method
 	coinType := utils.CoinName2Type(in.GetName())
+	// this is new information
 	pcoinInfo := getter.GetTokenInfo(in.GetName())
-	if pcoinInfo != nil && coinType == sphinxplugin.CoinType_CoinTypeUnKnow {
+	if pcoinInfo != nil && coinType != pcoinInfo.CoinType {
 		coinType = pcoinInfo.CoinType
 	}
 
