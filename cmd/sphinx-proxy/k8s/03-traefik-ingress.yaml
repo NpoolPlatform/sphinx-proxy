@@ -27,3 +27,5 @@ spec:
       http: *sphinx_proxy_grpc_rules
     - host: proxy.ohhash.com
       http: *sphinx_proxy_grpc_rules
+    - host: proxy.cryptomore.io
+      http: *sphinx_proxy_grpc_rules
