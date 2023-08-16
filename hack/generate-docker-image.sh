@@ -23,20 +23,18 @@ if [ ! $? -eq 0 ]; then
 fi
 set -e
 
-registry=uhub.service.ucloud.cn
-
-if [ "x" != $3 ]; then
-  registry=$3
-fi
-
 service_name=$1
 ## For development environment, pass the second variable
 if [ "xdevelopment" == "x$2" ]; then
   version=latest
+elif [ "xother" != "x$2" ]; then
+  version=$2
 fi
 
-if [ "xfeature" == "x$2" ]; then
-  version=feature
+registry=uhub.service.ucloud.cn
+
+if [ "x" != $3 ]; then
+  registry=$3
 fi
 
 echo "Generate docker image for $PLATFORM -- $version"
