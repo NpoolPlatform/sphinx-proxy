@@ -57,6 +57,7 @@ go test -ldflags "-s -w -X $pkg.buildDate=${compile_date} \
         -X $pkg.gitCommit=${git_revision} \
         -X $pkg.gitVersion=${version}     \
         -X $pkg.gitBranch=${git_branch}"  \
+        -p 1 \
         ./... -coverprofile ${ARTIFACTS}/coverage.out
 
 go tool cover -html "${ARTIFACTS}/coverage.out" -o "${ARTIFACTS}/coverage.html"
