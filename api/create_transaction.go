@@ -12,36 +12,13 @@ import (
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	"github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
-	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	ocodes "go.opentelemetry.io/otel/codes"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTransactionRequest) (out *sphinxproxy.CreateTransactionResponse, err error) {
 	out = &sphinxproxy.CreateTransactionResponse{}
-
-	_, span := otel.Tracer(sconst.ServiceName).Start(ctx, "CreateTransaction")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(ocodes.Error, "call CreateTransaction")
-			span.RecordError(err)
-		}
-	}()
-
-	span.SetAttributes(
-		attribute.String("Name", in.GetName()),
-		attribute.String("TransactionID", in.GetTransactionID()),
-		attribute.Float64("Amount", in.GetAmount()),
-		attribute.String("From", in.GetFrom()),
-		attribute.String("To", in.GetTo()),
-		attribute.String("Memo", in.GetMemo()),
-	)
 
 	// args check
 	if in.GetName() == "" {
@@ -86,7 +63,6 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		return out, status.Error(codes.InvalidArgument, "Amount Invalid")
 	}
 
-	span.AddEvent("call db GetTransactionExist")
 	exist, err := crud.GetTransactionExist(ctx, crud.GetTransactionExistParam{TransactionID: in.GetTransactionID()})
 	if err != nil {
 		logger.Sugar().Errorf("CreateTransaction cal GetTransactionExist error: %v", err)
@@ -109,7 +85,6 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 		tstate = sphinxproxy.TransactionState_TransactionStateRetrievePrivateInfo
 	}
 	// store to db
-	span.AddEvent("call db CreateTransaction")
 	if err := crud.CreateTransaction(ctx, &crud.CreateTransactionParam{
 		CoinType:         coinType,
 		TransactionState: tstate,

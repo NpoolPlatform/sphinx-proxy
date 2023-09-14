@@ -15,7 +15,7 @@ import (
 
 	coincli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	"github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
-	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
+	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
@@ -92,7 +92,7 @@ func (s *Server) GetEstimateGas(ctx context.Context, in *sphinxproxy.GetEstimate
 
 	// timeout, block wait done
 	select {
-	case <-time.After(sconst.GrpcTimeout * 6):
+	case <-time.After(constant.GrpcTimeout * 6):
 		esGasDoneChannel.Delete(uid)
 		logger.Sugar().Errorf("get transactionID: %v coin name: %v estimate gas wait response timeout", uid, in.GetName())
 		return out, status.Error(codes.Internal, "internal server error")

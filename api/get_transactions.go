@@ -8,9 +8,9 @@ import (
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	pconst "github.com/NpoolPlatform/sphinx-plugin/pkg/message/const"
+	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent"
-	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -18,7 +18,7 @@ import (
 // GetTransactions ..
 func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransactionsRequest) (out *sphinxproxy.GetTransactionsResponse, err error) {
 	pluginInfo := pconst.GetPluginInfo(ctx)
-	ctx, cancel := context.WithTimeout(ctx, sconst.GrpcTimeout)
+	ctx, cancel := context.WithTimeout(ctx, constant.GrpcTimeout)
 	defer cancel()
 
 	// TODO: debug plugin env info include(position and ip)

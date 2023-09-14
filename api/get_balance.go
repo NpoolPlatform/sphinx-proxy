@@ -16,7 +16,7 @@ import (
 	coincli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	"github.com/NpoolPlatform/sphinx-plugin/pkg/coins/getter"
 	ct "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
-	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
+	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
@@ -122,7 +122,7 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 		}
 
 		select {
-		case <-time.After(sconst.GrpcTimeout * 6):
+		case <-time.After(constant.GrpcTimeout * 6):
 			balanceDoneChannel.Delete(puid)
 			return out, status.Error(codes.Internal, "internal server error")
 		case info := <-pdone:
@@ -157,7 +157,7 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 
 	// timeout, block wait done
 	select {
-	case <-time.After(sconst.GrpcTimeout * 6):
+	case <-time.After(constant.GrpcTimeout * 6):
 		balanceDoneChannel.Delete(uid)
 		logger.Sugar().Errorf("get transactionID: %v wallet: %v balance wait response timeout", uid, in.GetAddress())
 		return out, status.Error(codes.Internal, "internal server error")

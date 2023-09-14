@@ -5,14 +5,10 @@ import (
 
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
+	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
-	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
-	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
 )
 
 type GetTransactionsParam struct {
@@ -22,18 +18,8 @@ type GetTransactionsParam struct {
 
 // GetTransactions ..
 func GetTransactions(ctx context.Context, params GetTransactionsParam) ([]*ent.Transaction, error) {
-	_, span := otel.Tracer(sconst.ServiceName).Start(ctx, "GetTransactions")
-	defer span.End()
-
-	span.SetAttributes(
-		attribute.String("CoinType", utils.TruncateCoinTypePrefix(params.CoinType)),
-		attribute.Int64("TransactionState", int64(params.TransactionState)),
-	)
-
 	client, err := db.Client()
 	if err != nil {
-		span.SetStatus(codes.Error, "get db client fail")
-		span.RecordError(err)
 		return nil, err
 	}
 
@@ -49,6 +35,6 @@ func GetTransactions(ctx context.Context, params GetTransactionsParam) ([]*ent.T
 	}
 
 	return stmt.Order(ent.Asc(transaction.FieldCreatedAt)).
-		Limit(sconst.DefaultPageSize).
+		Limit(constant.DefaultPageSize).
 		All(ctx)
 }

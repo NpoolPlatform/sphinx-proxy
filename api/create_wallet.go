@@ -13,13 +13,9 @@ import (
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
 	ct "github.com/NpoolPlatform/sphinx-plugin/pkg/types"
-	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
+	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/utils"
 	"github.com/google/uuid"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	ocodes "go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -38,20 +34,6 @@ type walletDoneInfo struct {
 var walletDoneChannel = sync.Map{}
 
 func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletRequest) (out *sphinxproxy.CreateWalletResponse, err error) {
-	_, span := otel.Tracer(sconst.ServiceName).Start(ctx, "CreateWallet")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(ocodes.Error, "call CreateWallet")
-			span.RecordError(err)
-		}
-	}()
-
-	span.SetAttributes(
-		attribute.String("Name", in.GetName()),
-	)
-
 	if in.GetName() == "" {
 		logger.Sugar().Errorf("CreateWallet Name: %v empty", in.GetName())
 		return out, status.Error(codes.InvalidArgument, "Name empty")
@@ -80,7 +62,6 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		coinType = pcoinInfo.CoinType
 	}
 
-	span.AddEvent("call getProxySign")
 	name := ""
 
 	switch coinType {
@@ -113,14 +94,6 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 		done = make(chan walletDoneInfo)
 	)
 
-	span.AddEvent("send chan message to sign",
-		trace.WithAttributes(
-			attribute.String("Name", in.GetName()),
-			attribute.Int64("TransactionType", int64(sphinxproxy.TransactionType_WalletNew)),
-			attribute.String("TransactionID", uid),
-		),
-	)
-
 	walletDoneChannel.Store(uid, done)
 	signProxy.walletNew <- &sphinxproxy.ProxySignRequest{
 		Name:            in.GetName(),
@@ -132,7 +105,7 @@ func (s *Server) CreateWallet(ctx context.Context, in *sphinxproxy.CreateWalletR
 
 	// timeout, block wait done
 	select {
-	case <-time.After(sconst.GrpcTimeout):
+	case <-time.After(constant.GrpcTimeout):
 		walletDoneChannel.Delete(uid)
 		logger.Sugar().Error("create wallet wait response timeout")
 		return out, status.Error(codes.Internal, "internal server error")

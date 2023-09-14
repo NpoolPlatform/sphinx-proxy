@@ -8,7 +8,6 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/config"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	mysqlconst "github.com/NpoolPlatform/go-service-framework/pkg/mysql/const"
-	"github.com/NpoolPlatform/sphinx-proxy/pkg/db"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/servicename"
 	cli "github.com/urfave/cli/v2"
 )
@@ -34,10 +33,6 @@ func main() {
 	)
 	if err != nil {
 		logger.Sugar().Errorf("fail to create %v: %v", serviceName, err)
-		return
-	}
-	if err := db.Init(); err != nil {
-		logger.Sugar().Errorf("fail to init db %v", err)
 		return
 	}
 	err = app.Run(os.Args)

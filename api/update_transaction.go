@@ -5,14 +5,14 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
+	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
-	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (s *Server) UpdateTransaction(ctx context.Context, in *sphinxproxy.UpdateTransactionRequest) (out *sphinxproxy.UpdateTransactionResponse, err error) {
-	ctx, cancel := context.WithTimeout(ctx, sconst.GrpcTimeout)
+	ctx, cancel := context.WithTimeout(ctx, constant.GrpcTimeout)
 	defer cancel()
 
 	if in.GetTransactionID() == "" {

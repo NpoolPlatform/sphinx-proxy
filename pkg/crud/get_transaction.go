@@ -7,25 +7,12 @@ import (
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
-	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
 )
 
 // GetTransaction ..
 func GetTransaction(ctx context.Context, transactionID string) (*ent.Transaction, error) {
-	_, span := otel.Tracer(sconst.ServiceName).Start(ctx, "GetTransaction")
-	defer span.End()
-
-	span.SetAttributes(
-		attribute.String("TransactionID", transactionID),
-	)
-
 	client, err := db.Client()
 	if err != nil {
-		span.SetStatus(codes.Error, "get db client fail")
-		span.RecordError(err)
 		return nil, err
 	}
 
@@ -59,18 +46,8 @@ type GetTransactionExistParam struct {
 }
 
 func GetTransactionExist(ctx context.Context, params GetTransactionExistParam) (bool, error) {
-	_, span := otel.Tracer(sconst.ServiceName).Start(ctx, "GetTransactionExist")
-	defer span.End()
-
-	span.SetAttributes(
-		attribute.String("TransactionID", params.TransactionID),
-		attribute.Int64("TransactionState", int64(params.TransactionState)),
-	)
-
 	client, err := db.Client()
 	if err != nil {
-		span.SetStatus(codes.Error, "get db client fail")
-		span.RecordError(err)
 		return false, err
 	}
 

@@ -6,9 +6,9 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/go-service-framework/pkg/price"
 	"github.com/NpoolPlatform/message/npool/sphinxproxy"
+	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/crud"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent"
-	sconst "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -19,7 +19,7 @@ func (s *Server) GetTransaction(ctx context.Context, in *sphinxproxy.GetTransact
 		return &sphinxproxy.GetTransactionResponse{}, status.Error(codes.InvalidArgument, "TransactionID empty")
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, sconst.GrpcTimeout)
+	ctx, cancel := context.WithTimeout(ctx, constant.GrpcTimeout)
 	defer cancel()
 
 	transInfo, err := crud.GetTransaction(ctx, in.GetTransactionID())

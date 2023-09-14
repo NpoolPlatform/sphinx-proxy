@@ -9,14 +9,14 @@ import (
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	npool "github.com/NpoolPlatform/message/npool/sphinxproxy"
 
-	constant "github.com/NpoolPlatform/sphinx-proxy/pkg/message/const"
+	servicename "github.com/NpoolPlatform/sphinx-proxy/pkg/servicename"
 )
 
 func do(ctx context.Context, fn func(_ctx context.Context, cli npool.SphinxProxyClient) (cruder.Any, error)) (cruder.Any, error) {
 	_ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	conn, err := grpc2.GetGRPCConn(constant.ServiceName, grpc2.GRPCTAG)
+	conn, err := grpc2.GetGRPCConn(servicename.ServiceDomain, grpc2.GRPCTAG)
 	if err != nil {
 		return nil, err
 	}
