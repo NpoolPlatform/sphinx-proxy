@@ -73,7 +73,7 @@ func (s *Server) GetTransactions(ctx context.Context, in *sphinxproxy.GetTransac
 	}
 
 	if len(infos) > 0 {
-		logger.Sugar().Infof(
+		logger.Sugar().Debugf(
 			"%v get tasks,CoinType:%v CoinTransactionState:%v Rows:%v",
 			pluginInfo,
 			in.GetCoinType(),
