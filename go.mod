@@ -4,12 +4,12 @@ go 1.17
 
 require (
 	entgo.io/ent v0.12.0
-	github.com/NpoolPlatform/basal-middleware v0.0.0-20230913134752-d45f93a3a60c
-	github.com/NpoolPlatform/chain-middleware v0.0.0-20230913142438-2e5786e6ca7e
-	github.com/NpoolPlatform/go-service-framework v0.0.0-20230918122755-65f92e1ffdb6
+	github.com/NpoolPlatform/basal-middleware v0.0.0-20230924051732-306a71d294ed
+	github.com/NpoolPlatform/chain-middleware v0.0.0-20230924052457-76b2482b116b
+	github.com/NpoolPlatform/go-service-framework v0.0.0-20230922114506-a65341cfbf48
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20230825073905-d23e4d838f99
-	github.com/NpoolPlatform/message v0.0.0-20230914023737-ac5d6d2a3a03
-	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20230914025325-158c3b77ef83
+	github.com/NpoolPlatform/message v0.0.0-20230923053829-31c88d9a36c2
+	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20230924064941-63a3bc0fe04b
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
 	github.com/urfave/cli/v2 v2.17.2-0.20221006022127-8f469abc00aa
