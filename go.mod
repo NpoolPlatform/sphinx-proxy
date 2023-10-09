@@ -24,7 +24,7 @@ require (
 	github.com/Geapefurit/gotron-sdk v0.0.0-20220724074720-3d7ea3cbd771 // indirect
 	github.com/GeertJohan/go.incremental v1.0.0 // indirect
 	github.com/GeertJohan/go.rice v1.0.2 // indirect
-	github.com/NpoolPlatform/build-chain v0.0.0-20230914024754-c0b427738553 // indirect
+	github.com/NpoolPlatform/build-chain v0.0.0-20231009011053-997261f760bb // indirect
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
 	github.com/Shonminh/apollo-client v0.4.0 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect

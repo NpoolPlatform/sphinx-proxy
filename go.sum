@@ -82,8 +82,8 @@ github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go
 github.com/Kubuxu/go-os-helper v0.0.1/go.mod h1:N8B+I7vPCT80IcP58r50u4+gEEcsZETFUpAzWW2ep1Y=
 github.com/NpoolPlatform/basal-middleware v0.0.0-20231008034340-a1d6a899ef37 h1:/Y9A/Y7pyMIU1yEcYNU2N7SgzJy7snCrz9s4fDpBg2g=
 github.com/NpoolPlatform/basal-middleware v0.0.0-20231008034340-a1d6a899ef37/go.mod h1:x+7Urm0IKub+2yGxAgdL2R4I6ZkICmMjhM0N8Q3G33U=
-github.com/NpoolPlatform/build-chain v0.0.0-20230914024754-c0b427738553 h1:HLO2wx8swY9TGjPBXsj6aK4MBOT5Wq1K3mY08x0OWxg=
-github.com/NpoolPlatform/build-chain v0.0.0-20230914024754-c0b427738553/go.mod h1:Te3Z9dwHOrMxDryuDXlqwGMypJeFfoErVrt2vceAmyI=
+github.com/NpoolPlatform/build-chain v0.0.0-20231009011053-997261f760bb h1:y5Dr5M1CPw/G/7s/qBXQn2bSYx2gEQwDed+78qQ7nik=
+github.com/NpoolPlatform/build-chain v0.0.0-20231009011053-997261f760bb/go.mod h1:E8FiiMxNxEnISAHBo6o3JhQ3Gb1iOxDyZSL+oWzBorg=
 github.com/NpoolPlatform/chain-middleware v0.0.0-20231008090947-e534ba41d758 h1:D1VssOHrSSF1FS4KiOtqK+oMiCGR14zQAr1TcWCTiok=
 github.com/NpoolPlatform/chain-middleware v0.0.0-20231008090947-e534ba41d758/go.mod h1:kLvUyaxmcwm/yH9Lz1VO/Yw+8uSlkiN95N4bDulMHNU=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20230930023319-e48074d9472e h1:onuKGDkR7ZDj5iXRY+e7SclNRo5OZF4/X4Dg0ZyqiRY=
