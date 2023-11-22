@@ -7,9 +7,9 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	crudermixin "github.com/NpoolPlatform/libent-cruder/pkg/mixin"
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
-	"github.com/google/uuid"
 )
 
 // Transaction holds the schema definition for the Transaction entity.
@@ -17,12 +17,15 @@ type Transaction struct {
 	ent.Schema
 }
 
+func (Transaction) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		crudermixin.AutoIDMixin{},
+	}
+}
+
 // Fields of the Transaction.
 func (Transaction) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New).
-			Unique(),
 		field.Int32("coin_type").
 			Optional().
 			Default(0),

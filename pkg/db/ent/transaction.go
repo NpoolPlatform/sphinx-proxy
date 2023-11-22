@@ -17,7 +17,9 @@ import (
 type Transaction struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID uuid.UUID `json:"id,omitempty"`
+	ID uint32 `json:"id,omitempty"`
+	// EntID holds the value of the "ent_id" field.
+	EntID uuid.UUID `json:"ent_id,omitempty"`
 	// CoinType holds the value of the "coin_type" field.
 	CoinType int32 `json:"coin_type,omitempty"`
 	// --will remove
@@ -67,11 +69,11 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case transaction.FieldUtxo, transaction.FieldPre, transaction.FieldTxData, transaction.FieldPayload:
 			values[i] = new([]byte)
-		case transaction.FieldCoinType, transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldExitCode, transaction.FieldAmount, transaction.FieldState, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
+		case transaction.FieldID, transaction.FieldCoinType, transaction.FieldNonce, transaction.FieldTransactionType, transaction.FieldExitCode, transaction.FieldAmount, transaction.FieldState, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
 		case transaction.FieldRecentBhash, transaction.FieldTransactionID, transaction.FieldCid, transaction.FieldName, transaction.FieldFrom, transaction.FieldTo, transaction.FieldMemo:
 			values[i] = new(sql.NullString)
-		case transaction.FieldID:
+		case transaction.FieldEntID:
 			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Transaction", columns[i])
@@ -89,10 +91,16 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 	for i := range columns {
 		switch columns[i] {
 		case transaction.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			t.ID = uint32(value.Int64)
+		case transaction.FieldEntID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
+				return fmt.Errorf("unexpected type %T for field ent_id", values[i])
 			} else if value != nil {
-				t.ID = *value
+				t.EntID = *value
 			}
 		case transaction.FieldCoinType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -246,6 +254,9 @@ func (t *Transaction) String() string {
 	var builder strings.Builder
 	builder.WriteString("Transaction(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString("ent_id=")
+	builder.WriteString(fmt.Sprintf("%v", t.EntID))
+	builder.WriteString(", ")
 	builder.WriteString("coin_type=")
 	builder.WriteString(fmt.Sprintf("%v", t.CoinType))
 	builder.WriteString(", ")

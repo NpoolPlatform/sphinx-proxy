@@ -12,6 +12,8 @@ const (
 	Label = "transaction"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldEntID holds the string denoting the ent_id field in the database.
+	FieldEntID = "ent_id"
 	// FieldCoinType holds the string denoting the coin_type field in the database.
 	FieldCoinType = "coin_type"
 	// FieldNonce holds the string denoting the nonce field in the database.
@@ -59,6 +61,7 @@ const (
 // Columns holds all SQL columns for transaction fields.
 var Columns = []string{
 	FieldID,
+	FieldEntID,
 	FieldCoinType,
 	FieldNonce,
 	FieldUtxo,
@@ -92,6 +95,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultEntID holds the default value on creation for the "ent_id" field.
+	DefaultEntID func() uuid.UUID
 	// DefaultCoinType holds the default value on creation for the "coin_type" field.
 	DefaultCoinType int32
 	// DefaultNonce holds the default value on creation for the "nonce" field.
@@ -134,6 +139,4 @@ var (
 	UpdateDefaultUpdatedAt func() uint32
 	// DefaultDeletedAt holds the default value on creation for the "deleted_at" field.
 	DefaultDeletedAt func() uint32
-	// DefaultID holds the default value on creation for the "id" field.
-	DefaultID func() uuid.UUID
 )

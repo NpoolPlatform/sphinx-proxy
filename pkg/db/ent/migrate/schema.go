@@ -10,7 +10,8 @@ import (
 var (
 	// TransactionsColumns holds the columns for the "transactions" table.
 	TransactionsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "id", Type: field.TypeUint32, Increment: true},
+		{Name: "ent_id", Type: field.TypeUUID, Unique: true},
 		{Name: "coin_type", Type: field.TypeInt32, Nullable: true, Default: 0},
 		{Name: "nonce", Type: field.TypeUint64, Nullable: true, Default: 0},
 		{Name: "utxo", Type: field.TypeJSON, Nullable: true},
@@ -39,9 +40,14 @@ var (
 		PrimaryKey: []*schema.Column{TransactionsColumns[0]},
 		Indexes: []*schema.Index{
 			{
+				Name:    "transaction_ent_id",
+				Unique:  true,
+				Columns: []*schema.Column{TransactionsColumns[1]},
+			},
+			{
 				Name:    "transaction_state_coin_type_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[17], TransactionsColumns[1], TransactionsColumns[18]},
+				Columns: []*schema.Column{TransactionsColumns[18], TransactionsColumns[2], TransactionsColumns[19]},
 			},
 		},
 	}

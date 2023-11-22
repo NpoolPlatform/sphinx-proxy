@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -22,6 +21,20 @@ type TransactionCreate struct {
 	mutation *TransactionMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetEntID sets the "ent_id" field.
+func (tc *TransactionCreate) SetEntID(u uuid.UUID) *TransactionCreate {
+	tc.mutation.SetEntID(u)
+	return tc
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableEntID(u *uuid.UUID) *TransactionCreate {
+	if u != nil {
+		tc.SetEntID(*u)
+	}
+	return tc
 }
 
 // SetCoinType sets the "coin_type" field.
@@ -265,16 +278,8 @@ func (tc *TransactionCreate) SetNillableDeletedAt(u *uint32) *TransactionCreate 
 }
 
 // SetID sets the "id" field.
-func (tc *TransactionCreate) SetID(u uuid.UUID) *TransactionCreate {
+func (tc *TransactionCreate) SetID(u uint32) *TransactionCreate {
 	tc.mutation.SetID(u)
-	return tc
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableID(u *uuid.UUID) *TransactionCreate {
-	if u != nil {
-		tc.SetID(*u)
-	}
 	return tc
 }
 
@@ -355,6 +360,10 @@ func (tc *TransactionCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tc *TransactionCreate) defaults() {
+	if _, ok := tc.mutation.EntID(); !ok {
+		v := transaction.DefaultEntID()
+		tc.mutation.SetEntID(v)
+	}
 	if _, ok := tc.mutation.CoinType(); !ok {
 		v := transaction.DefaultCoinType
 		tc.mutation.SetCoinType(v)
@@ -431,14 +440,13 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultDeletedAt()
 		tc.mutation.SetDeletedAt(v)
 	}
-	if _, ok := tc.mutation.ID(); !ok {
-		v := transaction.DefaultID()
-		tc.mutation.SetID(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TransactionCreate) check() error {
+	if _, ok := tc.mutation.EntID(); !ok {
+		return &ValidationError{Name: "ent_id", err: errors.New(`ent: missing required field "Transaction.ent_id"`)}
+	}
 	if _, ok := tc.mutation.TransactionID(); !ok {
 		return &ValidationError{Name: "transaction_id", err: errors.New(`ent: missing required field "Transaction.transaction_id"`)}
 	}
@@ -458,12 +466,9 @@ func (tc *TransactionCreate) sqlSave(ctx context.Context) (*Transaction, error) 
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = uint32(id)
 	}
 	return _node, nil
 }
@@ -474,7 +479,7 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: transaction.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: transaction.FieldID,
 			},
 		}
@@ -482,7 +487,15 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 	_spec.OnConflict = tc.conflict
 	if id, ok := tc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = &id
+		_spec.ID.Value = id
+	}
+	if value, ok := tc.mutation.EntID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: transaction.FieldEntID,
+		})
+		_node.EntID = value
 	}
 	if value, ok := tc.mutation.CoinType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -651,7 +664,7 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Transaction.Create().
-//		SetCoinType(v).
+//		SetEntID(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -660,7 +673,7 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.TransactionUpsert) {
-//			SetCoinType(v+v).
+//			SetEntID(v+v).
 //		}).
 //		Exec(ctx)
 func (tc *TransactionCreate) OnConflict(opts ...sql.ConflictOption) *TransactionUpsertOne {
@@ -695,6 +708,18 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetEntID sets the "ent_id" field.
+func (u *TransactionUpsert) SetEntID(v uuid.UUID) *TransactionUpsert {
+	u.Set(transaction.FieldEntID, v)
+	return u
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateEntID() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldEntID)
+	return u
+}
 
 // SetCoinType sets the "coin_type" field.
 func (u *TransactionUpsert) SetCoinType(v int32) *TransactionUpsert {
@@ -1150,6 +1175,20 @@ func (u *TransactionUpsertOne) Update(set func(*TransactionUpsert)) *Transaction
 		set(&TransactionUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *TransactionUpsertOne) SetEntID(v uuid.UUID) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateEntID() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateEntID()
+	})
 }
 
 // SetCoinType sets the "coin_type" field.
@@ -1644,12 +1683,7 @@ func (u *TransactionUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *TransactionUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
-	if u.create.driver.Dialect() == dialect.MySQL {
-		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: TransactionUpsertOne.ID is not supported by MySQL driver. Use TransactionUpsertOne.Exec instead")
-	}
+func (u *TransactionUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -1658,7 +1692,7 @@ func (u *TransactionUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error)
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *TransactionUpsertOne) IDX(ctx context.Context) uuid.UUID {
+func (u *TransactionUpsertOne) IDX(ctx context.Context) uint32 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -1709,6 +1743,10 @@ func (tcb *TransactionCreateBulk) Save(ctx context.Context) ([]*Transaction, err
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = uint32(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -1760,7 +1798,7 @@ func (tcb *TransactionCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.TransactionUpsert) {
-//			SetCoinType(v+v).
+//			SetEntID(v+v).
 //		}).
 //		Exec(ctx)
 func (tcb *TransactionCreateBulk) OnConflict(opts ...sql.ConflictOption) *TransactionUpsertBulk {
@@ -1838,6 +1876,20 @@ func (u *TransactionUpsertBulk) Update(set func(*TransactionUpsert)) *Transactio
 		set(&TransactionUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *TransactionUpsertBulk) SetEntID(v uuid.UUID) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateEntID() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateEntID()
+	})
 }
 
 // SetCoinType sets the "coin_type" field.
