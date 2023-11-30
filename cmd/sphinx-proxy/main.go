@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/app"
-	"github.com/NpoolPlatform/go-service-framework/pkg/config"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	mysqlconst "github.com/NpoolPlatform/go-service-framework/pkg/mysql/const"
+	redisconst "github.com/NpoolPlatform/go-service-framework/pkg/redis/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/servicename"
 	cli "github.com/urfave/cli/v2"
 )
@@ -29,7 +29,8 @@ func main() {
 		"./",
 		nil,
 		commands,
-		config.ServiceNameToNamespace(mysqlconst.MysqlServiceName),
+		mysqlconst.MysqlServiceName,
+		redisconst.RedisServiceName,
 	)
 	if err != nil {
 		logger.Sugar().Errorf("fail to create %v: %v", serviceName, err)

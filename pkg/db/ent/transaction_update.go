@@ -13,18 +13,34 @@ import (
 	"github.com/NpoolPlatform/message/npool/sphinxplugin"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/predicate"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db/ent/transaction"
+	"github.com/google/uuid"
 )
 
 // TransactionUpdate is the builder for updating Transaction entities.
 type TransactionUpdate struct {
 	config
-	hooks    []Hook
-	mutation *TransactionMutation
+	hooks     []Hook
+	mutation  *TransactionMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the TransactionUpdate builder.
 func (tu *TransactionUpdate) Where(ps ...predicate.Transaction) *TransactionUpdate {
 	tu.mutation.Where(ps...)
+	return tu
+}
+
+// SetEntID sets the "ent_id" field.
+func (tu *TransactionUpdate) SetEntID(u uuid.UUID) *TransactionUpdate {
+	tu.mutation.SetEntID(u)
+	return tu
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableEntID(u *uuid.UUID) *TransactionUpdate {
+	if u != nil {
+		tu.SetEntID(*u)
+	}
 	return tu
 }
 
@@ -521,13 +537,19 @@ func (tu *TransactionUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (tu *TransactionUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TransactionUpdate {
+	tu.modifiers = append(tu.modifiers, modifiers...)
+	return tu
+}
+
 func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   transaction.Table,
 			Columns: transaction.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: transaction.FieldID,
 			},
 		},
@@ -538,6 +560,13 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := tu.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: transaction.FieldEntID,
+		})
 	}
 	if value, ok := tu.mutation.CoinType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -856,6 +885,7 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: transaction.FieldDeletedAt,
 		})
 	}
+	_spec.Modifiers = tu.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{transaction.Label}
@@ -870,9 +900,24 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // TransactionUpdateOne is the builder for updating a single Transaction entity.
 type TransactionUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *TransactionMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *TransactionMutation
+	modifiers []func(*sql.UpdateBuilder)
+}
+
+// SetEntID sets the "ent_id" field.
+func (tuo *TransactionUpdateOne) SetEntID(u uuid.UUID) *TransactionUpdateOne {
+	tuo.mutation.SetEntID(u)
+	return tuo
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableEntID(u *uuid.UUID) *TransactionUpdateOne {
+	if u != nil {
+		tuo.SetEntID(*u)
+	}
+	return tuo
 }
 
 // SetCoinType sets the "coin_type" field.
@@ -1381,13 +1426,19 @@ func (tuo *TransactionUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (tuo *TransactionUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TransactionUpdateOne {
+	tuo.modifiers = append(tuo.modifiers, modifiers...)
+	return tuo
+}
+
 func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transaction, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   transaction.Table,
 			Columns: transaction.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: transaction.FieldID,
 			},
 		},
@@ -1415,6 +1466,13 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := tuo.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: transaction.FieldEntID,
+		})
 	}
 	if value, ok := tuo.mutation.CoinType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -1733,6 +1791,7 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Column: transaction.FieldDeletedAt,
 		})
 	}
+	_spec.Modifiers = tuo.modifiers
 	_node = &Transaction{config: tuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
