@@ -8,16 +8,14 @@ require (
 	github.com/NpoolPlatform/chain-middleware v0.0.0-20231020114413-49166aeb1ec8
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20230930023319-e48074d9472e
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20231008051607-f64457cf6ab6
-	github.com/NpoolPlatform/message v0.0.0-20231215075520-e09e412405cb
-	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20231215103733-36b9f5a76f71
+	github.com/NpoolPlatform/message v0.0.0-20231215124410-b3a7ec969f04
+	github.com/NpoolPlatform/sphinx-plugin v0.0.0-20231216013237-06dcf08e09c4
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
 	github.com/urfave/cli/v2 v2.17.2-0.20221006022127-8f469abc00aa
 	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.30.0
 )
-
-replace github.com/NpoolPlatform/sphinx-plugin => ../sphinx-plugin
 
 require (
 	ariga.io/atlas v0.10.0 // indirect
