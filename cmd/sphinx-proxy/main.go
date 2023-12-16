@@ -38,6 +38,6 @@ func main() {
 	}
 	err = app.Run(os.Args)
 	if err != nil {
-		logger.Sugar().Errorf("main", "Msg", "end of running", "ServiceName", serviceName, "Error", err)
+		logger.Sugar().Errorw("main", "Msg", "end of running", "ServiceName", serviceName, "Error", err)
 	}
 }
