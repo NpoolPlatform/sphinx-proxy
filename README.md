@@ -53,6 +53,7 @@ value | define                    | desc
 3     | TransactionStateSync      | 等待上链
 4     | TransactionStateDone      | 交易成功
 5     | TransactionStateFail      | 交易失败
+
 ### 命令
 * make init ```初始化仓库，创建go.mod```
 * make verify ```验证开发环境与构建环境，检查code conduct```
