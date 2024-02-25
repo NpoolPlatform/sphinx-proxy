@@ -88,28 +88,13 @@ pipeline {
       }
     }
 
-    stage('Generate docker image for feature') {
-      when {
-        expression { BUILD_TARGET == 'true' }
-        expression { BRANCH_NAME != 'master' }
-      }
-      steps {
-        sh 'make verify-build'
-        sh(returnStdout: false, script: '''
-          feature_name=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
-          DEVELOPMENT=$feature_name DOCKER_REGISTRY=$DOCKER_REGISTRY make generate-docker-images
-        '''.stripIndent())
-      }
-    }
-
     stage('Generate docker image for development') {
       when {
         expression { BUILD_TARGET == 'true' }
-        expression { BRANCH_NAME == 'master' }
       }
       steps {
         sh 'make verify-build'
-        sh 'DEVELOPMENT=development DOCKER_REGISTRY=$DOCKER_REGISTRY make generate-docker-images'
+        sh 'DOCKER_REGISTRY=$DOCKER_REGISTRY make generate-docker-images'
       }
     }
 
@@ -118,42 +103,38 @@ pipeline {
         expression { TAG_PATCH == 'true' }
       }
       steps {
+        sh(returnStdout: false, script: '''
+          set +e
+          revlist=`git rev-list --tags --max-count=1`
+          rc=$?
+          set -e
+          if [ 0 -eq $rc -a x"$revlist" != x ]; then
+            tag=`git describe --tags $revlist`
+
+            major=`echo $tag | awk -F '.' '{ print $1 }'`
+            minor=`echo $tag | awk -F '.' '{ print $2 }'`
+            patch=`echo $tag | awk -F '.' '{ print $3 }'`
+
+            case $TAG_FOR in
+              testing)
+                patch=$(( $patch + $patch % 2 + 1 ))
+                ;;
+              production)
+                patch=$(( $patch + 1 ))
+                git reset --hard
+                git checkout $tag
+                ;;
+            esac
+
+            tag=$major.$minor.$patch
+          else
+            tag=0.1.1
+          fi
+          git tag -a $tag -m "Bump version to $tag"
+        '''.stripIndent())
+
         withCredentials([gitUsernamePassword(credentialsId: 'KK-github-key', gitToolName: 'git-tool')]) {
-          sh(returnStdout: false, script: '''
-            set +e
-            revlist=`git rev-list --tags --max-count=1`
-            rc=$?
-            set -e
-            tagchanged=0
-            if [ 0 -eq $rc ]; then
-              tag=`git describe --tags $revlist`
-              major=`echo $tag | awk -F '.' '{ print $1 }'`
-              minor=`echo $tag | awk -F '.' '{ print $2 }'`
-              patch=`echo $tag | awk -F '.' '{ print $3 }'`
-              case $TAG_FOR in
-                testing)
-                  patch=$(( $patch + $patch % 2 + 1 ))
-                  tagchanged=1
-                  ;;
-                production)
-                  rem=$(( $patch % 2 ))
-                  if [ $rem -eq 1 ]; then
-                    patch=$(( $patch + 1 ))
-                    tagchanged=1
-	  	  fi
-                  git reset --hard
-                  git checkout $tag
-                  ;;
-              esac
-              tag=$major.$minor.$patch
-            else
-              tag=0.1.1
-            fi
-            if [ $tagchanged -eq 1 ]; then
-              git tag -a $tag -m "Bump version to $tag"
-              git push --tag
-            fi
-          '''.stripIndent())
+          sh 'git push --tag'
         }
       }
     }
@@ -168,13 +149,16 @@ pipeline {
           revlist=`git rev-list --tags --max-count=1`
           rc=$?
           set -e
-          if [ 0 -eq $rc ]; then
+          if [ 0 -eq $rc -a x"$revlist" != x ]; then
             tag=`git describe --tags $revlist`
+
             major=`echo $tag | awk -F '.' '{ print $1 }'`
             minor=`echo $tag | awk -F '.' '{ print $2 }'`
             patch=`echo $tag | awk -F '.' '{ print $3 }'`
+
             minor=$(( $minor + 1 ))
             patch=1
+
             tag=$major.$minor.$patch
           else
             tag=0.1.1
@@ -198,14 +182,17 @@ pipeline {
           revlist=`git rev-list --tags --max-count=1`
           rc=$?
           set -e
-          if [ 0 -eq $rc ]; then
+          if [ 0 -eq $rc -a x"$revlist" != x ]; then
             tag=`git describe --tags $revlist`
+
             major=`echo $tag | awk -F '.' '{ print $1 }'`
             minor=`echo $tag | awk -F '.' '{ print $2 }'`
             patch=`echo $tag | awk -F '.' '{ print $3 }'`
+
             major=$(( $major + 1 ))
             minor=0
             patch=1
+
             tag=$major.$minor.$patch
           else
             tag=0.1.1
@@ -236,30 +223,7 @@ pipeline {
           fi
         '''.stripIndent())
         sh 'make verify-build'
-        sh 'DEVELOPMENT=other DOCKER_REGISTRY=$DOCKER_REGISTRY make generate-docker-images'
-      }
-    }
-
-    stage('Release docker image for feature') {
-      when {
-        expression { RELEASE_TARGET == 'true' }
-        expression { BRANCH_NAME != 'master' }
-      }
-      steps {
-        sh(returnStdout: false, script: '''
-          feature_name=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
-          set +e
-          docker images | grep sphinx-proxy | grep $feature_name
-          rc=$?
-          set -e
-          if [ 0 -eq $rc ]; then
-            TAG=$feature_name DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
-          fi
-          images=`docker images | grep entropypool | grep sphinx-proxy | grep none | awk '{ print $3 }'`
-          for image in $images; do
-            docker rmi $image -f
-          done
-        '''.stripIndent())
+        sh 'DOCKER_REGISTRY=$DOCKER_REGISTRY make generate-docker-images'
       }
     }
 
@@ -269,12 +233,16 @@ pipeline {
       }
       steps {
         sh(returnStdout: false, script: '''
+          branch=latest
+          if [ "x$BRANCH_NAME" != "xmaster" ]; then
+            branch=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
+          fi
           set +e
-          docker images | grep sphinx-proxy | grep latest
+          docker images | grep sphinx-proxy | grep $branch
           rc=$?
           set -e
           if [ 0 -eq $rc ]; then
-            TAG=latest DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
+            DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
           fi
           images=`docker images | grep entropypool | grep sphinx-proxy | grep none | awk '{ print $3 }'`
           for image in $images; do
@@ -296,13 +264,13 @@ pipeline {
           set -e
 
           if [ 0 -eq $rc -a x"$revlist" != x ]; then
-            tag=`git describe --tags $revlist`
+            tag=`git tag --sort=-v:refname | grep [1\\|3\\|5\\|7\\|9]$ | head -n1`
             set +e
             docker images | grep sphinx-proxy | grep $tag
             rc=$?
             set -e
             if [ 0 -eq $rc ]; then
-              TAG=$tag DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
+              DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
             fi
           fi
         '''.stripIndent())
@@ -321,30 +289,14 @@ pipeline {
           set -e
 
           if [ 0 -eq $rc -a x"$taglist" != x ]; then
-            tag=`git describe --abbrev=0 --tags $taglist |grep [0\\|2\\|4\\|6\\|8]$ | head -n1`
+            tag=`git tag --sort=-v:refname | grep [0\\|2\\|4\\|6\\|8]$ | head -n1`
             set +e
             docker images | grep sphinx-proxy | grep $tag
             set -e
             if [ 0 -eq $rc ]; then
-              TAG=$tag DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
+              DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
             fi
           fi
-        '''.stripIndent())
-      }
-    }
-
-    stage('Deploy for feature') {
-      when {
-        expression { DEPLOY_TARGET == 'true' }
-        expression { TARGET_ENV ==~ /.*development.*/ }
-        expression { BRANCH_NAME != 'master' }
-      }
-      steps {
-        sh(returnStdout: false, script: '''
-          feature_name=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
-          sed -i "s/sphinx-proxy:latest/sphinx-proxy:$feature_name/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml
-          sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml
-          TAG=$feature_name make deploy-to-k8s-cluster
         '''.stripIndent())
       }
     }
@@ -353,11 +305,17 @@ pipeline {
       when {
         expression { DEPLOY_TARGET == 'true' }
         expression { TARGET_ENV ==~ /.*development.*/ }
-        expression { BRANCH_NAME == 'master' }
       }
       steps {
-        sh 'sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml'
-        sh 'TAG=latest make deploy-to-k8s-cluster'
+        sh(returnStdout: false, script: '''
+          branch=latest
+          if [ "x$BRANCH_NAME" != "xmaster" ]; then
+            branch=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
+          fi
+          sed -i "s/sphinx-proxy:latest/sphinx-proxy:$branch/g" cmd/sphinx-proxy/k8s/02-sphinx-proxy.yaml
+          sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/sphinx-proxy/k8s/02-sphinx-proxy.yaml
+          make deploy-to-k8s-cluster
+        '''.stripIndent())
       }
     }
 
@@ -372,16 +330,16 @@ pipeline {
           revlist=`git rev-list --tags --max-count=1`
           rc=$?
           set -e
-          if [ ! 0 -eq $rc ]; then
+          if [ ! 0 -eq $rc -o x"$revlist" == x]; then
             exit 0
           fi
-          tag=`git describe --tags $revlist`
+          tag=`git tag --sort=-v:refname | grep [1\\|3\\|5\\|7\\|9]$ | head -n1`
 
           git reset --hard
           git checkout $tag
           sed -i "s/sphinx-proxy:latest/sphinx-proxy:$tag/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml
           sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml
-          TAG=$tag make deploy-to-k8s-cluster
+          make deploy-to-k8s-cluster
         '''.stripIndent())
       }
     }
@@ -397,15 +355,15 @@ pipeline {
           taglist=`git rev-list --tags`
           rc=$?
           set -e
-          if [ ! 0 -eq $rc ]; then
+          if [ ! 0 -eq $rc -o x"$revlist" == x]; then
             exit 0
           fi
-          tag=`git describe --abbrev=0 --tags $taglist |grep [0\\|2\\|4\\|6\\|8]$ | head -n1`
+          tag=`git tag --sort=-v:refname | grep [0\\|2\\|4\\|6\\|8]$ | head -n1`
           git reset --hard
           git checkout $tag
           sed -i "s/sphinx-proxy:latest/sphinx-proxy:$tag/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml
           sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml
-          TAG=$tag make deploy-to-k8s-cluster
+          make deploy-to-k8s-cluster
         '''.stripIndent())
       }
     }
