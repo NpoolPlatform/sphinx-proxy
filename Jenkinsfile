@@ -339,6 +339,7 @@ pipeline {
           git checkout $tag
           sed -i "s/sphinx-proxy:latest/sphinx-proxy:$tag/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml
           sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml
+          sed -i "s/imagePullPolicy: Always/imagePullPolicy: IfNotPresent/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml
           make deploy-to-k8s-cluster
         '''.stripIndent())
       }
@@ -363,6 +364,7 @@ pipeline {
           git checkout $tag
           sed -i "s/sphinx-proxy:latest/sphinx-proxy:$tag/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml
           sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml
+          sed -i "s/imagePullPolicy: Always/imagePullPolicy: IfNotPresent/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml
           make deploy-to-k8s-cluster
         '''.stripIndent())
       }
