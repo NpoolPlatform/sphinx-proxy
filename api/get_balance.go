@@ -86,9 +86,6 @@ func (s *Server) GetBalance(ctx context.Context, in *sphinxproxy.GetBalanceReque
 	withPreBalance := false
 
 	switch coinType {
-	case sphinxplugin.CoinType_CoinTypealeo, sphinxplugin.CoinType_CoinTypetaleo:
-		name = "aleo"
-		withPreBalance = true
 	case sphinxplugin.CoinType_CoinTypeironfish, sphinxplugin.CoinType_CoinTypetironfish:
 		name = "ironfish"
 		withPreBalance = true

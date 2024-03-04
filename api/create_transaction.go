@@ -82,7 +82,7 @@ func (s *Server) CreateTransaction(ctx context.Context, in *sphinxproxy.CreateTr
 
 	tstate := sphinxproxy.TransactionState_TransactionStateWait
 	if coinType == sphinxplugin.CoinType_CoinTypealeo || coinType == sphinxplugin.CoinType_CoinTypetaleo {
-		tstate = sphinxproxy.TransactionState_TransactionStateRetrievePrivateInfo
+		tstate = sphinxproxy.TransactionState_TransactionStatePrepare
 	}
 	// store to db
 	if err := crud.CreateTransaction(ctx, &crud.CreateTransactionParam{
