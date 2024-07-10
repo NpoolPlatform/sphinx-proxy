@@ -55,6 +55,20 @@ func CreateTransaction(ctx context.Context, in *npool.CreateTransactionRequest) 
 	return nil
 }
 
+func UpdateTransaction(ctx context.Context, in *npool.UpdateTransactionRequest) error {
+	_, err := do(ctx, func(_ctx context.Context, cli npool.SphinxProxyClient) (cruder.Any, error) {
+		_, err := cli.UpdateTransaction(ctx, in)
+		if err != nil {
+			return nil, err
+		}
+		return nil, nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func GetTransaction(ctx context.Context, id string) (*npool.TransactionInfo, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.SphinxProxyClient) (cruder.Any, error) {
 		resp, err := cli.GetTransaction(ctx, &npool.GetTransactionRequest{
