@@ -47,7 +47,7 @@ state字段说明：
 value | define                    | desc
 ------|---------------------------|--------------
 0     | TransactionStateUnKnow    | 未知
-1     | TransactionStatePrepare   | 准备状态，需要从私钥中获取如ViewKey信息等，不是所有币种都需要
+30    | TransactionStatePrepare   | 准备状态，需要从私钥中获取如ViewKey信息等，不是所有币种都需要
 1     | TransactionStateWait      | 等待，交易创建时的初始状态
 2     | TransactionStateSign      | 签名
 20    | TransactionStateBroadcast | 广播
