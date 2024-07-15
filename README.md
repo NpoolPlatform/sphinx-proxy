@@ -3,7 +3,7 @@
 [![Test](https://github.com/NpoolPlatform/sphinx-proxy/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/NpoolPlatform/sphinx-proxy/actions/workflows/main.yml)
 
 [目录](#目录)
-- [Npool go service app template](#npool-sphinx-proxy)
+- [Npool go service app template](#npool-go-service-app-template)
     - [功能](#功能)
       - [sync](#sync)
       - [async](#async)
@@ -47,6 +47,7 @@ state字段说明：
 value | define                    | desc
 ------|---------------------------|--------------
 0     | TransactionStateUnKnow    | 未知
+30    | TransactionStatePrepare   | 准备状态，需要从私钥中获取如ViewKey信息等，不是所有币种都需要
 1     | TransactionStateWait      | 等待，交易创建时的初始状态
 2     | TransactionStateSign      | 签名
 20    | TransactionStateBroadcast | 广播
