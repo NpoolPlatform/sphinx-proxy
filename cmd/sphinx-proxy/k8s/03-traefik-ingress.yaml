@@ -29,3 +29,5 @@ spec:
       http: *sphinx_proxy_grpc_rules
     - host: proxy.cryptomore.io
       http: *sphinx_proxy_grpc_rules
+    - host: proxy.xhash.ai
+      http: *sphinx_proxy_grpc_rules
