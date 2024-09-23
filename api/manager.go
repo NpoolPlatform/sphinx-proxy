@@ -59,7 +59,7 @@ func getProxySign(name string) (*mSign, error) {
 
 	if len(name) > 0 {
 		for _, s := range lmSign {
-			if strings.EqualFold(s.ctype, name) {
+			if strings.Contains(s.ctype, name) {
 				return s, nil
 			}
 		}
