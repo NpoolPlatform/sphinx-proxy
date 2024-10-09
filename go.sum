@@ -90,10 +90,10 @@ github.com/NpoolPlatform/go-service-framework v0.0.0-20240510075442-89278cb5cf47
 github.com/NpoolPlatform/go-service-framework v0.0.0-20240510075442-89278cb5cf47/go.mod h1:8ZqSAAL4eLX/09HLWwDzQY0fMORy8nqHj3kwiUHEyS4=
 github.com/NpoolPlatform/libent-cruder v0.0.0-20231008051607-f64457cf6ab6 h1:zbM3Zq0qObWEiw+wYJihNFOsBfXey8mBgAhT7HzGB8Y=
 github.com/NpoolPlatform/libent-cruder v0.0.0-20231008051607-f64457cf6ab6/go.mod h1:EXCihQpRNNyWaPu1IphiZFLTyyUK/CJMZdW4My7y48Q=
-github.com/NpoolPlatform/message v0.0.0-20240921074648-bdf06c4ae271 h1:MmCqmkq/B5dxccAcsvXMdykGbicTjXxIo66/iWuyJZM=
-github.com/NpoolPlatform/message v0.0.0-20240921074648-bdf06c4ae271/go.mod h1:PxJpF0vSSOke+NJskbRBRQ2fK2K3SRe8zaEja+GxSHk=
-github.com/NpoolPlatform/sphinx-plugin v0.0.0-20240921075833-d4b84fc33ece h1:eExy3fuPsFx27JKOnvtMhhuXruR+C+CCQOBy9FSvhNs=
-github.com/NpoolPlatform/sphinx-plugin v0.0.0-20240921075833-d4b84fc33ece/go.mod h1:qgC29oOPPJYNKahQ3+mTBO4R+CKdA2I/CIMQmbFrdZ0=
+github.com/NpoolPlatform/message v0.0.0-20241009091849-457a5bb9814b h1:ImyFn9i2ZX5IFIqAh0UmyBlCUH+xz1Pyuu8SdvQPc8M=
+github.com/NpoolPlatform/message v0.0.0-20241009091849-457a5bb9814b/go.mod h1:PxJpF0vSSOke+NJskbRBRQ2fK2K3SRe8zaEja+GxSHk=
+github.com/NpoolPlatform/sphinx-plugin v0.0.0-20241009093757-3d377171a343 h1:3DXQp3BmQeE2t5sQ6dgwtSX/SFo4m/iTJzwCy3pG6g4=
+github.com/NpoolPlatform/sphinx-plugin v0.0.0-20241009093757-3d377171a343/go.mod h1:AhPGHthNbqnqAeY9FHkzSPvqcjKbUin/YxO7KgSDFNo=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/Shonminh/apollo-client v0.4.0 h1:AXGp4wOahrEKjheMXehgsG9B8dEfLQHttRLHeEefvus=
