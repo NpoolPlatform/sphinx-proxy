@@ -39,13 +39,14 @@ Transaction:
 | to             | string            | false  | false    | false    | true    | false         | false     | json:"to,omitempty"             | 1          |
 | value          | float64           | false  | false    | false    | true    | false         | false     | json:"value,omitempty"          | 0          |
 | state          | transaction.State | false  | false    | false    | false   | false         | false     | json:"state,omitempty"          | 0          |
+| payout         | string            | false  | false    | false    | false   | false         | false     | json:"payout,omitempty"         | 0          |
 | create_at      | uint32            | false  | false    | false    | true    | false         | false     | json:"create_at,omitempty"      | 0          |
 | update_at      | uint32            | false  | false    | false    | true    | true          | false     | json:"update_at,omitempty"      | 0          |
 | delete_at      | uint32            | false  | false    | false    | true    | false         | false     | json:"delete_at,omitempty"      | 0          |
 
 state字段说明：
 value | define                    | desc
-------|---------------------------|--------------
+------|---------------------------|-----------------------------------
 0     | TransactionStateUnKnow    | 未知
 30    | TransactionStatePrepare   | 准备状态，需要从私钥中获取如ViewKey信息等，不是所有币种都需要
 1     | TransactionStateWait      | 等待，交易创建时的初始状态
