@@ -312,8 +312,8 @@ pipeline {
           if [ "x$BRANCH_NAME" != "xmaster" ]; then
             branch=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
           fi
-          sed -i "s/sphinx-proxy:latest/sphinx-proxy:$branch/g" cmd/sphinx-proxy/k8s/02-sphinx-proxy.yaml
-          sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/sphinx-proxy/k8s/02-sphinx-proxy.yaml
+          sed -i "s/sphinx-proxy:latest/sphinx-proxy:$branch/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml
+          sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/sphinx-proxy/k8s/01-sphinx-proxy.yaml
           make deploy-to-k8s-cluster
         '''.stripIndent())
       }
