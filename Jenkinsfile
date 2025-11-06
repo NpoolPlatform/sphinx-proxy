@@ -16,7 +16,7 @@ pipeline {
     stage('Prepare') {
       steps {
         sh 'rm -rf ./output/*'
-        sh 'make deps'
+        // sh 'make deps'
       }
     }
 
