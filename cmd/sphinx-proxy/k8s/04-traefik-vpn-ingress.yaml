@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: sphinx-proxy-traefik-vpn-ingress
@@ -21,9 +21,12 @@ spec:
       http: &http_rules
         paths:
           - path: /api/sphinx-proxy
+            pathType: Prefix
             backend:
-              serviceName: sphinx-proxy-http
-              servicePort: 50000
+              service:
+                name: sphinx-proxy-http
+                port:
+                  number: 50000
     - host: api.internal-devops.development.xpool.top
       http: *http_rules
     - host: www.internal-devops.development.npool.top
