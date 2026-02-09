@@ -41,6 +41,20 @@ func GetBalance(ctx context.Context, in *npool.GetBalanceRequest) (*npool.Balanc
 	return info.(*npool.BalanceInfo), nil
 }
 
+func GetPrivateKey(ctx context.Context, in *npool.GetPrivateKeyRequest) (string, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.SphinxProxyClient) (cruder.Any, error) {
+		resp, err := cli.GetPrivateKey(ctx, in)
+		if err != nil {
+			return nil, err
+		}
+		return resp.Info, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return info.(string), nil
+}
+
 func CreateTransaction(ctx context.Context, in *npool.CreateTransactionRequest) error {
 	_, err := do(ctx, func(_ctx context.Context, cli npool.SphinxProxyClient) (cruder.Any, error) {
 		_, err := cli.CreateTransaction(ctx, in)

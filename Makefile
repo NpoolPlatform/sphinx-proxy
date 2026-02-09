@@ -22,6 +22,7 @@ go.mod:
 
 deps:
 	go get github.com/ugorji/go/codec@v1.2.11
+	go get github.com/NpoolPlatform/sphinx-plugin
 	go get -d ./...
 	go mod tidy -compat=1.17
 
