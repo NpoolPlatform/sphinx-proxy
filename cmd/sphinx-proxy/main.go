@@ -8,6 +8,7 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	mysqlconst "github.com/NpoolPlatform/go-service-framework/pkg/mysql/const"
 	redisconst "github.com/NpoolPlatform/go-service-framework/pkg/redis/const"
+    ossconst "github.com/NpoolPlatform/go-service-framework/pkg/oss/const"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/servicename"
 	cli "github.com/urfave/cli/v2"
 )
@@ -31,6 +32,7 @@ func main() {
 		commands,
 		mysqlconst.MysqlServiceName,
 		redisconst.RedisServiceName,
+        ossconst.S3NameSpace,
 	)
 	if err != nil {
 		logger.Sugar().Errorw("main", "ServiceName", serviceName, "Error", err)

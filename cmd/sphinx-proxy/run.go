@@ -9,6 +9,8 @@ import (
 	"github.com/NpoolPlatform/sphinx-proxy/api"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/db"
 	"github.com/NpoolPlatform/sphinx-proxy/pkg/migrator"
+	"github.com/NpoolPlatform/go-service-framework/pkg/oss"
+	ossconst "github.com/NpoolPlatform/go-service-framework/pkg/oss/const"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	cli "github.com/urfave/cli/v2"
@@ -37,6 +39,9 @@ func run(ctx context.Context) error {
 	if err := db.Init(); err != nil {
 		return err
 	}
+    if err := oss.Init(ossconst.KeyStoreKey, "sign_bucket"); err != nil {
+        return err
+    }
 	return nil
 }
 
